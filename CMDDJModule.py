@@ -409,23 +409,7 @@ class CMDDJ(loader.Module):
                 if chat.admin_rights or chat.creator:
                     count += 1
                     chat_type = "Группа" if dialog.is_group else "Канал"
-                    if getattr(chat, "username", None):
-                        username = f"@{chat.username}"
-                        msg += (
-                            f'\n• <a href="@{username}">{chat.title}</a>'
-                            f" <b>({chat_type})</b>"
-                        )
-                    else:
-                        try:
-                            invite = await message.client(ExportChatInviteRequest(chat.id))
-                            link = invite.link
-                        except Exception:
-                            link = f"tg://privategroup?id={chat.id}"
-                        
-                        msg += (
-                            f'\n• <a href="{link}">{chat.title}</a>'
-                            f" <b>({chat_type})</b>"
-                        )
+                    msg += f'\n• {chat.title} <b>({chat_type})</b> | <code>{chat.id}</code>'
 
         if msg:
             await message.edit(f"<b>Мои владения: {count}</b>\n{msg}", parse_mode="html")
