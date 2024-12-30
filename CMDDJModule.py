@@ -1,10 +1,9 @@
 # meta developer: @xdesai & @devjmodules
 
-import asyncio, pyfiglet, edge_tts, os, requests
+import asyncio, os, requests
 from .. import loader, security, utils
 from datetime import timedelta, datetime
 from telethon import functions
-from langdetect import detect
 from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.functions.messages import ExportChatInviteRequest, DeleteChatUserRequest, CreateChatRequest, DeleteChatRequest, GetHistoryRequest, AddChatUserRequest, ImportChatInviteRequest, ExportChatInviteRequest
 from hikkatl.tl.types import Message, Channel
