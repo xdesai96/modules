@@ -579,40 +579,6 @@ class CMDDJ(loader.Module):
                 print("Flood for", e.seconds)
 
     @loader.owner
-    async def speakcmd(self, event):
-        """Текст в речь. Использование: .speak <текст>"""
-        await event.delete()
-        if len(event.text.split(" ", maxsplit=1)) > 1:
-            text = event.text.split(" ", maxsplit=1)[1]
-        else:
-            await event.edit("❌ Пожалуйста, укажите текст для генерации.")
-            return
-        try:
-            lang = detect(text)
-            voice = "en-US-GuyNeural" if lang == 'en' else "ru-RU-DmitryNeural"
-        except Exception as e:
-            await event.reply("Не удалось определить язык текста.")
-            return
-        communicate = edge_tts.Communicate(text, voice=voice)
-        await communicate.save("voice.mp3")
-        if event.reply_to_msg_id:
-            await event.client.send_file(event.chat_id, "voice.mp3", voice_note=True, reply_to=event.reply_to_msg_id)
-        else:
-            await event.client.send_file(event.chat_id, "voice.mp3", voice_note=True, reply_to=event.reply_to_msg_id)
-        os.remove("voice.mp3")
-
-    @loader.owner
-    async def asciicmd(self, event):
-        """Пишет ASCII шрифтом. Использование: .ascii <текст>"""
-        if len(event.text.split(" ", maxsplit=1)) > 1:
-            text = event.text.split(" ", maxsplit=1)[1]
-        else:
-            await event.edit("❌ Пожалуйста, укажите текст для генерации.")
-            return
-        art = pyfiglet.figlet_format(text)
-        await event.edit(f"```\n⁠{art}\n```", parse_mode="markdown")
-
-    @loader.owner
     async def stealcmd(self, event):
         """Добавляет людей и ботов с чата в чат. Если дописать аргумент nobot то без ботов"""
         if len(event.text.split()) >= 2:
