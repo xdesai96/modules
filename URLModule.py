@@ -1,4 +1,5 @@
 # meta developer: @xdesai & @devjmodules
+# requires: requests, pyshorteners
 
 from .. import loader, utils
 import requests
