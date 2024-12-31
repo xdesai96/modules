@@ -14,12 +14,11 @@ class URLMod(loader.Module):
     strings = {"name": "URLModule"}
 
     async def scrapecmd(self, message):
-        """Extracts and processes data from the specified URL."""
+        """Parses the given URL."""
         args = utils.get_args_raw(message)
         if not args:
             await message.edit("<b>Please provide a URL to parse.</b>")
             return
-
         url = args.strip()
         try:
             response = requests.get(url)
@@ -30,6 +29,7 @@ class URLMod(loader.Module):
                     file.write(response_text)
                 await message.client.send_file(message.chat_id, "response.txt", caption="<b>Response is too long, sent as a file:</b>")
                 os.remove("response.txt")
+                await message.delete()
             else:
                 await message.edit(f"<b>Response:</b>\n<pre>{response_text}</pre>")
         except requests.exceptions.RequestException as e:
@@ -41,7 +41,6 @@ class URLMod(loader.Module):
         if not args:
             await message.edit("<b>Please provide a URL to shorten.</b>")
             return
-
         url = args.strip()
         try:
             shortener = pyshorteners.Shortener().tinyurl
@@ -56,7 +55,6 @@ class URLMod(loader.Module):
         if not args:
             await message.edit("<b>Please provide a shortened URL to expand.</b>")
             return
-
         short_url = args.strip()
         try:
             headers = {
@@ -66,10 +64,8 @@ class URLMod(loader.Module):
             retries = Retry(total=5, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
             session.mount("http://", HTTPAdapter(max_retries=retries))
             session.mount("https://", HTTPAdapter(max_retries=retries))
-
             response = session.get(short_url, headers=headers, allow_redirects=True)
             response.raise_for_status()
-
             expanded_url = response.url
             await message.edit(f"<b>Expanded URL:</b> <a href='{expanded_url}'>{expanded_url}</a>")
         except requests.exceptions.RequestException as e:
@@ -81,7 +77,6 @@ class URLMod(loader.Module):
         if not args:
             await message.edit("<b>Please provide a URL to get the IP address.</b>")
             return
-
         url = args.strip()
         try:
             hostname = url.split("//")[-1].split("/")[0]
