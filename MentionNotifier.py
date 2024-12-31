@@ -1,3 +1,5 @@
+# meta developer: @xdesai & @devjmodules
+
 from .. import loader, utils
 from telethon.tl.types import Message
 
