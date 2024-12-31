@@ -14,7 +14,7 @@ class URLMod(loader.Module):
     strings = {"name": "URLModule"}
 
     async def scrapecmd(self, message):
-        """Parses the given URL."""
+        """Extracts and processes data from the specified URL."""
         args = utils.get_args_raw(message)
         if not args:
             await message.edit("<b>Please provide a URL to parse.</b>")
