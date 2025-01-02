@@ -245,7 +245,6 @@ class CMDDJ(loader.Module):
             await event.delete()
         except Exception:
             pass
-        
 
     @loader.owner
     async def dgccmd(self, event):
@@ -287,30 +286,29 @@ class CMDDJ(loader.Module):
     @loader.owner
     async def joincmd(self, event):
         """Вступает в группу или канал по ссылке."""
-        link = utils.get_args(event)
+
+        link = utils.get_args_raw(event)
         if not link:
             await event.edit("Укажите ссылку на группу или канал.")
             return
-        if isinstance(link, list):
-            link = link[0]
+
+        link = link.strip()
         try:
-            entity = await event.client.get_entity(link)
-            if getattr(entity, 'broadcast', False) or getattr(entity, 'megagroup', False):
-                await event.client(JoinChannelRequest(link))
+            if "joinchat" in link or "+" in link:
+                invite_hash = link.split("/")[-1].replace("joinchat/", "").replace("+", "")
+                await self.client(ImportChatInviteRequest(invite_hash))
+                await event.edit(f"Успешно вступили в приватный чат по ссылке: {link}.")
             else:
-                invite_hash = link.split("/")[-1]
-                await event.client(ImportChatInviteRequest(invite_hash))
-            title = entity.title if hasattr(entity, 'title') else "Нет названия"
-            await event.edit(f"Joined to {title}\n{link}.")
-            await event.client.send_message("me", f"Joined to {title}\n{link}.")
-            await event.delete()
+                entity = await self.client.get_entity(link)
+                await self.client(JoinChannelRequest(entity))
+                title = entity.title if hasattr(entity, 'title') else "Нет названия"
+                await event.edit(f"Успешно вступили в публичный чат: {title}.")
+        except InviteHashExpiredError:
+            await event.edit("Срок действия ссылки истек!")
         except ValueError:
             await event.edit("Неверная ссылка. Проверьте корректность.")
-        except InviteHashExpiredError:
-            await event.edit("Срок ссылки истек!")
         except Exception as e:
-            await event.edit(e)
-            await event.delete()
+            await event.edit(f"Ошибка: {str(e)}")
 
     @loader.owner
     async def whoisownercmd(self, event):
