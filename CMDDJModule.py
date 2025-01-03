@@ -5,9 +5,8 @@ from .. import loader, security, utils
 from datetime import timedelta, datetime
 from ..inline.types import InlineCall # type: ignore
 from telethon import functions
-from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.functions.messages import ExportChatInviteRequest, DeleteChatUserRequest, CreateChatRequest, DeleteChatRequest, GetHistoryRequest, AddChatUserRequest, ImportChatInviteRequest, ExportChatInviteRequest
-from hikkatl.tl.types import Message, Channel
+from hikkatl.tl.types import Message
 from telethon.tl.functions.channels import GetFullChannelRequest, CreateChannelRequest, EditBannedRequest, EditTitleRequest, EditAdminRequest, JoinChannelRequest, DeleteChannelRequest, GetParticipantsRequest, GetFullChannelRequest
 from telethon.tl.types import *
 from telethon import Button
@@ -38,7 +37,6 @@ class CMDDJ(loader.Module):
     strings = {
         "name": "ChatModule",
         "loading": "🕐 <b>Обработка данных...</b>",
-        "unblock_bot": "❗ Разблокируйте @funstat для получения дополнительной информации.",
         "not_a_chat": "<emoji document_id=5312526098750252863>❌</emoji> <b>Команда не может быть запущена в личных сообщениях.</b>",
         "no_rights": "<emoji document_id=5318764049121420145>🫤</emoji> <b>У меня нет прав администратора в этом чате" \
                      " или я не могу изменять права администраторов.</b>",
@@ -522,69 +520,6 @@ class CMDDJ(loader.Module):
             )
         )
 
-    @loader.owner
-    async def userinfocmd(self, message: Message):
-        """Получить информацию о пользователе или канале. Использование: .userinfo <@юзернейм/ID> или ответ на сообщение"""
-        args = utils.get_args_raw(message)
-        reply = await message.get_reply_message()
-
-        await utils.answer(message, self.strings("loading"))
-
-        try:
-            entity = (
-                (await self._client.get_entity(args if not args.isdigit() else int(args)))
-                if args
-                else await self._client.get_entity(reply.sender_id)
-            )
-        except Exception:
-            await utils.answer(message, "❗ Не удалось найти пользователя или канал. Проверьте правильность ID или юзернейма.")
-            return
-
-        if isinstance(entity, Channel):
-            await self.process_channel_info(entity, message)
-        else:
-            await self.process_user_info(entity, message)
-
-    async def process_user_info(self, user_ent, message):
-        """Обработка информации о пользователе"""
-        user = await self._client(GetFullUserRequest(user_ent.id))
-        registration_date = get_creation_date(user_ent.id)
-        funstat_info = await self.get_funstat_info(user_ent.id)
-
-        user_info = (
-            "<b>👤 Информация о пользователе:</b>\n\n"
-            f"<b>Имя:</b> <code>{user_ent.first_name or '🚫'}</code>\n"
-            f"<b>Фамилия:</b> <code>{user_ent.last_name or '🚫'}</code>\n"
-            f"<b>Юзернейм:</b> @{user_ent.username or '🚫'}\n"
-            f"<b>Описание:</b>\n{user.full_user.about or '🚫'}\n\n"
-            f"<b>Дата регистрации:</b> <code>{registration_date}</code>\n"
-            f"<b>Общие чаты:</b> <code>{user.full_user.common_chats_count}</code>\n"
-            f"<b>ID:</b> <code>{user_ent.id}</code>\n"
-        )
-
-        if user_ent.username:
-            user_info += f'<b><a href="tg://user?id={user_ent.id}">🌐 Вечная ссылка</a></b>\n\n'
-        else:
-            user_info += "Вечная ссылка отсутствует.\n\n"
-
-        user_info += f"{funstat_info}"
-
-        photo = await self._client.download_profile_photo(user_ent.id)
-
-        if photo:
-            await self._client.send_file(
-                message.chat_id,
-                file=photo,
-                caption=user_info,
-                buttons=[
-                    [Button.inline("🔄 Обновить данные", data=f"refresh:{user_ent.id}")]
-                ]
-            )
-        else:
-            await self._client.send_message(message.chat_id, user_info)
-
-        await message.delete()
-
     async def process_channel_info(self, channel_ent, message):
         """Обработка информации о канале"""
         channel = await self._client(GetFullChannelRequest(channel_ent))
@@ -622,35 +557,6 @@ class CMDDJ(loader.Module):
             await self._client.send_message(message.chat_id, channel_info)
 
         await message.delete()
-
-    async def get_funstat_info(self, user_id: int) -> str:
-        """Отправка запроса в @funstat и получение информации"""
-        chat = "@Suusbdj_bot"
-        attempts = 3
-        for attempt in range(attempts):
-            try:
-                await self._client.send_message(chat, str(user_id))
-
-                await asyncio.sleep(5)
-
-                messages = await self._client.get_messages(chat, limit=5)
-
-                for message in messages:
-                    if f"👤 {user_id}" in message.text or str(user_id) in message.text:
-                        lines = message.text.split("\n")
-                        filtered_lines = [
-                            line for line in lines if "ID:" not in line and "Это" not in line
-                        ]
-                        return "\n".join(filtered_lines)
-
-                await asyncio.sleep(1)
-
-            except YouBlockedUserError:
-                return self.strings("unblock_bot")
-            except Exception as e:
-                return f"Ошибка при получении данных: {e}"
-
-        return "⚠️ Не удалось получить окончательный ответ от @funstat_obot."
 
     @loader.owner
     async def createcmd(self, message):
