@@ -39,29 +39,30 @@ class CMDDJ(loader.Module):
         "name": "ChatModule",
         "loading": "🕐 <b>Обработка данных...</b>",
         "unblock_bot": "❗ Разблокируйте @funstat для получения дополнительной информации.",
-        "not_a_chat": "<emoji document_id=5312526098750252863>❌</emoji> <b>The command cannot be run in private messages.</b>",
-        "no_rights": "<emoji document_id=5318764049121420145>🫤</emoji> <b>I have no administrator rights or cannot promote" \
-                     " and demote administrators.</b>",
-        "no_user": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>You should specify an user.</b>",
-        "demoted": "<emoji document_id=5458403743835889060>😂</emoji> <b>{name} was demoted to an regular user.</b>",
-        "promoted_full": "<emoji document_id=5271557007009128936>👑</emoji> <b>{name} was promoted to an administrator" \
-                        " with full rights.</b>\n<emoji document_id=5470060791883374114>✍️</emoji> <b>Rank:</b> {rank}",
-        "promoted": "<emoji document_id=5451786809845491357>🫣</emoji> <b>{name} was promoted to an administrator.</b>\n" \
-                    "<emoji document_id=5470060791883374114>✍️</emoji> <b>Rank:</b> {rank}",
-        "choose_rights": "<emoji document_id=5271557007009128936>👑</emoji> <b>Choose administrator rights for {name}</b>" \
-                         "\n<emoji document_id=5470060791883374114>✍️</emoji> <b>Rank</b>: {rank}",
-        "right_change_info": "{emoji} Change info {channel_or_chat}",
-        "of_channel": "of channel", "of_chat": "of chat",
-        "right_post_messages": "{emoji} Post messages",
-        "right_edit_messages": "{emoji} Edit posts",
-        "right_delete_messages": "{emoji} Delete messages",
-        "right_ban_users": "{emoji} Restrict users",
-        "right_invite_users": "{emoji} Invite users",
-        "right_pin_messages": "{emoji} Pin messages",
-        "right_add_admins": "{emoji} Promote administrators",
-        "right_anonymous": "{emoji} Anonymous",
-        "right_manage_call": "{emoji} Manage calls",
-        "confirm": "✅ Confirm",
+        "not_a_chat": "<emoji document_id=5312526098750252863>❌</emoji> <b>Команда не может быть запущена в личных сообщениях.</b>",
+        "no_rights": "<emoji document_id=5318764049121420145>🫤</emoji> <b>У меня нет прав администратора в этом чате" \
+                     " или я не могу изменять права администраторов.</b>",
+        "no_user": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>Вы не указали пользователя.</b>",
+        "demoted": "<emoji document_id=5458403743835889060>😂</emoji> <b>С {name} сняты права администратора.</b>",
+        "promoted_full": "<emoji document_id=5271557007009128936>👑</emoji> <b>{name} повышен до администратора " \
+                        "с полными правами.</b>\n<emoji document_id=5470060791883374114>✍️</emoji> <b>Должность:</b> {rank}",
+        "promoted": "<emoji document_id=5451786809845491357>🫣</emoji> <b>{name} повышен до администратора.</b>\n" \
+                    "<emoji document_id=5470060791883374114>✍️</emoji> <b>Должность:</b> {rank}",
+        "choose_rights": "<emoji document_id=5271557007009128936>👑</emoji> <b>Выберите, какие права вы хотите дать " \
+                         "{name}</b>\n<emoji document_id=5470060791883374114>✍️</emoji> <b>Должность</b>: {rank}",
+        "right_change_info": "{emoji} Изменение профиля {channel_or_chat}",
+        "of_channel": "канала", "of_chat": "чата",
+        "right_post_messages": "{emoji} Публиковать посты",
+        "right_edit_messages": "{emoji} Изменять посты",
+        "right_delete_messages": "{emoji} Удалять сообщения",
+        "right_ban_users": "{emoji} Ограничивать пользователей",
+        "right_invite_users": "{emoji} Добавлять пользователей",
+        "right_pin_messages": "{emoji} Закреплять сообщения",
+        "right_add_admins": "{emoji} Назначать администраторов",
+        "right_anonymous": "{emoji} Анонимность",
+        "right_manage_call": "{emoji} Управление звонками",
+        "confirm": "✅ Подтвердить",
+        "_cls_doc": "Управление правами администраторов в чатах."
     }
 
     @loader.owner
@@ -71,7 +72,7 @@ class CMDDJ(loader.Module):
 
     @loader.owner
     async def fullrightscmd(self, message: Message):
-        """<user> [role (aka [prefix])] — Promote an user to administrator with full rights."""
+        """<пользователь> [роль (aka префикс)] — Повышение пользователя до администратора с полными правами."""
         if message.is_private:
             return await utils.answer(
                 message, self.strings("not_a_chat", message)
@@ -134,7 +135,7 @@ class CMDDJ(loader.Module):
 
     @loader.owner
     async def promotecmd(self, message: Message):
-        """<user> [role (aka [prefix])] — Promote an user to administrator."""
+        """<пользователь> [роль (префикс)] — Повышение пользователя до администратора."""
         if message.is_private:
             return await utils.answer(
                 message, self.strings("not_a_chat", message)
@@ -465,7 +466,7 @@ class CMDDJ(loader.Module):
 
     @loader.owner
     async def demotecmd(self, message: Message):
-        """<user> — Demote an administrator to a user."""
+        """<пользователь> — Снятие прав администратора с пользователя."""
         if message.is_private:
             return await utils.answer(
                 message, self.strings("not_a_chat", message)
