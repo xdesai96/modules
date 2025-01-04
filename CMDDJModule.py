@@ -733,14 +733,17 @@ class CMDDJ(loader.Module):
             
             chat = await message.get_chat()
 
-            if not chat.admin_rights and not chat.creator:
-                await message.edit("Вы не являетесь администратором этой группы/канала.")
+            try:
+                await self._client(EditTitleRequest(
+                    channel=chat,
+                    title=new_name
+                ))
+            except ChatAdminRequiredError:
+                await message.edit("У меня нет прав администратора в этом чате.")
                 return
-
-            await self._client(EditTitleRequest(
-                channel=chat,
-                title=new_name
-            ))
+            except Exception as e:
+                await message.edit(f"Произошла ошибка: {e}")
+                return
 
             await message.edit(f"Название изменено на: {new_name}")
             await message.delete()
