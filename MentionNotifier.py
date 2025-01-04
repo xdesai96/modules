@@ -71,19 +71,27 @@ class MentionNotifierMod(loader.Module):
             await message.edit(f"{user_id} is not in the blacklist")
 
     async def mnlistcmd(self, message):
-        """Lists the users to ignore mentions from"""
+        """Lists the users to ignore mentions from and chats to notify mentions from"""
         blacklist = self.config["BLACKLIST"]
         whitelist = self.config["WHITELIST"]
         output = "Users to ignore mentions from:\n"
         if blacklist:
             for user in blacklist:
-                output += f"<emoji document_id=4974551780743447211>🛑</emoji> {user}\n"
+                try:
+                    user_entity = await self.client.get_entity(user)
+                    output += f"<emoji document_id=4974551780743447211>🛑</emoji> {user_entity.first_name} ({user})\n"
+                except:
+                    output += f"<emoji document_id=4974551780743447211>🛑</emoji> {user}\n"
         else:
             output += "No users to ignore mentions from"
         output += "\n\nChats to notify mentions from:\n"
         if whitelist:
             for chat in whitelist:
-                output += f"<emoji document_id=4974608010455286340>🛑</emoji> {chat}\n"
+                try:
+                    chat_entity = await self.client.get_entity(chat)
+                    output += f"<emoji document_id=4974608010455286340>🛑</emoji> {chat_entity.title} ({chat})\n"
+                except:
+                    output += f"<emoji document_id=4974608010455286340>🛑</emoji> {chat}\n"
         else:
             output += "No chats to notify mentions from"
         await message.edit(output)
@@ -106,3 +114,5 @@ class MentionNotifierMod(loader.Module):
                     else:
                         notification = f"You were mentioned by <i><b>{sender.first_name}</b></i> in <b>{chat.title}</b>.\nLink: {chat_link}"
                     await self.inline.bot.send_message(me.id, notification, parse_mode="html")
+                else:
+                    await self.client.send_message("me", f"You were mentioned by {sender.first_name} in {chat.title} | {chat.id}.")
