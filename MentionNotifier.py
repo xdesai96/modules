@@ -41,10 +41,10 @@ class MentionNotifierMod(loader.Module):
     async def mnwlcmd(self, message):
         """Adds a chat to the whitelist"""
         args = utils.get_args_raw(message)
-        args = args[3:] if args.startswith("-47") else args[4:] if args.startswith("-100") else args
+        args = args[3:] if args.startswith("-46") else args[4:] if args.startswith("-100") else args
         chat_id = (
             int(args) if args.isdigit() or args.startswith("-") else (await self.client.get_entity(args)).id
-        ) if args else int(str(message.chat_id)[3:]) if str(message.chat_id).startswith("-47") else int(str(message.chat_id)[4:]) if str(message.chat_id).startswith("-100") else message.chat_id
+        ) if args else int(str(message.chat_id)[3:]) if str(message.chat_id).startswith("-46") else int(str(message.chat_id)[4:]) if str(message.chat_id).startswith("-100") else message.chat_id
         whitelist = self.config["WHITELIST"]
         if chat_id not in whitelist:
             whitelist.append(chat_id)
