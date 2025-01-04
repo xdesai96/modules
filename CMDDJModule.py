@@ -648,10 +648,23 @@ class CMDDJ(loader.Module):
                 await event.client(DeleteChannelRequest(chat_id))
                 chat_type = "Супергруппа/Канал"
             except Exception:
-                await event.client(DeleteChatRequest(chat_id))
-                chat_type = "Обычная группа"
+                try:
+                    await event.client(DeleteChatRequest(chat_id))
+                    chat_type = "Обычная группа"
+                except Exception as e:
+                    if "CHANNEL_PRIVATE" in str(e):
+                        await event.edit("❌ Чат недоступен или приватный.")
+                        return
+                    elif "CHAT_ADMIN_REQUIRED" in str(e):
+                        await event.edit("❌ У вас недостаточно прав для удаления этой группы/канала.")
+                        return
+                    elif "Invalid object ID for a chat." in str(e):
+                        await event.edit("❌ Неверный ID.")
+                        return
+                    await event.edit(f"❌ Произошла ошибка: {e}")
+                    return
 
-            await event.edit(f"✅ Группа/канал ({chat_type}) успешно удалена.")
+            await event.edit(f"✅ ({chat_type}) успешно удалена.")
             await event.delete()
 
         except ChatAdminRequiredError:
