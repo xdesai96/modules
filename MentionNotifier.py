@@ -105,6 +105,6 @@ class MentionNotifierMod(loader.Module):
                         notification = f"You were mentioned by @{sender.username} in <b>{chat.title}</b>.\nLink: {chat_link}"
                     else:
                         notification = f"You were mentioned by <i><b>{sender.first_name}</b></i> in <b>{chat.title}</b>.\nLink: {chat_link}"
-                    await self.inline.bot.send_message(me.id, notification, parse_mode="html", link_preview=False)
+                    await self.inline.bot.send_message(me.id, notification, parse_mode="html")
                 else:
                     await self.client.send_message("me", f"You were mentioned by {sender.first_name} in {chat.title} | {chat.id}.")
