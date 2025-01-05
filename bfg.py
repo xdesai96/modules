@@ -1,3 +1,4 @@
+# meta developer: @xdesai & @devjmodules
 import asyncio
 import time
 from telethon import functions
