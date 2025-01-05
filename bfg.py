@@ -1,4 +1,3 @@
-# meta developer: @xdesai & @devjmodules
 import asyncio
 import time
 from telethon import functions
@@ -10,10 +9,10 @@ class Farm:
             commands = [
                 ('моя ферма', [0, 1]),
                 ('мой бизнес', [0, 1]),
-                ('мой генератор', [0, 1]),
-                ('мое дерево', [0, 1]),
-                ('мой карьер', [0, 1]),
                 ('мой сад', [0, 1, 3]),
+                ('мое дерево', [0, 1]),
+                ('мой генератор', [0, 1]),
+                ('мой карьер', [0, 1]),
             ]
             for command, clicks in commands:
                 await conv.send_message(command)
@@ -26,8 +25,8 @@ class Farm:
                     await asyncio.sleep(3)
                     try:
                         await r.click(click)
-                    except:
-                        continue
+                    except Exception:
+                        pass
 
 class BfgMod(loader.Module, Farm):
     """
