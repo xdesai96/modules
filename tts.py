@@ -1,3 +1,4 @@
+# meta developer: @xdesai & @devjmodules
 import os
 from langdetect import detect
 import edge_tts
