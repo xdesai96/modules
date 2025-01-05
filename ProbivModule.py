@@ -1,3 +1,4 @@
+# meta developer: @xdesai & @devjmodules
 import requests
 from threading import Thread
 from pyngrok import ngrok
