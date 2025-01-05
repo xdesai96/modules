@@ -1,3 +1,4 @@
+# meta developer: @xdesai & @devjmodules
 from .. import loader
 from telethon import functions
 import time
