@@ -1,3 +1,5 @@
+# meta developer: @xdesai & @devjmodules
+
 import asyncio
 import time
 from telethon import functions
@@ -17,9 +19,11 @@ class Farm:
             for command, clicks in commands:
                 await conv.send_message(command)
                 try:
-                    r = await conv.get_response()
+                    r = asyncio.wait_for(await conv.get_response(), timeout=10)
+                except asyncio.TimeoutError:
+                    pass
                 except:
-                    continue
+                    pass
 
                 for click in clicks:
                     await asyncio.sleep(3)
