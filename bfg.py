@@ -65,7 +65,7 @@ class BfgMod(loader.Module, Farm):
         self.main_loop.stop()
         await asyncio.sleep(1)
         await self.autofarm()
-        self.set("Tree_time", time.time() + 3600)
+        self.set("Tree_time", 0)
         self.config["AutoFarm"] = True
         self.main_loop.start()
         await message.edit("Автоматическая фарма перезапущена.")
