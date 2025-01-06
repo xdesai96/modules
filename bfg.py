@@ -18,19 +18,11 @@ class Farm:
             ]
             for command, clicks in commands:
                 await conv.send_message(command)
-                try:
-                    r = asyncio.wait_for(await conv.get_response(), timeout=10)
-                except asyncio.TimeoutError:
-                    pass
-                except:
-                    pass
+                r = await conv.get_response()
 
                 for click in clicks:
                     await asyncio.sleep(3)
-                    try:
-                        await r.click(click)
-                    except Exception:
-                        pass
+                    await r.click(click)
 
 class BfgMod(loader.Module, Farm):
     """
@@ -65,6 +57,18 @@ class BfgMod(loader.Module, Farm):
         self.config["AutoFarm"] = True
         self.main_loop.start()
         await message.edit("Автоматическая фарма включена.")
+
+    @loader.command()
+    async def rstbfg(self, message):
+        """Перезапустить автоматическую фарму."""
+        self.config["AutoFarm"] = False
+        self.main_loop.stop()
+        await asyncio.sleep(1)
+        await self.autofarm()
+        self.set("Tree_time", time.time() + 3600)
+        self.config["AutoFarm"] = True
+        self.main_loop.start()
+        await message.edit("Автоматическая фарма перезапущена.")
         
     @loader.command()
     async def bfgstop(self, message):
