@@ -2,6 +2,7 @@
 
 from .. import loader, utils
 from telethon.tl.types import Message
+import html
 
 @loader.tds
 class MentionNotifierMod(loader.Module):
@@ -112,5 +113,5 @@ class MentionNotifierMod(loader.Module):
                     if sender.username:
                         notification = f"You were mentioned by @{sender.username} in <b>{chat.title}</b>.\nLink: {chat_link}"
                     else:
-                        notification = f"You were mentioned by <i><b>{sender.first_name}</b></i> in <b>{chat.title}</b>.\nLink: {chat_link}"
+                        notification = f"You were mentioned by <i><b>{html.escape(sender.first_name)} </b></i>in <b>{chat.title}</b>.\nLink: {chat_link}"
                     await self.inline.bot.send_message(me.id, notification, parse_mode="html")
