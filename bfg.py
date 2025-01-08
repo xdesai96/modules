@@ -17,12 +17,19 @@ class Farm:
                 ('мой карьер', [0, 1]),
             ]
             for command, clicks in commands:
+                await asyncio.sleep(2)
                 await conv.send_message(command)
-                r = await conv.get_response()
+                try:
+                    r = await conv.get_response(timeout=10)
+                except asyncio.exceptions.TimeoutError:
+                    continue
 
                 for click in clicks:
                     await asyncio.sleep(3)
-                    await r.click(click)
+                    try:
+                        await r.click(click)
+                    except Exception as e:
+                        continue
 
 class BfgMod(loader.Module, Farm):
     """
