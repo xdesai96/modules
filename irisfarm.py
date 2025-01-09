@@ -32,7 +32,7 @@ class IrFarmMod(loader.Module, IrisFarm):
 
     @loader.loop(interval=1, autostart=True)
     async def main_loop(self):
-        if self.config["IrisFarm"] and (not self.get("Iris_time") or (time.time() - self.get('Iris_time')) >= 4 * 60 * 60 + 1):
+        if self.config["IrisFarm"] and (not self.get("Iris_time") or (time.time() - self.get('Iris_time')) >= 4 * 60 * 60 + 10):
             await self.autofarm()
             self.set("Iris_time", int(time.time()))
 
