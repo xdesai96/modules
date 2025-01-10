@@ -54,7 +54,7 @@ class MembersListMod(loader.Module):
             first_name = member.first_name or ''
             last_name = member.last_name or ''
             username = member.username or ''
-            phone = member.phone or ''
+            phone = member.phone if member.id != (await self.client.get_me()).id and member.phone else ''
             members_list.append(f"{user_id}, {first_name}, {last_name}, {username}, {phone}")
 
         return members_list
