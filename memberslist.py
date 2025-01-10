@@ -15,6 +15,7 @@ class MembersListMod(loader.Module):
     async def mlistcmd(self, message):
         """Get the members list of multiple chats and send it as a txt file."""
         args = utils.get_args_raw(message)
+        await message.delete()
         if not args:
             return await utils.answer(message, "Please specify chat IDs separated by spaces.")
         
