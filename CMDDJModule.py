@@ -11,7 +11,7 @@ from telethon.tl.functions.channels import GetFullChannelRequest, CreateChannelR
 from telethon.tl.types import *
 from telethon import Button
 from telethon.errors import *
-from telethon.errors.rpcerrorlist import YouBlockedUserError
+from telethon.errors.rpcerrorlist import YouBlockedUserError, AdminRankInvalidError
 
 def get_creation_date(user_id: int) -> str:
     url = "https://restore-access.indream.app/regdate"
@@ -34,7 +34,7 @@ class CMDDJ(loader.Module):
     """Модуль для админов чатов
     Made by Desai"""
     
-    strings = {
+    strings_ru = {
         "name": "ChatModule",
         "loading": "🕐 <b>Обработка данных...</b>",
         "not_a_chat": "<emoji document_id=5312526098750252863>❌</emoji> <b>Команда не может быть запущена в личных сообщениях.</b>",
@@ -60,7 +60,44 @@ class CMDDJ(loader.Module):
         "right_anonymous": "{emoji} Анонимность",
         "right_manage_call": "{emoji} Управление звонками",
         "confirm": "✅ Подтвердить",
-        "_cls_doc": "Управление правами администраторов в чатах."
+        "adminrankerror" : "❌ Недопустимый префикс",
+        "_cls_doc": "Управление правами администраторов в чатах.",
+        "invalid_args": "<b>Неверные аргументы. Используйте: .create <g|s|c> <название></b>",
+        "spam_ban": "❌ Ваш аккаунт ограничен в создании новых групп/каналов.",
+        "no_reply": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>Вы не ответили на сообщение.</b>"
+    }
+
+    strings = {
+        "name": "ChatModule",
+        "loading": "🕐 <b>Processing data...</b>",
+        "not_a_chat": "<emoji document_id=5312526098750252863>❌</emoji> <b>The command cannot be run in private messages.</b>",
+        "no_rights": "<emoji document_id=5318764049121420145>🫤</emoji> <b>I do not have admin rights in this chat" \
+                     " or I cannot change admin rights.</b>",
+        "no_user": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>You did not specify a user.</b>",
+        "demoted": "<emoji document_id=5458403743835889060>😂</emoji> <b>{name} has been demoted from admin.</b>",
+        "promoted_full": "<emoji document_id=5271557007009128936>👑</emoji> <b>{name} has been promoted to admin " \
+                        "with full rights.</b>\n<emoji document_id=5470060791883374114>✍️</emoji> <b>Rank:</b> {rank}",
+        "promoted": "<emoji document_id=5451786809845491357>🫣</emoji> <b>{name} has been promoted to admin.</b>\n" \
+                    "<emoji document_id=5470060791883374114>✍️</emoji> <b>Rank:</b> {rank}",
+        "choose_rights": "<emoji document_id=5271557007009128936>👑</emoji> <b>Select the rights you want to give " \
+                         "{name}</b>\n<emoji document_id=5470060791883374114>✍️</emoji> <b>Rank:</b> {rank}",
+        "right_change_info": "{emoji} Change profile {channel_or_chat}",
+        "of_channel": "channel", "of_chat": "chat",
+        "right_post_messages": "{emoji} Post messages",
+        "right_edit_messages": "{emoji} Edit messages",
+        "right_delete_messages": "{emoji} Delete messages",
+        "right_ban_users": "{emoji} Restrict users",
+        "right_invite_users": "{emoji} Invite users",
+        "right_pin_messages": "{emoji} Pin messages",
+        "right_add_admins": "{emoji} Add admins",
+        "right_anonymous": "{emoji} Anonymous",
+        "right_manage_call": "{emoji} Manage calls",
+        "confirm": "✅ Confirm",
+        "adminrankerror" : "❌ Invalid prefix",
+        "_cls_doc": "Manage admin rights in chats.",
+        "invalid_args": "<b>Invalid arguments. Use: .create <g|s|c> <name></b>",
+        "spam_ban": "❌ Your account is restricted from creating new groups/channels.",
+        "no_reply": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>You did not reply to a message.</b>"
     }
 
     @loader.owner
@@ -149,7 +186,10 @@ class CMDDJ(loader.Module):
             if args:
                 rank = args
         else:
-            user_id = await utils.get_target(message)
+            try:
+                user_id = int(args.split()[0])
+            except ValueError:
+                user_id = await utils.get_target(message)
             if len(args.split()) > 1:
                 rank = " ".join(args.split()[1:])
 
@@ -329,6 +369,10 @@ class CMDDJ(loader.Module):
             return await call.edit(
                 text=self.strings("no_rights")
             )
+        except AdminRankInvalidError:
+            return await call.edit(
+                text=self.strings("adminrankerror")
+            )
 
         await call.edit(
             text=self.strings("promoted").format(
@@ -473,12 +517,16 @@ class CMDDJ(loader.Module):
         user_id = None
         chat = await message.get_chat()
         rank = ""
+        args = utils.get_args_raw(message)
         reply = await message.get_reply_message()
         if reply:
             if reply.sender_id != message._client.tg_id:
                 user_id = reply.sender_id
         else:
-            user_id = await utils.get_target(message)
+            try:
+                user_id = int(args.split()[0])
+            except ValueError:
+                user_id = await utils.get_target(message)
 
         if (not chat.admin_rights or not chat.admin_rights.add_admins) and not chat.creator:
             return await utils.answer(message, self.strings("no_rights", message))
@@ -520,44 +568,6 @@ class CMDDJ(loader.Module):
             )
         )
 
-    async def process_channel_info(self, channel_ent, message):
-        """Обработка информации о канале"""
-        channel = await self._client(GetFullChannelRequest(channel_ent))
-        description = channel.full_chat.about or "🚫"
-        creation_date = get_creation_date(channel_ent.id)
-        subscriber_count = channel.full_chat.participants_count
-
-        channel_info = (
-            "<b>📣 Информация о канале:</b>\n\n"
-            f"<b>Название:</b> <code>{channel_ent.title}</code>\n"
-            f"<b>Юзернейм:</b> @{channel_ent.username or '🚫'}\n"
-            f"<b>Описание:</b>\n{description}\n\n"
-            f"<b>Дата создания:</b> <code>{creation_date}</code>\n"
-            f"<b>Количество подписчиков:</b> <code>{subscriber_count}</code>\n"
-            f"<b>ID:</b> <code>{channel_ent.id}</code>\n"
-        )
-
-        if channel_ent.username:
-            channel_info += f'<b><a href="https://t.me/{channel_ent.username}">Ссылка на канал</a></b>\n\n'
-        else:
-            channel_info += "Ссылка на канал отсутствует.\n\n"
-
-        photo = await self._client.download_profile_photo(channel_ent.id)
-
-        if photo:
-            await self._client.send_file(
-                message.chat_id,
-                file=photo,
-                caption=channel_info,
-                buttons=[
-                    [Button.inline("🔄 Обновить данные", data=f"refresh:{channel_ent.id}")]
-                ]
-            )
-        else:
-            await self._client.send_message(message.chat_id, channel_info)
-
-        await message.delete()
-
     @loader.owner
     async def createcmd(self, message):
         """Используй .create <g|s|c> <название>, чтобы создать группу, супергруппу или канал."""
@@ -586,13 +596,11 @@ class CMDDJ(loader.Module):
                 f'<b>Группа "{title}" создана.\nЛинк: {result.link}.</b>'
             )
         except IndexError:
-            return await message.edit("<b>Неверно указаны аргументы.</b>")
+            return await message.edit(self.strings("invalid_args", message))
         except UnboundLocalError:
-            return await message.edit("<b>Неверно указаны аргументы.</b>")
+            return await message.edit(self.strings("invalid_args", message))
         except UserRestrictedError:
-            return await message.edit(
-                "<b>У вас спамбан, вы не можете создавать каналы или группы.</b>"
-            )
+            return await message.edit(self.strings("spam_ban", message))
 
     @loader.owner
     async def useridcmd(self, message):
@@ -618,11 +626,11 @@ class CMDDJ(loader.Module):
         """Удаляет сообщение. Использование: ?del <reply>"""
         reply = await event.get_reply_message()
         if not reply:
-            await event.edit("Ответь на сообщение которое надо удалить.")
+            await utils.answer(event, self.strings("no_reply", event))
             return await event.delete()
         try:
-            await reply.delete()
             await event.delete()
+            await reply.delete()
         except Exception:
             pass
 
@@ -631,7 +639,7 @@ class CMDDJ(loader.Module):
         """Удаляет группу/канал по ссылке или ID. Использование: .dgc <ID или ссылка>"""
         args = utils.get_args(event)
         if not args:
-            await event.edit("❌ Укажите ID или ссылку на группу/канал.")
+            await event.edit(self.strings("invalid_args", event))
             return
         
         link = args[0] if isinstance(args, list) else args
@@ -642,7 +650,7 @@ class CMDDJ(loader.Module):
                 chat_id = await event.client.get_entity(link)
                 chat_id = chat_id.id
             else:
-                await event.edit("❌ Некорректный формат. Используйте ссылку или числовой ID.")
+                await event.edit(self.strings("invalid_args", event))
                 return
             try:
                 await event.client(DeleteChannelRequest(chat_id))
@@ -764,6 +772,21 @@ class CMDDJ(loader.Module):
                 await event.edit(f"Ошибка при подсчете участников: {e}")
         else:
             return await event.edit("<b>Братан, это не чат!</b>")
+
+    @loader.owner
+    async def banallcmd(self, message):
+        """Забанить всех участников в группе/канале"""
+        await message.delete()
+        chat = message.chat
+        if chat:
+            async for user in self.client.iter_participants(chat.id):
+                try:
+                    if user.id == (await self.client.get_me()).id:
+                        continue
+                    await self.client.edit_permissions(chat.id, user.id, view_messages=False)
+                    await asyncio.sleep(5)
+                except Exception as e:
+                    pass
 
     @loader.owner
     async def chatinfocmd(self, chatinfo):
