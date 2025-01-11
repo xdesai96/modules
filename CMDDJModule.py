@@ -1,6 +1,6 @@
 # meta developer: @xdesai & @devjmodules
 
-import asyncio, os, requests
+import asyncio, os
 from .. import loader, security, utils
 from datetime import timedelta, datetime
 from ..inline.types import InlineCall # type: ignore
@@ -9,25 +9,8 @@ from telethon.tl.functions.messages import ExportChatInviteRequest, DeleteChatUs
 from hikkatl.tl.types import Message
 from telethon.tl.functions.channels import GetFullChannelRequest, CreateChannelRequest, EditBannedRequest, EditTitleRequest, EditAdminRequest, JoinChannelRequest, DeleteChannelRequest, GetParticipantsRequest, GetFullChannelRequest
 from telethon.tl.types import *
-from telethon import Button
 from telethon.errors import *
 from telethon.errors.rpcerrorlist import YouBlockedUserError, AdminRankInvalidError
-
-def get_creation_date(user_id: int) -> str:
-    url = "https://restore-access.indream.app/regdate"
-    headers = {
-        "accept": "*/*",
-        "content-type": "application/x-www-form-urlencoded",
-        "user-agent": "Nicegram/92 CFNetwork/1390 Darwin/22.0.0",
-        "x-api-key": "e758fb28-79be-4d1c-af6b-066633ded128",
-        "accept-language": "en-US,en;q=0.9",
-    }
-    data = {"telegramId": user_id}
-    response = requests.post(url, headers=headers, json=data)
-    if response.status_code == 200 and "data" in response.json():
-        return response.json()["data"]["date"]
-    else:
-        return "Ошибка получения данных"
 
 @loader.tds
 class CMDDJ(loader.Module):
@@ -38,8 +21,7 @@ class CMDDJ(loader.Module):
         "name": "ChatModule",
         "loading": "🕐 <b>Обработка данных...</b>",
         "not_a_chat": "<emoji document_id=5312526098750252863>❌</emoji> <b>Команда не может быть запущена в личных сообщениях.</b>",
-        "no_rights": "<emoji document_id=5318764049121420145>🫤</emoji> <b>У меня нет прав администратора в этом чате" \
-                     " или я не могу изменять права администраторов.</b>",
+        "no_rights": "<emoji document_id=5318764049121420145>🫤</emoji> <b>У меня недостаточно прав.</b>",
         "no_user": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>Вы не указали пользователя.</b>",
         "demoted": "<emoji document_id=5458403743835889060>😂</emoji> <b>С {name} сняты права администратора.</b>",
         "promoted_full": "<emoji document_id=5271557007009128936>👑</emoji> <b>{name} повышен до администратора " \
@@ -62,17 +44,87 @@ class CMDDJ(loader.Module):
         "confirm": "✅ Подтвердить",
         "adminrankerror" : "❌ Недопустимый префикс",
         "_cls_doc": "Управление правами администраторов в чатах.",
-        "invalid_args": "<b>Неверные аргументы. Используйте: .create <g|s|c> <название></b>",
+        "invalid_args": "❌ <b>Неверные аргументы.</b>",
         "spam_ban": "❌ Ваш аккаунт ограничен в создании новых групп/каналов.",
-        "no_reply": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>Вы не ответили на сообщение.</b>"
+        "no_reply": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>Вы не ответили на сообщение.</b>",
+        "rpc_error": "Произошла ошибка: {error}",
+        "invite_hash_expired": "Срок ссылки истек.",
+        "title_changed": "Название группы/канала изменено на {new_name}",
+        "chat_unavailable": "❌ Чат недоступен или приватный.",
+        "of_chat": "Группа",
+        "of_channel": "Канал",
+        "own_list": "<b>Мои владения: {count}</b>\n{msg}",
+        "no_ownerships": "Владений нет.",
+        "no_user": "Пользователь не найден.",
+        "unknown_user": "Неизвестный пользователь.",
+        "unmuted": "Пользователь {first_name}(<code>{user_id}</code>) был размучен.",
+        "muted": "Пользователь {first_name}(<code>{user_id}</code>) был замучен на {mute_time} миинут.",
+        "users_too_much": "Лимит приглашения пользователей достигнут.",
+        "kick_all": "{user_count} участников будут кикнуты.",
+        "kicked": "Пользователь {name}(<code>{id}</code>) был кикнут.",
+        "chat_type_error": "Не удалось определить тип чата.",
+        "invite_success": "<b>Пользователь приглашён успешно!</b>",
+        "privacy_settings_error": "<b>Настройки приватности пользователя не позволяют пригласить его.</b>",
+        "deleted_account": "<b>Аккаунт пользователя удалён.</b>",
+        "blocked_contact": "<b>Вы заблокировали этого пользователя.</b>",
+        "search_deleted_accounts": "<emoji document_id=5188311512791393083>🔎</emoji> <b>Поиск удалённых аккаунтов</b>",
+        "no_deleted_accounts": "<emoji document_id=5341509066344637610>😎</emoji> <b>Здесь нет ни одного удалённого аккаунта</b>",
+        "kicked_deleted_accounts": "<emoji document_id=5328302454226298081>🫥</emoji> <b>Удалено {count} удалённых аккаунтов</b>",
+        "chat_info_header": "Информация о чате:\n",
+        "chat_id": "<b>ID:</b> {id}\n",
+        "group_title": "<b>Название группы:</b> {title}\n",
+        "previous_title": "<b>Предыдущее название:</b> {title}\n",
+        "group_type_public": "<b>Тип группы:</b> Публичный\n",
+        "group_link": "<b>Ссылка:</b> {link}\n",
+        "group_type_private": "<b>Тип группы:</b> Приватный\n",
+        "group_creator_username": "<b>Создатель:</b> @{username}\n",
+        "group_creator_link": "<b>Создатель:</b> <a href=\"tg://user?id={id}\">{firstname}</a>\n",
+        "group_created": "<b>Создан:</b> {date} - {time}\n",
+        "messages_viewable": "<b>Видимые сообщения:</b> {count}\n",
+        "messages_sent": "<b>Всего сообщений:</b> {count}\n",
+        "group_members": "<b>Участников:</b> {count}\n",
+        "group_admins": "<b>Админов:</b> {count}\n",
+        "group_bots": "<b>Ботов:</b> {count}\n",
+        "group_online": "<b>Сейчас онлайн:</b> {count}\n",
+        "group_restricted": "<b>Ограниченных пользователей:</b> {count}\n",
+        "group_banned": "<b>Забаненных пользователей:</b> {count}\n",
+        "group_stickers": "<b>Стикеры группы:</b> <a href=\"{stickers}\">Перейти</a>\n",
+        "group_slowmode": "<b>Слоумод:</b> {slowmode}",
+        "group_slowmode_time": ", {time} секунд\n",
+        "group_restricted_status": "<b>Ограничен:</b> {restricted}\n",
+        "group_restriction_details": "> Платформа: {platform}\n> Причина: {reason}\n> Текст: {text}\n\n",
+        "group_scam": "<b>Скам:</b> да\n\n",
+        "group_verified": "<b>Верифицирован:</b> {verified}\n",
+        "group_description": "<b>Описание:</b> {description}\n",
+        "no": "Нет",
+        "yes": "Да",
+        "no_title": "Нет названия",
+        "join_success": "Успешно вступили в приватный чат по ссылке: {link}.",
+        "successful_delete": "✅ ({chat_type}) успешно удалена.",
+        "owner_info": "Владелец:\n<a href='tg://user?id={owner_id}'>{owner_name}</a>",
+        "members_count": "Количество участников (без ботов) в чате: {count}",
+        "bots_in_chat": "<b>Ботов в \"{title}\": {count}</b>\n",
+        "deleted_bot": "\n• Удалённый бот <b>|</b> <code>{user_id}</code>",
+        "too_many_bots": "Черт, слишком много ботов здесь. Загружаю список ботов в файл...",
+        "no_one_unbanned": "Никто не разбанен",
+        "no_one_banned": "Никто не забанен",
+        "admins_in_chat": "<b>Админов в \"{title}\": {count}</b>\n",
+        "too_many_admins": "Черт, слишком много админов здесь. Загружаю список админов в файл...",
+        "users_not_found": "\n<b>Пользователи не найдены.</b>",
+        "large_chat_loading": "<b>Черт, слишком большой чат. Загружаю список пользователей в файл...</b>",
+        "admins_in_chat_caption": "<b>Админов в \"{}\":</b>",
+        "bots_in_chat_caption": "<b>Ботов в \"{}\":</b>",
+        "users_in_chat_caption": "<b>Пользователей в {}:</b>",
+        "data_fetch_error": "Ошибка получения данных",
+        "this_chat": "этом чате",
+        "members_in_chat": "Участников в {title}:\n",
     }
 
     strings = {
         "name": "ChatModule",
         "loading": "🕐 <b>Processing data...</b>",
         "not_a_chat": "<emoji document_id=5312526098750252863>❌</emoji> <b>The command cannot be run in private messages.</b>",
-        "no_rights": "<emoji document_id=5318764049121420145>🫤</emoji> <b>I do not have admin rights in this chat" \
-                     " or I cannot change admin rights.</b>",
+        "no_rights": "<emoji document_id=5318764049121420145>🫤</emoji> <b>I don't have enough rights.</b>",
         "no_user": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>You did not specify a user.</b>",
         "demoted": "<emoji document_id=5458403743835889060>😂</emoji> <b>{name} has been demoted from admin.</b>",
         "promoted_full": "<emoji document_id=5271557007009128936>👑</emoji> <b>{name} has been promoted to admin " \
@@ -95,15 +147,87 @@ class CMDDJ(loader.Module):
         "confirm": "✅ Confirm",
         "adminrankerror" : "❌ Invalid prefix",
         "_cls_doc": "Manage admin rights in chats.",
-        "invalid_args": "<b>Invalid arguments. Use: .create <g|s|c> <name></b>",
+        "invalid_args": "❌ <b>Invalid arguments.</b>",
         "spam_ban": "❌ Your account is restricted from creating new groups/channels.",
-        "no_reply": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>You did not reply to a message.</b>"
+        "no_reply": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>You did not reply to a message.</b>",
+        "rpc_error": "Error occurred: {error}",
+        "invite_hash_expired": "Link expired.",
+        "title_changed": "Group/channel name changed to {new_name}",
+        "chat_unavailable": "❌ Chat unavailable or private.",
+        "of_chant": "Group",
+        "of_channel": "Channel",
+        "own_list": "<b>My possessions: {count}</b>\n{msg}",
+        "no_ownerships": "No possessions.",
+        "no_user": "User not found.",
+        "unknown_user": "Unknown user.",
+        "unmuted": "User {first_name}(<code>{user_id}</code>) was unmuted.",
+        "muted": "User {first_name}(<code>{user_id}</code>) was muted for {mute_time} minutes.",
+        "users_too_much": "The user invitation limit has been reached.",
+        "kick_all": "{user_count} participants will be kicked.",
+        "kicked": "User {name}(<code>{id}</code>) was kicked.",
+        "chat_type_error": "Failed to determine chat type.",
+        "invite_success": "<b>User successfully invited!</b>",
+        "privacy_settings_error": "<b>The user's privacy settings do not allow inviting them.</b>",
+        "deleted_account": "<b>The user's account is deleted.</b>",
+        "blocked_contact": "<b>You have blocked this user.</b>",
+        "search_deleted_accounts": "<emoji document_id=5188311512791393083>🔎</emoji> <b>Searching for deleted accounts</b>",
+        "no_deleted_accounts": "<emoji document_id=5341509066344637610>😎</emoji> <b>No deleted accounts found here</b>",
+        "kicked_deleted_accounts": "<emoji document_id=5328302454226298081>🫥</emoji> <b>Removed {count} deleted accounts</b>",
+        "chat_info_header": "Chat information:\n",
+        "chat_id": "<b>ID:</b> {id}\n",
+        "group_title": "<b>Group title:</b> {title}\n",
+        "previous_title": "<b>Previous title:</b> {title}\n",
+        "group_type_public": "<b>Group type:</b> Public\n",
+        "group_link": "<b>Link:</b> {link}\n",
+        "group_type_private": "<b>Group type:</b> Private\n",
+        "group_creator_username": "<b>Creator:</b> @{username}\n",
+        "group_creator_link": "<b>Creator:</b> <a href=\"tg://user?id={id}\">{firstname}</a>\n",
+        "group_created": "<b>Created:</b> {date} - {time}\n",
+        "messages_viewable": "<b>Viewable messages:</b> {count}\n",
+        "messages_sent": "<b>Total messages:</b> {count}\n",
+        "group_members": "<b>Members:</b> {count}\n",
+        "group_admins": "<b>Admins:</b> {count}\n",
+        "group_bots": "<b>Bots:</b> {count}\n",
+        "group_online": "<b>Currently online:</b> {count}\n",
+        "group_restricted": "<b>Restricted users:</b> {count}\n",
+        "group_banned": "<b>Banned users:</b> {count}\n",
+        "group_stickers": "<b>Group stickers:</b> <a href=\"{stickers}\">Go to</a>\n",
+        "group_slowmode": "<b>Slow mode:</b> {slowmode}",
+        "group_slowmode_time": ", {time} seconds\n",
+        "group_restricted_status": "<b>Restricted:</b> {restricted}\n",
+        "group_restriction_details": "> Platform: {platform}\n> Reason: {reason}\n> Text: {text}\n\n",
+        "group_scam": "<b>Scam:</b> yes\n\n",
+        "group_verified": "<b>Verified:</b> {verified}\n",
+        "group_description": "<b>Description:</b> {description}\n",
+        "no": "No",
+        "yes": "Yes",
+        "no_title": "No title",
+        "join_success": "Successfully joined the private chat via the link: {link}.",
+        "successful_delete": "✅ ({chat_type}) successfully deleted.",
+        "owner_info": "Owner:\n<a href='tg://user?id={owner_id}'>{owner_name}</a>",
+        "members_count": "Number of members (excluding bots) in the chat: {count}",
+        "bots_in_chat": "<b>Bots in \"{title}\": {count}</b>\n",
+        "deleted_bot": "\n• Deleted bot <b>|</b> <code>{user_id}</code>",
+        "too_many_bots": "Damn, too many bots here. Loading the list of bots into a file...",
+        "no_one_unbanned": "No one is unbanned",
+        "no_one_banned": "No one is banned",
+        "admins_in_chat": "<b>Admins in \"{title}\": {count}</b>\n",
+        "too_many_admins": "Damn, too many admins here. Loading the list of admins into a file...",
+        "users_not_found": "\n<b>No users found.</b>",
+        "large_chat_loading": "<b>Damn, the chat is too large. Loading the list of users into a file...</b>",
+        "admins_in_chat_caption": "<b>Admins in \"{}\":</b>",
+        "bots_in_chat_caption": "<b>Bots in \"{}\":</b>",
+        "users_in_chat_caption": "<b>Users in {}:</b>",
+        "data_fetch_error": "Error fetching data",
+        "this_chat": "this chat",
+        "members_in_chat": "Members in {title}:\n"
     }
 
     @loader.owner
     async def client_ready(self, client, db):
         self.client = client
         self.db = db
+        self.muted = []
 
     @loader.owner
     async def fullrightscmd(self, message: Message):
@@ -658,31 +782,29 @@ class CMDDJ(loader.Module):
             except Exception:
                 try:
                     await event.client(DeleteChatRequest(chat_id))
-                    chat_type = "Обычная группа"
+                    chat_type = self.strings("of_chat", event)
                 except Exception as e:
                     if "CHANNEL_PRIVATE" in str(e):
                         await event.edit("❌ Чат недоступен или приватный.")
                         return
                     elif "CHAT_ADMIN_REQUIRED" in str(e):
-                        await event.edit("❌ У вас недостаточно прав для удаления этой группы/канала.")
+                        await event.edit(self.strings("no_rights", event))
                         return
                     elif "Invalid object ID for a chat." in str(e):
-                        await event.edit("❌ Неверный ID.")
+                        await event.edit(self.strings("invalid_args", event))
                         return
-                    await event.edit(f"❌ Произошла ошибка: {e}")
+                    await event.edit(self.strings("invalid_args", event).format(error=str(e)))
                     return
-
-            await event.edit(f"✅ ({chat_type}) успешно удалена.")
-            await event.delete()
+            await event.edit(self.strings("successful_delete", event).format(chat_type=chat_type))
 
         except ChatAdminRequiredError:
-            await event.edit("❌ У вас недостаточно прав для удаления этой группы/канала.")
+            await event.edit(self.strings("no_rights", event))
         except ChannelPrivateError:
-            await event.edit("❌ Чат недоступен или приватный.")
+            await event.edit(self.strings("chat_unavailable", event))
         except RpcError as e:
-            await event.edit(f"❌ Ошибка RPC: {e}")
+            await event.edit(self.strings("rpc_error", event).format(error=e))
         except Exception as e:
-            await event.edit(f"❌ Произошла ошибка: {e}")
+            await event.edit(self.strings("rpc_error", event).format(error=e))
 
     @loader.owner
     async def joincmd(self, event):
@@ -690,7 +812,7 @@ class CMDDJ(loader.Module):
 
         link = utils.get_args_raw(event)
         if not link:
-            await event.edit("Укажите ссылку на группу или канал.")
+            await event.edit(self.strings("invalid_args", event))
             return
 
         link = link.strip()
@@ -698,18 +820,18 @@ class CMDDJ(loader.Module):
             if "joinchat" in link or "+" in link:
                 invite_hash = link.split("/")[-1].replace("joinchat/", "").replace("+", "")
                 await self.client(ImportChatInviteRequest(invite_hash))
-                await event.edit(f"Успешно вступили в приватный чат по ссылке: {link}.")
+                await event.edit(self.strings("join_success", event).format(link=link))
             else:
                 entity = await self.client.get_entity(link)
                 await self.client(JoinChannelRequest(entity))
-                title = entity.title if hasattr(entity, 'title') else "Нет названия"
-                await event.edit(f"Успешно вступили в публичный чат: {title}.")
+                title = entity.title if hasattr(entity, 'title') else self.strings("no_title", event)
+                await event.edit(self.strings("join_success", event).format(link=link))
         except InviteHashExpiredError:
-            await event.edit("Срок действия ссылки истек!")
+            await event.edit(self.strings("invite_hash_expired", event))
         except ValueError:
-            await event.edit("Неверная ссылка. Проверьте корректность.")
+            await event.edit(self.strings("invalid_link", event))
         except Exception as e:
-            await event.edit(f"Ошибка: {str(e)}")
+            await event.edit(self.strings("rpc_error", event).format(error=str(e)))
 
     @loader.owner
     async def whoisownercmd(self, event):
@@ -722,11 +844,11 @@ class CMDDJ(loader.Module):
                 if isinstance(admin.participant, ChannelParticipantCreator):
                     owner_name = f"{admin.first_name} {admin.last_name or ''}".strip()
                     owner_id = admin.id
-                    await event.edit(f"Владелец:\n<a href='tg://user?id={owner_id}'>{owner_name}</a>")
+                    await event.edit(self.strings("owner_info").format(owner_id=owner_id, owner_name=owner_name))
                     return
             await event.edit("Владелец не найден.")
         except Exception as e:
-            await event.edit(f"Ошибка: {str(e)}")
+            await event.edit(self.strings("rpc_error", event).format(error=str(e)))
 
     @loader.owner
     async def renamecmd(self, message):
@@ -734,7 +856,7 @@ class CMDDJ(loader.Module):
         try:
             args = utils.get_args(message)
             if not args:
-                await message.edit("Укажите новое название для группы/канала.")
+                await message.edit(self.strings("invalid_args", message))
                 return
 
             new_name = " ".join(args)
@@ -747,16 +869,16 @@ class CMDDJ(loader.Module):
                     title=new_name
                 ))
             except ChatAdminRequiredError:
-                await message.edit("У меня нет прав администратора в этом чате.")
+                await message.edit(self.strings("no_rights", message))
                 return
             except Exception as e:
-                await message.edit(f"Произошла ошибка: {e}")
+                await message.edit(self.strings("rpc_error", message).format(error=e))
                 return
 
-            await message.edit(f"Название изменено на: {new_name}")
+            await message.edit(self.strings("title_changed", message).format(new_name=new_name))
             await message.delete()
         except Exception as e:
-            await message.edit(f"Ошибка: {str(e)}")
+            await message.edit(self.strings("rpc_error", message).format(error=str(e)))
 
     @loader.owner
     async def memberscmd(self, event):
@@ -767,11 +889,11 @@ class CMDDJ(loader.Module):
                 members = await event.client.get_participants(chat)
                 real_members = [member for member in members if not member.bot]
                 count = len(real_members)
-                await event.edit(f"Количество участников (без ботов) в чате: {count}")
+                await event.edit(self.strings("members_count").format(count=count))
             except Exception as e:
-                await event.edit(f"Ошибка при подсчете участников: {e}")
+                await event.edit(self.strings("rpc_error", event).format(error=e))
         else:
-            return await event.edit("<b>Братан, это не чат!</b>")
+            return await utils.answer(event, self.strings("not_a_chat", event))
 
     @loader.owner
     async def banallcmd(self, message):
@@ -792,10 +914,10 @@ class CMDDJ(loader.Module):
     async def chatinfocmd(self, chatinfo):
         """Используй .chatinfo <айди чата>; ничего"""
         if chatinfo.chat:
-            await chatinfo.edit("<b>Загрузка информации...</b>")
+            await chatinfo.edit(self.strings("loading", chatinfo))
             await chatinfo.delete()
-            chat = await get_chatinfo(chatinfo)
-            caption = await fetch_info(chat, chatinfo)
+            chat = await self.get_chatinfo(chatinfo)
+            caption = await self.fetch_info(chat, chatinfo)
             try:
                 await chatinfo.client.send_message(
                     chatinfo.to_id,
@@ -804,17 +926,18 @@ class CMDDJ(loader.Module):
                         chat.full_chat.id, "chatphoto.jpg"
                     ),
                 )
+                os.remove("chatphoto.jpg")
             except Exception:
-                await chatinfo.edit(f"<b>Произошла непредвиденная ошибка.</b>")
+                await chatinfo.edit(self.strings("rpc_error", chatinfo))
                 await chatinfo.delete()
         else:
-            await chatinfo.edit("<b>Братан, это не чат!</b>")
+            await chatinfo.edit(self.strings("not_a_chat", chatinfo))
             await chatinfo.delete()
 
     @loader.owner
     async def owncmd(self, message):
         """Выводит список чатов, каналов и групп где вы владелец."""
-        await message.edit("<b>Считаем...</b>")
+        await message.edit(self.strings("loading", message))
         
         count = 0
         msg = ""
@@ -824,13 +947,13 @@ class CMDDJ(loader.Module):
                 chat = await message.client.get_entity(dialog.id)
                 if chat.admin_rights or chat.creator:
                     count += 1
-                    chat_type = "Группа" if dialog.is_group else "Канал"
+                    chat_type = self.strings("of_chat") if dialog.is_group else self.strings("of_channel")
                     msg += f'\n• {chat.title} <b>({chat_type})</b> | <code>{chat.id}</code>'
 
         if msg:
-            await message.edit(f"<b>Мои владения: {count}</b>\n{msg}", parse_mode="html")
+            await message.edit(self.strings("own_list", message).format(count=count, msg=msg), parse_mode="html")
         else:
-            await message.edit("<b>Нет владений, где вы являетесь администратором.</b>")
+            await message.edit(self.strings("no_ownerships", message))
 
     @loader.owner
     async def unmutecmd(self, message):
@@ -839,12 +962,12 @@ class CMDDJ(loader.Module):
             try:
                 args = message.raw_text.split(maxsplit=1)
                 if len(args) < 2:
-                    await message.edit("Укажите ID пользователя после команды.")
+                    await message.edit(self.strings("no_user", message))
                     return
                 
                 user_id = int(args[1])
                 user = await message.client.get_entity(user_id)
-                first_name = user.first_name or "Неизвестный"
+                first_name = user.first_name or self.strings("unknown_user", message)
                 
                 await message.client.edit_permissions(
                     entity=message.chat_id,
@@ -857,15 +980,21 @@ class CMDDJ(loader.Module):
                     send_inline=True,
                     send_polls=True
                 )
-                
+                self.muted.remove(user_id)
                 await message.edit(
-                    f"Пользователь <a href='tg://user?id={user_id}'>{first_name}</a> был размучен. Он может снова отправлять сообщения.",
+                    self.strings("unmuted", message).format(
+                        user_id=user_id,
+                        first_name=first_name
+                    ),
                     parse_mode="html"
                 )
+                return
             except ValueError:
-                await message.edit("Укажите корректный ID пользователя.")
+                await message.edit(self.strings("no_user", message))
+                return
             except Exception as e:
-                await message.edit(f"Произошла ошибка: {e}")
+                await message.edit(self.strings("rpc_error", message).format(error=e))
+                return
         reply_message = await message.get_reply_message()
         user_id = reply_message.sender_id
         first_name = reply_message.sender.first_name
@@ -881,21 +1010,22 @@ class CMDDJ(loader.Module):
                 send_inline = True,
                 send_polls = True
             )
+            self.muted.remove(user_id)
             await message.client.send_message(
-                    message.chat_id,
-                    f"Пользователь <a href='tg://user?id={user_id}'>{first_name}</a> был размучен. Он может снова отправлять сообщения.",
-                    reply_to=reply_message.id
-                )
+                message.chat_id,
+                self.strings("unmuted", message).format(
+                    user_id=user_id,
+                    first_name=first_name
+                ),
+                reply_to=reply_message.id
+            )
             await message.delete()
         except UserAdminInvalidError:
-            await message.edit("Я не могу замутить администратора.")
-            await message.delete()
+            await message.edit(self.strings("no_rights", message))
         except ChatAdminRequiredError:
-            await message.edit("У меня нет прав администратора для выполнения этой команды.")
-            await message.delete()
+            await message.edit(self.strings("no_rights", message))
         except Exception as e:
-            await message.edit(f"Ошибка: {e}")
-            await message.delete()
+            await message.edit(self.strings("rpc_error", message).format(error=e))
 
     @loader.owner
     async def mutecmd(self, message):
@@ -903,19 +1033,17 @@ class CMDDJ(loader.Module):
         args = message.raw_text.split(maxsplit=2)
 
         if len(args) < 2:
-            await message.edit("Использование: .mute <reply | ID | username> <time> - мутит на определенное время (в минутах).")
-            await message.delete()
+            await message.edit(self.strings("invalid_args", message))
             return
         try:
             mute_time = int(args[-1])
             duration = timedelta(minutes=mute_time)
         except ValueError:
-            await message.edit("Укажите корректное время мута (в минутах).")
-            await message.delete()
+            await message.edit(self.strings("invalid_args", message))
             return
 
         user_id = None
-        first_name = "пользователь"
+        first_name = self.strings("unknown_user", message)
 
         if message.is_reply:
             reply_message = await message.get_reply_message()
@@ -928,15 +1056,14 @@ class CMDDJ(loader.Module):
                 user_id = user.id
                 first_name = user.first_name
             except Exception:
-                await message.edit("Не удалось найти пользователя по ID или username.")
-                await message.delete()
+                await message.edit(self.strings("no_user", message))
                 return
         else:
-            await message.edit("Ответьте на сообщение пользователя или укажите его ID/username.")
-            await message.delete()
+            await message.edit(self.strings("no_user", message))
             return
 
         try:
+            self.muted.append(user_id)
             await message.client.edit_permissions(
                 entity=message.chat_id,
                 user=user_id,
@@ -951,54 +1078,57 @@ class CMDDJ(loader.Module):
             )
 
             await message.edit(
-                f"Пользователь <a href='tg://user?id={user_id}'>{first_name}</a> замучен на {mute_time} минут.",
+                self.strings("muted", message).format(
+                    user_id=user_id,
+                    first_name=first_name,
+                    mute_time=mute_time
+                ),
                 parse_mode="html"
             )
 
             await asyncio.sleep(duration.total_seconds())
-
-            await message.client.send_message(
-                message.chat_id,
-                f"Время мута пользователя <a href='tg://user?id={user_id}'>{first_name}</a> завершилось. Он может снова отправлять сообщения.",
-                parse_mode="html"
-            )
+            if user_id in self.muted:
+                await message.client.send_message(
+                    message.chat_id,
+                    self.strings("unmuted", message).format(
+                        user_id=user_id,
+                        first_name=first_name
+                    ),
+                    parse_mode="html"
+                )
+                self.muted.remove(user_id)
 
         except UserAdminInvalidError:
-            await message.edit("Я не могу замутить администратора.")
-            await message.delete()
+            await message.edit(self.strings("no_rights", message))
         except ChatAdminRequiredError:
-            await message.edit("У меня нет прав администратора для выполнения этой команды.")
-            await message.delete()
+            await message.edit(self.strings("no_rights", message))
         except Exception as e:
-            await message.edit(f"Ошибка: {e}")
-            await message.delete()
+            await message.edit(self.strings("rpc_error", message).format(error=e))
 
     @loader.owner
     async def kickallcmd(self, event):
         """Удаляет всех пользователей из чата."""
         user = [i async for i in event.client.iter_participants(event.to_id.channel_id)]
         await event.edit(
-            f"<b>{len(user)} пользователей будет кикнуто из чата"
-            f" {event.to_id.channel_id}</b>"
+            self.strings("kick_all", event).format(
+            user_count=len(user)
+            )
         )
-        await event.delete()
         for u in user:
             try:
                 try:
                     if u.is_self != True:
                         await event.client.kick_participant(event.chat_id, u.id)
-                    else:
-                        pass
+                        asyncio.sleep(1)
                 except:
                     pass
             except FloodWaitError as e:
-                print("Flood for", e.seconds)
+                await event.edit(self.strings("flood_wait", event).format(seconds=e.seconds))
 
     @loader.owner
     async def stealcmd(self, event):
         """Добавляет людей и ботов с чата в чат. Если дописать аргумент nobot то без ботов"""
         if len(event.text.split()) >= 2:
-            print("Started!")
             idschannelgroup = int(event.text.split(" ", maxsplit=2)[1])
             arg = event.text.split(" ", maxsplit=2)[2] if len(event.text.split()) > 2 else None
             entity = await event.client.get_entity(idschannelgroup)
@@ -1020,7 +1150,7 @@ class CMDDJ(loader.Module):
                     i async for i in event.client.iter_participants(event.to_id.channel_id)
                 ]
             await event.edit(
-                f"<b>({len(user)})просто прикол)</b>"
+                self.strings("steal_complete", event).format(count=len(user))
             )
             await event.delete()
             try:
@@ -1038,7 +1168,6 @@ class CMDDJ(loader.Module):
                             await asyncio.sleep(e.seconds)
                         except Exception as e:
                             if "Too many requests" in str(e):
-                                print("Stopped!")
                                 return
                             print(f"{str(e)}")
                         await asyncio.sleep(2)
@@ -1057,222 +1186,215 @@ class CMDDJ(loader.Module):
                             await asyncio.sleep(e.seconds)
                         except Exception as e:
                             if "Too many requests" in str(e):
-                                print("Stopped!")
                                 return
                             print(f"{str(e)}")
                         await asyncio.sleep(2)
             except UsersTooMuchError:
-                print("The maximum number of users has been exceeded")
-                print("Stopped!")
+                await event.edit(self.strings("users_too_much", event))
                 return
         else:
-            await event.edit(f"<b>Куда приглашать будем?</b>")
-        print("Stopped!")
+            await event.edit(self.strings("invalid_args", event))
 
     @loader.owner
     async def userscmd(self, message):
         """Выводит список участников."""
         if not message.is_private:
-            await message.edit("<b>Считаем...</b>")
+            await message.edit(self.strings("loading", message))
             info = await message.client.get_entity(message.chat_id)
-            title = info.title or "этом чате"
+            title = info.title or self.strings("this_chat")
             users = await message.client.get_participants(message.chat_id)
-            mentions = ""
+            mentions = self.strings("members_in_chat").format(title=title)
             user_mentions = []
             for user in users:
                 if not user.bot:
                     if not user.deleted:
                         user_mentions.append(f"\n• <a href =\"tg://user?id={user.id}\">{user.first_name}</a> | <code>{user.id}</code>")
                     else:
-                        user_mentions.append(f"\n• Удалённый аккаунт <b>|</b> <code>{user.id}</code>")
+                        user_mentions.append(self.strings("deleted_account").format(user_id=user.id))
 
             if user_mentions:
                 mentions += ''.join(user_mentions)
             else:
-                mentions += "\n<b>Пользователи не найдены.</b>"
+                mentions += self.strings("users_not_found")
 
             try:
                 await message.edit(mentions)
                 return
             except MessageTooLongError:
-                await message.edit("<b>Черт, слишком большой чат. Загружаю список пользователей в файл...</b>")
+                await message.edit(self.strings("large_chat_loading"))
                 file = open("userslist.md", "w+")
                 file.write(mentions)
                 file.close()
                 await message.client.send_file(message.chat_id,
-                                               "userslist.md",
-                                               caption="<b>Пользователей в {}:</b>".format(title),
-                                               reply_to=message.id)
+                               "userslist.md",
+                               caption=self.strings("users_in_chat_caption").format(title),
+                               reply_to=message.id)
                 os.remove("userslist.md")
                 await message.delete()
                 return
         else:
-            return await message.edit("<b>Братан, это не чат!</b>")
+            return await message.edit(self.strings("not_a_chat"), message)
 
     @loader.owner
     async def adminscmd(self, message):
         """Выводит список всех админов в чате (без учёта ботов)."""
         if not message.is_private:
-            await message.edit("<b>Считаем...</b>")
+            await message.edit(self.strings("loading", message))
             info = await message.client.get_entity(message.chat_id)
             title = info.title or "this chat"
 
             admins = await message.client.get_participants(message.chat_id, filter=ChannelParticipantsAdmins)
             real_members = [member for member in admins if not member.bot]
-            mentions = f"<b>Админов в \"{title}\": {len(real_members)}</b>\n"
+            mentions = self.strings("admins_in_chat").format(title=title, count=len(real_members))
 
             for user in real_members:
                 if not user.deleted:
                     mentions += f"\n• <a href=\"tg://user?id={user.id}\">{user.first_name}</a> | <code>{user.id}</code>"
                 else:
-                    mentions += f"\n• Удалённый аккаунт <b>|</b> <code>{user.id}</code>"
+                    mentions += self.strings("deleted_account").format(user_id=user.id)
 
             try:
                 await message.edit(mentions)
             except MessageTooLongError:
-                await message.edit("Черт, слишком много админов здесь. Загружаю список админов в файл...")
+                await message.edit(self.strings("too_many_admins"))
                 with open("adminlist.md", "w+") as file:
                     file.write(mentions)
                 await message.client.send_file(message.chat_id,
-                                            "adminlist.md",
-                                            caption="<b>Админов в \"{}\":</b>".format(title),
-                                            reply_to=message.id)
+                               "adminlist.md",
+                               caption=self.strings("admins_in_chat_caption").format(title),
+                               reply_to=message.id)
                 os.remove("adminlist.md")
                 await message.delete()
         else:
-            return await message.edit("<b>Братан, это не чат!</b>")
+            return await message.edit(self.strings("not_a_chat"), message)
 
     @loader.owner
     async def botscmd(self, message):
         """Выводит список всех ботов в чате."""
         if not message.is_private:
-            await message.edit("<b>Считаем...</b>")
+            await message.edit(self.strings("loading", message))
 
             info = await message.client.get_entity(message.chat_id)
             title = info.title if info.title else "this chat"
 
             bots = await message.client.get_participants(message.to_id, filter=ChannelParticipantsBots)
-            mentions = f"<b>Ботов в \"{title}\": {len(bots)}</b>\n"
+            mentions = self.strings("bots_in_chat").format(title=title, count=len(bots))
 
             for user in bots:
                 if not user.deleted:
                     mentions += f"\n• <a href=\"tg://user?id={user.id}\">{user.first_name}</a> | <code>{user.id}</code>"
                 else:
-                    mentions += f"\n• Удалённый бот <b>|</b> <code>{user.id}</code>"
+                    mentions += self.strings("deleted_bot").format(user_id=user.id)
 
             try:
                 await message.edit(mentions, parse_mode="html")
             except MessageTooLongError:
-                await message.edit("Черт, слишком много ботов здесь. Загружаю список ботов в файл...")
+                await message.edit(self.strings("too_many_bots"))
                 file = open("botlist.md", "w+")
                 file.write(mentions)
                 file.close()
                 await message.client.send_file(message.chat_id,
-                                               "botlist.md",
-                                               caption="<b>Ботов в \"{}\":</b>".format(title),
-                                               reply_to=message.id)
+                               "botlist.md",
+                               caption=self.strings("bots_in_chat_caption").format(title),
+                               reply_to=message.id)
                 os.remove("botlist.md")
                 await message.delete()
         else:
-            return await message.edit("<b>Братан, это не чат!</b>")
+            return await message.edit(self.strings("not_a_chat", message))
 
     @loader.owner
     async def unbancmd(self, message):
         """Разбанить участника. Использование: .ban <reply/id>"""
         if not isinstance(message.to_id, PeerChannel):
-            return await utils.answer(message, "Братан, это не чат!")
+            return await utils.answer(message, self.strings("not_a_chat", message))
         if message.is_reply:
             user = await utils.get_user(await message.get_reply_message())
         else:
             args = utils.get_args(message)
             if len(args) == 0:
-                return await utils.answer(message, "Никто не разбанен")
+                return await utils.answer(message, self.strings("no_one_unbanned"))
             if args[0].isdigit():
                 who = int(args[0])
             else:
                 who = args[0]
             user = await self.client.get_entity(who)
         if not user:
-            return await utils.answer(message, "Кого разбанить?")
+            return await utils.answer(message, self.strings("no_user", message))
         try:
             await self.client(EditBannedRequest(message.chat_id, user.id, ChatBannedRights(until_date=None, view_messages=False)))
             await message.delete()
             return
         except BadRequestError:
-            await utils.answer(message, "Я не админ...")
-            await message.delete()
+            await utils.answer(message, self.strings("no_rights", message))
             return
 
     @loader.owner
     async def bancmd(self, message):
         """Забанить участника. Использование: .ban <reply/id>"""
         if not isinstance(message.to_id, PeerChannel):
-            return await utils.answer(message, "Братан, это не чат!")
+            return await utils.answer(message, self.strings("not_a_chat", message))
         if message.is_reply:
             user = await utils.get_user(await message.get_reply_message())
         else:
             args = utils.get_args(message)
             if len(args) == 0:
-                return await utils.answer(message, "Никто не забанен")
+                return await utils.answer(message, self.strings("no_one_banned"))
             if args[0].isdigit():
                 who = int(args[0])
             else:
                 who = args[0]
             user = await self.client.get_entity(who)
         if not user:
-            return await utils.answer(message, "Кого банить?")
+            return await utils.answer(message, self.strings("no_user", message))
         try:
             await self.client(EditBannedRequest(message.chat_id, user.id, ChatBannedRights(until_date=None, view_messages=True)))
             await message.delete()
             return
         except BadRequestError:
-            await utils.answer(message, "Я не админ...")
-            await message.delete()
+            await utils.answer(message, self.strings("no_rights", message))
             return
 
     @loader.owner
     async def kickcmd(self, message):
         """Кикнуть участника из чата. Использование: .kick <reply/id>"""
         if isinstance(message.to_id, PeerUser):
-            return await utils.answer(message, "Это не группа!")
+            return await utils.answer(message, self.strings("not_a_chat", message))
         if message.is_reply:
             user = await utils.get_user(await message.get_reply_message())
         else:
             args = utils.get_args(message)
             if len(args) == 0:
-                return await utils.answer(message, "Никто не кикнут")
+                return await utils.answer(message, self.strings("no_user", message))
             if args[0].isdigit():
                 who = int(args[0])
             else:
                 who = args[0]
             user = await self.client.get_entity(who)
         if not user:
-            return await utils.answer(message, "Кого кикать?")
+            return await utils.answer(message, self.strings("no_user", message))
         if user.is_self:
             if not (await message.client.is_bot()
                     or await self.allmodules.check_security(message, security.OWNER | security.SUDO)):
                 return
         try:
             await self.client.kick_participant(message.chat_id, user.id)
-            await message.delete()
+            await utils.answer(message, self.strings("kicked", message).format(name=user.first_name, id=user.id))
             return
         except BadRequestError:
-            await utils.answer(message, "Я не админ...")
-            await message.delete()
+            await utils.answer(message, self.strings("no_rights", message))
             return
 
     @loader.owner
     async def invitecmd(self, message):
         """Пригласить пользователя/бота в чат. Использование: .invite <id/reply>."""
         if message.is_private:
-            return await message.edit("<b>Братан, это не чат!</b>")
+            return await message.edit(self.strings("not_a_chat", message))
 
         args = utils.get_args_raw(message)
         reply = await message.get_reply_message()
         
         if not args and not reply:
-            await message.edit("<b>Нет аргументов или реплая.</b>")
-            await message.delete()
+            await message.edit(self.strings("invalid_args", message))
             return
 
         try:
@@ -1294,21 +1416,20 @@ class CMDDJ(loader.Module):
                                 users=[user.id]
                             ))
             else:
-                await message.edit("Не удалось определить тип чата.")
-            await message.edit("<b>Пользователь приглашён успешно!</b>")
-            await message.delete()
+                await message.edit(self.strings("chat_type_error", message))
+            await message.edit(self.strings("invite_success", message))
             return
 
         except ValueError:
-            m = "<b>Неверный @ или ID.</b>"
+            m = self.strings("no_user", message)
         except UserIdInvalidError:
-            m = "<b>Неверный @ или ID.</b>"
+            m = self.strings("no_user", message)
         except UserPrivacyRestrictedError:
-            m = "<b>Настройки приватности пользователя не позволяют пригласить его.</b>"
+            m = self.strings("privacy_settings_error", message)
         except UserNotMutualContactError:
-            m = "<b>Настройки приватности пользователя не позволяют пригласить его.</b>"
+            m = self.strings("privacy_settings_error", message)
         except ChatAdminRequiredError:
-            m = "<b>У меня нет прав.</b>"
+            m = self.strings("no_rights", message)
         except UserBotError:
             group = await message.client.get_entity(message.chat_id)
             if args:
@@ -1331,23 +1452,14 @@ class CMDDJ(loader.Module):
                 rank='admin'
             ))
         except ChatWriteForbiddenError:
-            m = "<b>У меня нет прав.</b>"
+            m = self.strings("no_rights", message)
         except ChannelPrivateError:
-            m = "<b>У меня нет прав.</b>"
-        except UserKickedError:
-            m = "<b>Пользователь кикнут из чата, обратитесь к администраторам.</b>"
-        except BotGroupsBlockedError:
-            m = "<b>Бот заблокирован в чате, обратитесь к администраторам.</b>"
-        except UserBlockedError:
-            m = "<b>Пользователь заблокирован в чате, обратитесь к администраторам.</b>"
+            m = self.strings("no_rights", message)
         except InputUserDeactivatedError:
-            m = "<b>Аккаунт пользователя удалён.</b>"
-        except UserAlreadyParticipantError:
-            m = "<b>Пользователь уже в группе.</b>"
+            m = self.strings("deleted_account", message)
         except YouBlockedUserError:
-            m = "<b>Вы заблокировали этого пользователя.</b>"
+            m = self.strings("blocked_contact", message)
         await message.edit(m)
-        await message.delete()
         return
 
     @loader.owner
@@ -1356,18 +1468,17 @@ class CMDDJ(loader.Module):
         chat = await message.get_chat()
 
         if isinstance(chat, User):
-            await utils.answer(message, "<emoji document_id=5787313834012184077>😀</emoji> <b>Эта команда предназначена только для групп</b>")
-            await message.delete()
+            await utils.answer(message, self.strings("not_a_chat", message))
             return
 
         if not chat.admin_rights and not chat.creator:
-            await utils.answer(message, "<emoji document_id=5787544344906959608>ℹ️</emoji> <b>Недостаточно прав для выполнения этой команды.</b>")
+            await utils.answer(message, self.strings("no_rights", message))
             await message.delete()
             return
 
         removed_count = 0
         
-        edit_message = await utils.answer(message, "<emoji document_id=5188311512791393083>🔎</emoji> <b>Поиск удалённых аккаунтов</b>")
+        edit_message = await utils.answer(message, self.strings("search_deleted_accounts", message))
         if not edit_message:
             edit_message = message
 
@@ -1377,28 +1488,26 @@ class CMDDJ(loader.Module):
                     await self._client.kick_participant(chat, user)
                     removed_count += 1
                 except ChatAdminRequiredError:
-                    await utils.answer(message, "<emoji document_id=5787544344906959608>ℹ️</emoji> <b>Для выполнения команды необходимы права администратора</b>")
-                    await message.delete()
+                    await utils.answer(message, self.strings("no_rights", message))
                     return
                 except Exception as e:
-                    await utils.answer(message, f"<emoji document_id=5787544344906959608>ℹ️</emoji> <b>Ошибка при удалении аккаунта {user.id}: {str(e)}</b>")
-                    await message.delete()
+                    await utils.answer(message, self.strings("rpc_error").format(error=str(e)))
+                    return
 
         if removed_count == 0:
-            await edit_message.edit("<emoji document_id=5341509066344637610>😎</emoji> <b>Здесь нет ни одного удалённого аккаунта</b>")
-            await message.delete()
+            await edit_message.edit(self.strings("no_deleted_accounts", message))
         else:
-            await edit_message.edit(f"<emoji document_id=5328302454226298081>🫥</emoji> <b>Удалено {removed_count} удалённых аккаунтов</b>")
+            await edit_message.edit(self.strings("kicked_deleted_accounts", message).format(count=removed_count))
 
     @loader.owner
     async def wipecmd(self, message):
-        """Удаляет все сообщения от тебя без вопросов"""
+        """Удаляет все сообщения от тебя"""
         chat = message.chat
         if chat:
             async for msg in message.client.iter_messages(chat, from_user="me"):
                 await msg.delete()
         else:
-            await message.edit("<b>В лс не чищу!</b>")
+            await message.edit(self.strings("not_a_chat", message))
 
     @loader.owner
     async def _is_owner(self, chat_id):
@@ -1406,230 +1515,227 @@ class CMDDJ(loader.Module):
         permissions = await self.client.get_permissions(chat_id, 'me')
         return permissions.is_creator
 
-async def get_chatinfo(event):
-    chat = utils.get_args_raw(event)
-    chat_info = None
-    if chat:
-        try:
-            chat = int(chat)
-        except ValueError:
-            pass
-    if not chat:
-        if event.reply_to_msg_id:
-            replied_msg = await event.get_reply_message()
-            if replied_msg.fwd_from and replied_msg.fwd_from.channel_id is not None:
-                chat = replied_msg.fwd_from.channel_id
-        else:
-            chat = event.chat_id
-    try:
-        chat_info = await event.client(GetFullChannelRequest(chat))
-    except:
+    async def get_chatinfo(self, event):
+        chat = utils.get_args_raw(event)
+        chat_info = None
+        if chat:
+            try:
+                chat = int(chat)
+            except ValueError:
+                pass
+        if not chat:
+            if event.reply_to_msg_id:
+                replied_msg = await event.get_reply_message()
+                if replied_msg.fwd_from and replied_msg.fwd_from.channel_id is not None:
+                    chat = replied_msg.fwd_from.channel_id
+            else:
+                chat = event.chat_id
         try:
             chat_info = await event.client(GetFullChannelRequest(chat))
-        except ChannelInvalidError:
-            return None
-        except ChannelPrivateError:
-            return None
-        except ChannelPublicGroupNaError:
-            return None
         except:
-            chat = event.input_chat
-            chat_info = await event.client(GetFullChannelRequest(chat))
-            return chat_info
-    return chat_info
+            try:
+                chat_info = await event.client(GetFullChannelRequest(chat))
+            except ChannelInvalidError:
+                return None
+            except ChannelPrivateError:
+                return None
+            except ChannelPublicGroupNaError:
+                return None
+            except:
+                chat = event.input_chat
+                chat_info = await event.client(GetFullChannelRequest(chat))
+                return chat_info
+        return chat_info
 
 
-async def fetch_info(chat, event):
-    chat_obj_info = await event.client.get_entity(chat.full_chat.id)
-    chat_title = chat_obj_info.title
-    try:
-        msg_info = await event.client(
-            GetHistoryRequest(
-                peer=chat_obj_info.id,
-                offset_id=0,
-                offset_date=datetime(2010, 1, 1),
-                add_offset=-1,
-                limit=1,
-                max_id=0,
-                min_id=0,
-                hash=0,
-            )
-        )
-    except Exception:
-        msg_info = None
-        await event.edit("<b>Произошла непредвиденная ошибка.</b>")
-        await event.delete()
-    first_msg_valid = (
-        True
-        if msg_info and msg_info.messages and msg_info.messages[0].id == 1
-        else False
-    )
-    creator_valid = True if first_msg_valid and msg_info.users else False
-    creator_id = msg_info.users[0].id if creator_valid else None
-    creator_firstname = (
-        msg_info.users[0].first_name
-        if creator_valid and msg_info.users[0].first_name is not None
-        else "Удалённый аккаунт"
-    )
-    creator_username = (
-        msg_info.users[0].username
-        if creator_valid and msg_info.users[0].username is not None
-        else None
-    )
-    created = msg_info.messages[0].date if first_msg_valid else None
-    former_title = (
-        msg_info.messages[0].action.title
-        if first_msg_valid
-        and type(msg_info.messages[0].action) is MessageActionChannelMigrateFrom
-        and msg_info.messages[0].action.title != chat_title
-        else None
-    )
-    description = chat.full_chat.about
-    members = (
-        chat.full_chat.participants_count
-        if hasattr(chat.full_chat, "participants_count")
-        else chat_obj_info.participants_count
-    )
-    admins = (
-        chat.full_chat.admins_count if hasattr(chat.full_chat, "admins_count") else None
-    )
-    banned_users = (
-        chat.full_chat.kicked_count if hasattr(chat.full_chat, "kicked_count") else None
-    )
-    restrcited_users = (
-        chat.full_chat.banned_count if hasattr(chat.full_chat, "banned_count") else None
-    )
-    users_online = 0
-    async for i in event.client.iter_participants(event.chat_id):
-        if isinstance(i.status, UserStatusOnline):
-            users_online = users_online + 1
-    group_stickers = (
-        chat.full_chat.stickerset.title
-        if hasattr(chat.full_chat, "stickerset") and chat.full_chat.stickerset
-        else None
-    )
-    messages_viewable = msg_info.count if msg_info else None
-    messages_sent = (
-        chat.full_chat.read_inbox_max_id
-        if hasattr(chat.full_chat, "read_inbox_max_id")
-        else None
-    )
-    messages_sent_alt = (
-        chat.full_chat.read_outbox_max_id
-        if hasattr(chat.full_chat, "read_outbox_max_id")
-        else None
-    )
-    username = chat_obj_info.username if hasattr(chat_obj_info, "username") else None
-    bots_list = chat.full_chat.bot_info
-    bots = 0
-    slowmode = (
-        "Да"
-        if hasattr(chat_obj_info, "slowmode_enabled") and chat_obj_info.slowmode_enabled
-        else "Нет"
-    )
-    slowmode_time = (
-        chat.full_chat.slowmode_seconds
-        if hasattr(chat_obj_info, "slowmode_enabled") and chat_obj_info.slowmode_enabled
-        else None
-    )
-    restricted = (
-        "Да"
-        if hasattr(chat_obj_info, "restricted") and chat_obj_info.restricted
-        else "Нет"
-    )
-    verified = (
-        "Да" if hasattr(chat_obj_info, "verified") and chat_obj_info.verified else "Нет"
-    )
-    username = "@{}".format(username) if username else None
-    creator_username = "@{}".format(creator_username) if creator_username else None
-
-    if admins is None:
+    async def fetch_info(self, chat, event):
+        chat_obj_info = await event.client.get_entity(chat.full_chat.id)
+        chat_title = chat_obj_info.title
         try:
-            participants_admins = await event.client(
-                GetParticipantsRequest(
-                    channel=chat.full_chat.id,
-                    filter=ChannelParticipantsAdmins(),
-                    offset=0,
-                    limit=0,
+            msg_info = await event.client(
+                GetHistoryRequest(
+                    peer=chat_obj_info.id,
+                    offset_id=0,
+                    offset_date=datetime(2010, 1, 1),
+                    add_offset=-1,
+                    limit=1,
+                    max_id=0,
+                    min_id=0,
                     hash=0,
                 )
             )
-            admins = participants_admins.count if participants_admins else None
         except Exception:
-            await event.edit("<b>Произошла непредвиденная ошибка.</b>")
-            await event.delete()
-    if bots_list:
-        for bot in bots_list:
-            bots += 1
+            msg_info = None
+            await event.edit(self.strings("rpc_error", event))
+        first_msg_valid = (
+            True
+            if msg_info and msg_info.messages and msg_info.messages[0].id == 1
+            else False
+        )
+        creator_valid = True if first_msg_valid and msg_info.users else False
+        creator_id = msg_info.users[0].id if creator_valid else None
+        creator_firstname = (
+            msg_info.users[0].first_name
+            if creator_valid and msg_info.users[0].first_name is not None
+            else self.strings("deleted_account", event)
+        )
+        creator_username = (
+            msg_info.users[0].username
+            if creator_valid and msg_info.users[0].username is not None
+            else None
+        )
+        created = msg_info.messages[0].date if first_msg_valid else None
+        former_title = (
+            msg_info.messages[0].action.title
+            if first_msg_valid
+            and type(msg_info.messages[0].action) is MessageActionChannelMigrateFrom
+            and msg_info.messages[0].action.title != chat_title
+            else None
+        )
+        description = chat.full_chat.about
+        members = (
+            chat.full_chat.participants_count
+            if hasattr(chat.full_chat, "participants_count")
+            else chat_obj_info.participants_count
+        )
+        admins = (
+            chat.full_chat.admins_count if hasattr(chat.full_chat, "admins_count") else None
+        )
+        banned_users = (
+            chat.full_chat.kicked_count if hasattr(chat.full_chat, "kicked_count") else None
+        )
+        restrcited_users = (
+            chat.full_chat.banned_count if hasattr(chat.full_chat, "banned_count") else None
+        )
+        users_online = 0
+        async for i in event.client.iter_participants(event.chat_id):
+            if isinstance(i.status, UserStatusOnline):
+                users_online = users_online + 1
+        group_stickers = (
+            chat.full_chat.stickerset.title
+            if hasattr(chat.full_chat, "stickerset") and chat.full_chat.stickerset
+            else None
+        )
+        messages_viewable = msg_info.count if msg_info else None
+        messages_sent = (
+            chat.full_chat.read_inbox_max_id
+            if hasattr(chat.full_chat, "read_inbox_max_id")
+            else None
+        )
+        messages_sent_alt = (
+            chat.full_chat.read_outbox_max_id
+            if hasattr(chat.full_chat, "read_outbox_max_id")
+            else None
+        )
+        username = chat_obj_info.username if hasattr(chat_obj_info, "username") else None
+        bots_list = chat.full_chat.bot_info
+        bots = 0
+        slowmode = (
+            self.strings("yes", event)
+            if hasattr(chat_obj_info, "slowmode_enabled") and chat_obj_info.slowmode_enabled
+            else self.strings("no", event)
+        )
+        slowmode_time = (
+            chat.full_chat.slowmode_seconds
+            if hasattr(chat_obj_info, "slowmode_enabled") and chat_obj_info.slowmode_enabled
+            else None
+        )
+        restricted = (
+            self.strings("yes", event)
+            if hasattr(chat_obj_info, "restricted") and chat_obj_info.restricted
+            else self.strings("no", event)
+        )
+        verified = (
+            self.strings("Yes", event) if hasattr(chat_obj_info, "verified") and chat_obj_info.verified else self.strings("no", event)
+        )
+        username = "@{}".format(username) if username else None
+        creator_username = "@{}".format(creator_username) if creator_username else None
 
-    caption = "<b>ИНФОРМАЦИЯ О ЧАТЕ:</b>\n\n"
-    caption += f"<b>ID:</b> {chat_obj_info.id}\n"
-    if chat_title is not None:
-        caption += f"<b>Название группы:</b> {chat_title}\n"
-    if former_title is not None:
-        caption += f"<b>Предыдущее название:</b> {former_title}\n"
-    if username is not None:
-        caption += f"<b>Тип группы:</b> Публичный\n"
-        caption += f"<b>Линк:</b> {username}\n"
-    else:
-        caption += f"<b>Тип группы:</b> Приватный\n"
-    if creator_username is not None:
-        caption += f"<b>Создатель:</b> <code>{creator_username}</code>\n"
-    elif creator_valid:
-        caption += (
-            "<b>Создатель:</b> <code><a"
-            f' href="tg://user?id={creator_id}">{creator_firstname}</a></code>\n'
-        )
-    if created is not None:
-        caption += (
-            f"<b>Создан:</b> {created.date().strftime('%b %d, %Y')} -"
-            f" {created.time()}\n"
-        )
-    else:
-        caption += (
-            f"<b>Создан:</b> {chat_obj_info.date.date().strftime('%b %d, %Y')} -"
-            f" {chat_obj_info.date.time()}\n"
-        )
-    if messages_viewable is not None:
-        caption += f"<b>Видимые сообщения:</b> {messages_viewable}\n"
-    if messages_sent:
-        caption += f"<b>Всего сообщений:</b> {messages_sent}\n"
-    elif messages_sent_alt:
-        caption += f"<b>Всего сообщений:</b> {messages_sent_alt}\n"
-    if members is not None:
-        caption += f"<b>Участников:</b> {members}\n"
-    if admins is not None:
-        caption += f"<b>Админов:</b> {admins}\n"
-    if bots_list:
-        caption += f"<b>Ботов:</b> {bots}\n"
-    if users_online:
-        caption += f"<b>Сейчас онлайн:</b> {users_online}\n"
-    if restrcited_users is not None:
-        caption += f"<b>Ограниченных пользователей:</b> {restrcited_users}\n"
-    if banned_users is not None:
-        caption += f"<b>Забаненных пользователей:</b> {banned_users}\n"
-    if group_stickers is not None:
-        caption += (
-            "<b>Стикеры группы:</b> <a"
-            f' href="t.me/addstickers/{chat.full_chat.stickerset.short_name}">{group_stickers}</a>\n'
-        )
-    caption += "\n"
-    caption += f"<b>Слоумод:</b> {slowmode}"
-    if hasattr(chat_obj_info, "slowmode_enabled") and chat_obj_info.slowmode_enabled:
-        caption += f", {slowmode_time} секунд\n"
-    else:
+        if admins is None:
+            try:
+                participants_admins = await event.client(
+                    GetParticipantsRequest(
+                        channel=chat.full_chat.id,
+                        filter=ChannelParticipantsAdmins(),
+                        offset=0,
+                        limit=0,
+                        hash=0,
+                    )
+                )
+                admins = participants_admins.count if participants_admins else None
+            except Exception:
+                await event.edit(self.strings("rpc_error", event))
+        if bots_list:
+            for bot in bots_list:
+                bots += 1
+
+        caption = self.strings("chat_info_header", event)
+        caption += f"<b>ID:</b> {chat_obj_info.id}\n"
+        if chat_title is not None:
+            caption += self.strings("group_title", event).format(title=chat_title)
+        if former_title is not None:
+            caption += self.strings("previous_title", event).format(title=former_title)
+        if username is not None:
+            caption += self.strings("group_type_public", event)
+            caption += self.strings("group_link", event).format(link=username)
+        else:
+            caption += self.strings("group_type_private", event)
+        if creator_username is not None:
+            caption += self.strings("group_creator_username", event).format(username=creator_username)
+        elif creator_valid:
+            caption += self.strings("group_creator_link", event).format(
+                id=creator_id, firstname=creator_firstname
+            )
+        if created is not None:
+            caption += self.strings("group_created", event).format(
+                date=created.date().strftime('%b %d, %Y'), time=created.time()
+            )
+        else:
+            caption += self.strings("group_created", event).format(
+                date=chat_obj_info.date.date().strftime('%b %d, %Y'),
+                time=chat_obj_info.date.time()
+            )
+        if messages_viewable is not None:
+            caption += self.strings("messages_viewable", event).format(count=messages_viewable)
+        if messages_sent:
+            caption += self.strings("messages_sent", event).format(count=messages_sent)
+        elif messages_sent_alt:
+            caption += self.strings("messages_sent", event).format(count=messages_sent_alt)
+        if members is not None:
+            caption += self.strings("group_members", event).format(count=members)
+        if admins is not None:
+            caption += self.strings("group_admins", event).format(count=admins)
+        if bots_list:
+            caption += self.strings("group_bots", event).format(count=bots)
+        if users_online:
+            caption += self.strings("group_online", event).format(count=users_online)
+        if restrcited_users is not None:
+            caption += self.strings("group_restricted", event).format(count=restrcited_users)
+        if banned_users is not None:
+            caption += self.strings("group_banned", event).format(count=banned_users)
+        if group_stickers is not None:
+            caption += self.strings("group_stickers", event).format(
+                stickers=f"t.me/addstickers/{chat.full_chat.stickerset.short_name}"
+            )
         caption += "\n"
-    caption += f"<b>Ограничен:</b> {restricted}\n"
-    if chat_obj_info.restricted:
-        caption += f"> Платформа: {chat_obj_info.restriction_reason[0].platform}\n"
-        caption += f"> Причина: {chat_obj_info.restriction_reason[0].reason}\n"
-        caption += f"> Текст: {chat_obj_info.restriction_reason[0].text}\n\n"
-    else:
-        caption += ""
-    if hasattr(chat_obj_info, "scam") and chat_obj_info.scam:
-        caption += "<b>Скам</b>: да\n\n"
-    if hasattr(chat_obj_info, "verified"):
-        caption += f"<b>Верифицирован:</b> {verified}\n\n"
-    if description:
-        caption += f"<b>Описание:</b> \n\n<code>{description}</code>\n"
-    return caption
+        caption += self.strings("group_slowmode", event).format(slowmode=slowmode)
+        if hasattr(chat_obj_info, "slowmode_enabled") and chat_obj_info.slowmode_enabled:
+            caption += self.strings("group_slowmode_time", event).format(time=slowmode_time)
+        else:
+            caption += "\n"
+        caption += self.strings("group_restricted_status", event).format(restricted=restricted)
+        if chat_obj_info.restricted:
+            caption += self.strings("group_restriction_details", event).format(
+                platform=chat_obj_info.restriction_reason[0].platform,
+                reason=chat_obj_info.restriction_reason[0].reason,
+                text=chat_obj_info.restriction_reason[0].text
+            )
+        else:
+            caption += ""
+        if hasattr(chat_obj_info, "scam") and chat_obj_info.scam:
+            caption += self.strings("group_scam", event)
+        if hasattr(chat_obj_info, "verified"):
+            caption += self.strings("group_verified", event).format(verified=verified)
+        if description:
+            caption += self.strings("group_description", event).format(description=description)
+        return caption
