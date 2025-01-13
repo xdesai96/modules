@@ -9,3 +9,4 @@ bfg
 encmod
 send
 memberslist
+stats
