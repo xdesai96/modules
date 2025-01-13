@@ -10,3 +10,4 @@ encmod
 send
 memberslist
 stats
+weather
