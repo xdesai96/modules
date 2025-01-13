@@ -49,7 +49,7 @@ class Stats(loader.Module):
 
     @loader.command()
     async def stats(self, message):
-        """Показать статистику аккаунта"""
+        """Получить статистику"""
         await utils.answer(message, self.strings['loading_stats'])
         users = 0
         bots = 0
@@ -57,8 +57,19 @@ class Stats(loader.Module):
         channels = 0
         all_chats = 0
         archived = 0
-        blocked_chats = await self._client(GetBlockedRequest(offset=0, limit=1))
-        blocked = blocked_chats.count
+
+        limit = 100
+        offset = 0
+        total_blocked = 0
+        while True:
+            blocked_chats = await self._client(GetBlockedRequest(offset=offset, limit=limit))
+            blocked = len(blocked_chats.blocked)
+            total_blocked += blocked
+
+            if blocked < limit:
+                break
+
+            offset += limit
 
         async for dialog in self._client.iter_dialogs():
             all_chats += 1
@@ -79,4 +90,4 @@ class Stats(loader.Module):
 
         await utils.answer(message, self.strings("stats", message).format(users=users, bots=bots, channels=channels,
                                                                           groups=groups, all_chats=all_chats,
-                                                                          blocked=blocked, archived=archived))
+                                                                          blocked=total_blocked, archived=archived))
