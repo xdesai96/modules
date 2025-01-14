@@ -1,12 +1,17 @@
 # meta developer: @xdesai & @devjmodules
+
 from .. import loader
 from telethon import functions
 import time
-import datetime
+import asyncio
 
 class IrisFarm:
     async def autofarm(self):
-        await self._client.send_message(self._bot, "фармить")
+        try:
+            async with self._client.conversation(self._bot, timeout=30) as conv:
+                await conv.send_message("фармить")
+        except asyncio.exceptions.TimeoutError:
+            pass
         
 
 class IrFarmMod(loader.Module, IrisFarm):
