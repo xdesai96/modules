@@ -1,9 +1,9 @@
-# meta developer: @xdesai & @devjmodules
+# meta developer: @xdesai
 
 import asyncio, os
 from .. import loader, security, utils
 from datetime import timedelta, datetime
-from ..inline.types import InlineCall # type: ignore
+from ..inline.types import InlineCall
 from telethon import functions
 from telethon.tl.functions.messages import ExportChatInviteRequest, DeleteChatUserRequest, CreateChatRequest, DeleteChatRequest, GetHistoryRequest, AddChatUserRequest, ImportChatInviteRequest, ExportChatInviteRequest
 from hikkatl.tl.types import Message
@@ -118,6 +118,7 @@ class CMDDJ(loader.Module):
         "data_fetch_error": "Ошибка получения данных",
         "this_chat": "этом чате",
         "members_in_chat": "Участников в {title}:\n",
+        "steal_complete": "({count}) Просто прикол)"
     }
 
     strings = {
@@ -220,7 +221,8 @@ class CMDDJ(loader.Module):
         "users_in_chat_caption": "<b>Users in {}:</b>",
         "data_fetch_error": "Error fetching data",
         "this_chat": "this chat",
-        "members_in_chat": "Members in {title}:\n"
+        "members_in_chat": "Members in {title}:\n",
+        "steal_complete": "({count}) just for fun)"
     }
 
     @loader.owner
@@ -980,7 +982,10 @@ class CMDDJ(loader.Module):
                     send_inline=True,
                     send_polls=True
                 )
-                self.muted.remove(user_id)
+                try:
+                    self.muted.remove(user_id)
+                except:
+                    pass
                 await message.edit(
                     self.strings("unmuted", message).format(
                         user_id=user_id,
@@ -1010,7 +1015,10 @@ class CMDDJ(loader.Module):
                 send_inline = True,
                 send_polls = True
             )
-            self.muted.remove(user_id)
+            try:
+                self.muted.remove(user_id)
+            except:
+                pass
             await message.client.send_message(
                 message.chat_id,
                 self.strings("unmuted", message).format(
@@ -1096,7 +1104,10 @@ class CMDDJ(loader.Module):
                     ),
                     parse_mode="html"
                 )
-                self.muted.remove(user_id)
+                try:
+                    self.muted.remove(user_id)
+                except:
+                    pass
 
         except UserAdminInvalidError:
             await message.edit(self.strings("no_rights", message))
@@ -1459,7 +1470,7 @@ class CMDDJ(loader.Module):
             m = self.strings("deleted_account", message)
         except YouBlockedUserError:
             m = self.strings("blocked_contact", message)
-        await message.edit(m)
+        # await message.edit(m)
         return
 
     @loader.owner
