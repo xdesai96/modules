@@ -11,3 +11,4 @@ send
 memberslist
 stats
 weather
+InlineButtons
