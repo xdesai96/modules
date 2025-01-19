@@ -1,4 +1,4 @@
-#meta developer: @xdesai & @devjmodules
+#meta developer: @xdesai
 
 # This module is for setting a profile photo and repeating it.
 
