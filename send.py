@@ -1,4 +1,4 @@
-# meta developer: @xdesai & @devjmodules
+# meta developer: @xdesai
 
 from .. import loader, utils
 
