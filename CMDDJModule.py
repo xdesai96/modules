@@ -908,7 +908,6 @@ class CMDDJ(loader.Module):
                     if user.id == (await self.client.get_me()).id:
                         continue
                     await self.client.edit_permissions(chat.id, user.id, view_messages=False)
-                    await asyncio.sleep(5)
                 except Exception as e:
                     pass
 
