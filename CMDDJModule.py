@@ -722,7 +722,7 @@ class CMDDJ(loader.Module):
                 )
             created_chat = r.chats[0].id
             result = await message.client(ExportChatInviteRequest(peer=created_chat))
-            await utils.answer(
+            await utils.answer(message,
                 f'<b>Группа "{title}" создана.\nЛинк: {result.link}.</b>'
             )
         except IndexError:
@@ -769,7 +769,7 @@ class CMDDJ(loader.Module):
         """Удаляет группу/канал по ссылке или ID. Использование: .dgc <ID или ссылка>"""
         args = utils.get_args(event)
         if not args:
-            await event.edit(self.strings("invalid_args", event))
+            await utils.answer(event, self.strings("invalid_args", event))
             return
         
         link = args[0] if isinstance(args, list) else args
@@ -780,7 +780,7 @@ class CMDDJ(loader.Module):
                 chat_id = await event.client.get_entity(link)
                 chat_id = chat_id.id
             else:
-                await event.edit(self.strings("invalid_args", event))
+                await utils.answer(event, self.strings("invalid_args", event))
                 return
             try:
                 await event.client(DeleteChannelRequest(chat_id))
@@ -791,26 +791,26 @@ class CMDDJ(loader.Module):
                     chat_type = self.strings("of_chat", event)
                 except Exception as e:
                     if "CHANNEL_PRIVATE" in str(e):
-                        await event.edit("❌ Чат недоступен или приватный.")
+                        await utils.answer(event, "❌ Чат недоступен или приватный.")
                         return
                     elif "CHAT_ADMIN_REQUIRED" in str(e):
-                        await event.edit(self.strings("no_rights", event))
+                        await utils.answer(event, self.strings("no_rights", event))
                         return
                     elif "Invalid object ID for a chat." in str(e):
-                        await event.edit(self.strings("invalid_args", event))
+                        await utils.answer(event, self.strings("invalid_args", event))
                         return
-                    await event.edit(self.strings("invalid_args", event).format(error=str(e)))
+                    await utils.answer(event, self.strings("invalid_args", event).format(error=str(e)))
                     return
-            await event.edit(self.strings("successful_delete", event).format(chat_type=chat_type))
+            await utils.answer(event, self.strings("successful_delete", event).format(chat_type=chat_type))
 
         except ChatAdminRequiredError:
-            await event.edit(self.strings("no_rights", event))
+            await utils.answer(event, self.strings("no_rights", event))
         except ChannelPrivateError:
-            await event.edit(self.strings("chat_unavailable", event))
+            await utils.answer(event, self.strings("chat_unavailable", event))
         except RpcError as e:
-            await event.edit(self.strings("rpc_error", event).format(error=e))
+            await utils.answer(event, self.strings("rpc_error", event).format(error=e))
         except Exception as e:
-            await event.edit(self.strings("rpc_error", event).format(error=e))
+            await utils.answer(event, self.strings("rpc_error", event).format(error=e))
 
     @loader.owner
     async def joincmd(self, event):
@@ -818,7 +818,7 @@ class CMDDJ(loader.Module):
 
         link = utils.get_args_raw(event)
         if not link:
-            await event.edit(self.strings("invalid_args", event))
+            await utils.answer(event, self.strings("invalid_args", event))
             return
 
         link = link.strip()
@@ -826,18 +826,18 @@ class CMDDJ(loader.Module):
             if "joinchat" in link or "+" in link:
                 invite_hash = link.split("/")[-1].replace("joinchat/", "").replace("+", "")
                 await self.client(ImportChatInviteRequest(invite_hash))
-                await event.edit(self.strings("join_success", event).format(link=link))
+                await utils.answer(event, self.strings("join_success", event).format(link=link))
             else:
                 entity = await self.client.get_entity(link)
                 await self.client(JoinChannelRequest(entity))
                 title = entity.title if hasattr(entity, 'title') else self.strings("no_title", event)
-                await event.edit(self.strings("join_success", event).format(link=link))
+                await utils.answer(event, self.strings("join_success", event).format(link=link))
         except InviteHashExpiredError:
-            await event.edit(self.strings("invite_hash_expired", event))
+            await utils.answer(event, self.strings("invite_hash_expired", event))
         except ValueError:
-            await event.edit(self.strings("invalid_link", event))
+            await utils.answer(event, self.strings("invalid_link", event))
         except Exception as e:
-            await event.edit(self.strings("rpc_error", event).format(error=str(e)))
+            await utils.answer(event, self.strings("rpc_error", event).format(error=str(e)))
 
     @loader.owner
     async def whoisownercmd(self, event):
@@ -850,11 +850,11 @@ class CMDDJ(loader.Module):
                 if isinstance(admin.participant, ChannelParticipantCreator):
                     owner_name = f"{admin.first_name} {admin.last_name or ''}".strip()
                     owner_id = admin.id
-                    await event.edit(self.strings("owner_info").format(owner_id=owner_id, owner_name=owner_name))
+                    await utils.answer(event, self.strings("owner_info").format(owner_id=owner_id, owner_name=owner_name))
                     return
-            await event.edit("Владелец не найден.")
+            await utils.answer(event, "Владелец не найден.")
         except Exception as e:
-            await event.edit(self.strings("rpc_error", event).format(error=str(e)))
+            await utils.answer(event, self.strings("rpc_error", event).format(error=str(e)))
 
     @loader.owner
     async def renamecmd(self, message):
@@ -895,9 +895,9 @@ class CMDDJ(loader.Module):
                 members = await event.client.get_participants(chat)
                 real_members = [member for member in members if not member.bot]
                 count = len(real_members)
-                await event.edit(self.strings("members_count").format(count=count))
+                await utils.answer(event, self.strings("members_count").format(count=count))
             except Exception as e:
-                await event.edit(self.strings("rpc_error", event).format(error=e))
+                await utils.answer(event, self.strings("rpc_error", event).format(error=e))
         else:
             return await utils.answer(event, self.strings("not_a_chat", event))
 
@@ -919,7 +919,7 @@ class CMDDJ(loader.Module):
     async def chatinfocmd(self, chatinfo):
         """Используй .chatinfo <айди чата>; ничего"""
         if chatinfo.chat:
-            await chatinfo.edit(self.strings("loading", chatinfo))
+            await utils.answer(chatinfo, self.strings("loading", chatinfo))
             await chatinfo.delete()
             chat = await self.get_chatinfo(chatinfo)
             caption = await self.fetch_info(chat, chatinfo)
@@ -933,10 +933,10 @@ class CMDDJ(loader.Module):
                 )
                 os.remove("chatphoto.jpg")
             except Exception:
-                await chatinfo.edit(self.strings("rpc_error", chatinfo))
+                await utils.answer(chatinfo, self.strings("rpc_error", chatinfo))
                 await chatinfo.delete()
         else:
-            await chatinfo.edit(self.strings("not_a_chat", chatinfo))
+            await utils.answer(chatinfo, self.strings("not_a_chat", chatinfo))
             await chatinfo.delete()
 
     @loader.owner
@@ -989,7 +989,7 @@ class CMDDJ(loader.Module):
                     self.muted.remove(user_id)
                 except:
                     pass
-                await utils.answer(
+                await utils.answer(message,
                     self.strings("unmuted", message).format(
                         user_id=user_id,
                         first_name=first_name
@@ -1123,7 +1123,7 @@ class CMDDJ(loader.Module):
     async def kickallcmd(self, event):
         """Удаляет всех пользователей из чата."""
         user = [i async for i in event.client.iter_participants(event.to_id.channel_id)]
-        await event.edit(
+        await utils.answer(event, 
             self.strings("kick_all", event).format(
             user_count=len(user)
             )
@@ -1137,7 +1137,7 @@ class CMDDJ(loader.Module):
                 except:
                     pass
             except FloodWaitError as e:
-                await event.edit(self.strings("flood_wait", event).format(seconds=e.seconds))
+                await utils.answer(event, self.strings("flood_wait", event).format(seconds=e.seconds))
 
     @loader.owner
     async def stealcmd(self, event):
@@ -1163,7 +1163,7 @@ class CMDDJ(loader.Module):
                 user = [
                     i async for i in event.client.iter_participants(event.to_id.channel_id)
                 ]
-            await event.edit(
+            await utils.answer(event, 
                 self.strings("steal_complete", event).format(count=len(user))
             )
             await event.delete()
@@ -1204,10 +1204,10 @@ class CMDDJ(loader.Module):
                             print(f"{str(e)}")
                         await asyncio.sleep(2)
             except UsersTooMuchError:
-                await event.edit(self.strings("users_too_much", event))
+                await utils.answer(event, self.strings("users_too_much", event))
                 return
         else:
-            await event.edit(self.strings("invalid_args", event))
+            await utils.answer(event, self.strings("invalid_args", event))
 
     @loader.owner
     async def userscmd(self, message):
@@ -1436,14 +1436,19 @@ class CMDDJ(loader.Module):
 
         except ValueError:
             m = self.strings("no_user", message)
+            await utils.answer(m)
         except UserIdInvalidError:
             m = self.strings("no_user", message)
+            await utils.answer(m)
         except UserPrivacyRestrictedError:
             m = self.strings("privacy_settings_error", message)
+            await utils.answer(m)
         except UserNotMutualContactError:
             m = self.strings("privacy_settings_error", message)
+            await utils.answer(m)
         except ChatAdminRequiredError:
             m = self.strings("no_rights", message)
+            await utils.answer(m)
         except UserBotError:
             group = await message.client.get_entity(message.chat_id)
             if args:
@@ -1467,13 +1472,16 @@ class CMDDJ(loader.Module):
             ))
         except ChatWriteForbiddenError:
             m = self.strings("no_rights", message)
+            await utils.answer(m)
         except ChannelPrivateError:
             m = self.strings("no_rights", message)
+            await utils.answer(m)
         except InputUserDeactivatedError:
             m = self.strings("deleted_account", message)
+            await utils.answer(m)
         except YouBlockedUserError:
             m = self.strings("blocked_contact", message)
-        # await utils.answer(m)
+            await utils.answer(m)
         return
 
     @loader.owner
@@ -1580,7 +1588,7 @@ class CMDDJ(loader.Module):
             )
         except Exception:
             msg_info = None
-            await event.edit(self.strings("rpc_error", event))
+            await utils.answer(event, self.strings("rpc_error", event))
         first_msg_valid = (
             True
             if msg_info and msg_info.messages and msg_info.messages[0].id == 1
@@ -1678,7 +1686,7 @@ class CMDDJ(loader.Module):
                 )
                 admins = participants_admins.count if participants_admins else None
             except Exception:
-                await event.edit(self.strings("rpc_error", event))
+                await utils.answer(event, self.strings("rpc_error", event))
         if bots_list:
             for bot in bots_list:
                 bots += 1
