@@ -1088,7 +1088,7 @@ class CMDDJ(loader.Module):
                 until_date=duration
             )
 
-            await utils.answer(
+            await utils.answer(mesage,
                 self.strings("muted", message).format(
                     user_id=user_id,
                     first_name=first_name,
