@@ -1228,7 +1228,7 @@ class CMDDJ(loader.Module):
                 mentions += self.strings("users_not_found")
 
             try:
-                await utils.answer(mentions)
+                await utils.answer(message, mentions)
                 return
             except MessageTooLongError:
                 await utils.answer(message, self.strings("large_chat_loading"))
@@ -1297,7 +1297,7 @@ class CMDDJ(loader.Module):
                     mentions += self.strings("deleted_bot").format(user_id=user.id)
 
             try:
-                await utils.answer(mentions, parse_mode="html")
+                await utils.answer(message, mentions, parse_mode="html")
             except MessageTooLongError:
                 await utils.answer(message, self.strings("too_many_bots"))
                 file = open("botlist.md", "w+")
