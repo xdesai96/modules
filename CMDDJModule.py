@@ -1264,7 +1264,7 @@ class CMDDJ(loader.Module):
                     mentions += self.strings("deleted_account").format(user_id=user.id)
 
             try:
-                await utils.answer(mentions)
+                await utils.answer(message, mentions)
             except MessageTooLongError:
                 await utils.answer(message, self.strings("too_many_admins"))
                 with open("adminlist.md", "w+") as file:
