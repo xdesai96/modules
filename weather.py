@@ -43,7 +43,7 @@ class Weather(loader.Module):
         """Check the weather in the specified city."""
         args = utils.get_args_raw(message).split()
         if len(args) < 1:
-            await message.edit(self.strings('invalid_args', message))
+            await utils.answer(message, self.strings('invalid_args', message))
             return
         if isinstance(args, list):
             args = args[0]
@@ -54,7 +54,7 @@ class Weather(loader.Module):
             response = requests.get(url)
             data = response.json()
             if data.get('cod') != 200:
-                await message.edit(self.strings('api_error', message).format(city=city, data=data))
+                await utils.answer(message, self.strings('api_error', message).format(city=city, data=data))
                 return
 
             country = data['sys']['country']
@@ -65,8 +65,8 @@ class Weather(loader.Module):
             wind_speed = wind_data
             humidity = weather_data["humidity"]
             description = data["weather"][0]["description"].capitalize()
-            await message.edit(self.strings('weather_info', message).format(city=city.capitalize(), country=country, description=description, temperature=temperature,
+            await utils.answer(message, self.strings('weather_info', message).format(city=city.capitalize(), country=country, description=description, temperature=temperature,
                                                                             feels_like=feels_like, humidity=humidity,
                                                                             wind_speed=wind_speed))
         except Exception as e:
-            await message.edit(self.strings('error', message).format(e=e))
+            await utils.answer(message, self.strings('error', message).format(e=e))
