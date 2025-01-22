@@ -3,20 +3,21 @@
 from telethon.tl.types import Message
 from PIL import Image
 import os
+import subprocess
 from .. import loader, utils
 
 @loader.tds
 class P2G(loader.Module):
     """Модуль для преобразования изображения в GIF"""
     strings = {
-        "name": "P2G",
+        "name": "ImageToGif",
         "processing": "📤 Image Processing...",
         "no_image": "❌ No image found!",
         "gif_ready": "✅ GIF is ready!"
     }
 
     strings_ru = { 
-        "name": "P2G",
+        "name": "ImageToGif",
         "processing": "📤 Обработка изображения...",
         "no_image": "❌ Изображение не найдено!",
         "gif_ready": "✅ GIF готов!"
@@ -38,27 +39,41 @@ class P2G(loader.Module):
         if not file or not file.endswith((".jpg", ".jpeg", ".png")):
             await utils.answer(message, self.strings("no_image", message))
             return
-
+        mp4_path = file.rsplit(".", 1)[0] + ".mp4"
         try:
             img = Image.open(file)
             frames = [img.copy() for _ in range(10)]
-            gif_path = file.rsplit(".", 1)[0] + ".gif"
+            temp_dir = "temp_frames"
+            os.makedirs(temp_dir, exist_ok=True)
+            frame_files = []
 
-            frames[0].save(
-                gif_path,
-                save_all=True,
-                append_images=frames[1:],
-                duration=100,
-                loop=0
-            )
+            for i, frame in enumerate(frames):
+                frame_file = os.path.join(temp_dir, f"frame_{i:03d}.png")
+                frame.save(frame_file)
+                frame_files.append(frame_file)
 
-            await self.client.send_file(
-                message.chat_id, gif_path, reply_to=reply.id
-            )
+            ffmpeg_command = [
+                "ffmpeg",
+                "-y",
+                "-framerate", "10",
+                "-i", os.path.join(temp_dir, "frame_%03d.png"),
+                "-c:v", "libx264",
+                "-pix_fmt", "yuv420p",
+                mp4_path
+            ]
+            subprocess.run(ffmpeg_command, check=True)
+
+            async with message.client.action(message.chat_id, "document"):
+                await message.client.send_file(
+                    message.chat_id, mp4_path, reply_to=reply.id
+                )
+
             await message.delete()
-
         finally:
             if os.path.exists(file):
                 os.remove(file)
-            if os.path.exists(gif_path):
-                os.remove(gif_path)
+            if mp4_path and os.path.exists(mp4_path):
+                os.remove(mp4_path)
+            for frame_file in frame_files:
+                if os.path.exists(frame_file):
+                    os.remove(frame_file)
