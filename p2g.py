@@ -33,12 +33,22 @@ class P2G(loader.Module):
             await utils.answer(message, self.strings("no_image", message))
             return
 
-        proccessing_info = await utils.answer(message, self.strings["processing"])
+        await utils.answer(message, self.strings["processing"])
 
         file = await reply.download_media()
         if not file or not file.endswith((".jpg", ".jpeg", ".png")):
             await utils.answer(message, self.strings("no_image", message))
             return
+        
+        try:
+            img = Image.open(file)
+            if img.format.lower() == "webp":
+                file = file.rsplit(".", 1)[0] + ".png"
+                img.save(file, format="PNG")
+        except Exception:
+            await utils.answer(message, self.strings["no_image"])
+            return
+
         mp4_path = file.rsplit(".", 1)[0] + ".mp4"
         try:
             img = Image.open(file)
@@ -57,10 +67,12 @@ class P2G(loader.Module):
                 "-y",
                 "-framerate", "10",
                 "-i", os.path.join(temp_dir, "frame_%03d.png"),
+                "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2",
                 "-c:v", "libx264",
                 "-pix_fmt", "yuv420p",
                 mp4_path
             ]
+
             subprocess.run(ffmpeg_command, check=True)
 
             async with message.client.action(message.chat_id, "document"):
@@ -69,7 +81,6 @@ class P2G(loader.Module):
                 )
 
             await message.delete()
-            await proccessing_info.delete()
         finally:
             if os.path.exists(file):
                 os.remove(file)
