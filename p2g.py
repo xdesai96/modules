@@ -33,7 +33,7 @@ class P2G(loader.Module):
             await utils.answer(message, self.strings("no_image", message))
             return
 
-        await utils.answer(message, self.strings["processing"])
+        proccessing_info = await utils.answer(message, self.strings["processing"])
 
         file = await reply.download_media()
         if not file or not file.endswith((".jpg", ".jpeg", ".png")):
@@ -69,6 +69,7 @@ class P2G(loader.Module):
                 )
 
             await message.delete()
+            await proccessing_info.delete()
         finally:
             if os.path.exists(file):
                 os.remove(file)
