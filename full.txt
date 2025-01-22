@@ -12,3 +12,4 @@ memberslist
 stats
 weather
 InlineButtons
+p2g
