@@ -1,6 +1,5 @@
 # meta developer: @xdesai
 
-import html
 import asyncio, os
 from .. import loader, security, utils
 from datetime import timedelta, datetime
@@ -252,11 +251,11 @@ class CMDDJ(loader.Module):
             if reply.sender_id != message._client.tg_id:
                 user_id = reply.sender_id
             if args:
-                rank = html.escape(args)
+                rank = args
         else:
             user_id = await utils.get_target(message)
             if len(args.split()) > 1:
-                rank = html.escape(" ".join(args.split()[1:]))
+                rank = " ".join(args.split()[1:])
 
         if (not chat.admin_rights or not chat.admin_rights.add_admins) and not chat.creator:
             return await utils.answer(message, self.strings("no_rights", message))
@@ -296,7 +295,7 @@ class CMDDJ(loader.Module):
             self.strings("promoted_full", message).format(
                 name=user.first_name,
                 rank=rank
-            )
+            ), parse_mode='markdown'
         )
 
     @loader.owner
@@ -315,14 +314,14 @@ class CMDDJ(loader.Module):
             if reply.sender_id != message._client.tg_id:
                 user_id = reply.sender_id
             if args:
-                rank = html.escape(args)
+                rank = args
         else:
             try:
                 user_id = int(args.split()[0])
             except ValueError:
                 user_id = await utils.get_target(message)
             if len(args.split()) > 1:
-                rank = html.escape(" ".join(args.split()[1:]))
+                rank = " ".join(args.split()[1:])
 
         if (not chat.admin_rights or not chat.admin_rights.add_admins) and not chat.creator:
             return await utils.answer(message, self.strings("no_rights", message))
@@ -470,6 +469,7 @@ class CMDDJ(loader.Module):
                 name=user.first_name,
                 rank=rank
             ),
+            parse_mode='markdown',
             silent=True,
             reply_markup=reply_markup
         )
@@ -634,6 +634,7 @@ class CMDDJ(loader.Module):
                 name=user.first_name,
                 rank=rank
             ),
+            parse_mode='markdown',
             reply_markup=reply_markup
         )
 
