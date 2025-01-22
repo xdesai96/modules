@@ -1,5 +1,6 @@
 # meta developer: @xdesai
 
+import html
 import asyncio, os
 from .. import loader, security, utils
 from datetime import timedelta, datetime
@@ -71,7 +72,6 @@ class CMDDJ(loader.Module):
         "no_deleted_accounts": "<emoji document_id=5341509066344637610>😎</emoji> <b>Здесь нет ни одного удалённого аккаунта</b>",
         "kicked_deleted_accounts": "<emoji document_id=5328302454226298081>🫥</emoji> <b>Удалено {count} удалённых аккаунтов</b>",
         "chat_info_header": "Информация о чате:\n",
-        "chat_id": "<b>ID:</b> {id}\n",
         "group_title": "<b>Название группы:</b> {title}\n",
         "previous_title": "<b>Предыдущее название:</b> {title}\n",
         "group_type_public": "<b>Тип группы:</b> Публичный\n",
@@ -118,7 +118,10 @@ class CMDDJ(loader.Module):
         "data_fetch_error": "Ошибка получения данных",
         "this_chat": "этом чате",
         "members_in_chat": "Участников в {title}:\n",
-        "steal_complete": "({count}) Просто прикол)"
+        "steal_complete": "({count}) Просто прикол)",
+        "my_id": "<emoji document_id=5208454037531280484>💜</emoji> <b>Мой ID</b>: <code>{id}</code>",
+        "users_id": "<emoji document_id=6035084557378654059>👤</emoji> <b>ID пользователя</b>: <code>{id}</code>",
+        "chat_id": "<emoji document_id=5886436057091673541>💬</emoji> <b>ID чата</b>: <code>{id}</code>"
     }
 
     strings = {
@@ -175,7 +178,6 @@ class CMDDJ(loader.Module):
         "no_deleted_accounts": "<emoji document_id=5341509066344637610>😎</emoji> <b>No deleted accounts found here</b>",
         "kicked_deleted_accounts": "<emoji document_id=5328302454226298081>🫥</emoji> <b>Removed {count} deleted accounts</b>",
         "chat_info_header": "Chat information:\n",
-        "chat_id": "<b>ID:</b> {id}\n",
         "group_title": "<b>Group title:</b> {title}\n",
         "previous_title": "<b>Previous title:</b> {title}\n",
         "group_type_public": "<b>Group type:</b> Public\n",
@@ -222,7 +224,10 @@ class CMDDJ(loader.Module):
         "data_fetch_error": "Error fetching data",
         "this_chat": "this chat",
         "members_in_chat": "Members in {title}:\n",
-        "steal_complete": "({count}) just for fun)"
+        "steal_complete": "({count}) just for fun)",
+        "my_id": "<emoji document_id=5208454037531280484>💜</emoji> <b>My ID</b>: <code>{id}</code>",
+        "users_id": "<emoji document_id=6035084557378654059>👤</emoji> <b>User's ID</b>: <code>{id}</code>",
+        "chat_id": "<emoji document_id=5886436057091673541>💬</emoji> <b>Chat ID</b>: <code>{id}</code>"
     }
 
     @loader.owner
@@ -239,7 +244,7 @@ class CMDDJ(loader.Module):
                 message, self.strings("not_a_chat", message)
             )
 
-        rank, user_id = "Admin", None
+        rank, user_id = "", None
         chat = await message.get_chat()
         args = utils.get_args_raw(message)
         reply = await message.get_reply_message()
@@ -247,11 +252,11 @@ class CMDDJ(loader.Module):
             if reply.sender_id != message._client.tg_id:
                 user_id = reply.sender_id
             if args:
-                rank = args
+                rank = html.escape(args)
         else:
             user_id = await utils.get_target(message)
             if len(args.split()) > 1:
-                rank = " ".join(args.split()[1:])
+                rank = html.escape(" ".join(args.split()[1:]))
 
         if (not chat.admin_rights or not chat.admin_rights.add_admins) and not chat.creator:
             return await utils.answer(message, self.strings("no_rights", message))
@@ -310,14 +315,14 @@ class CMDDJ(loader.Module):
             if reply.sender_id != message._client.tg_id:
                 user_id = reply.sender_id
             if args:
-                rank = args
+                rank = html.escape(args)
         else:
             try:
                 user_id = int(args.split()[0])
             except ValueError:
                 user_id = await utils.get_target(message)
             if len(args.split()) > 1:
-                rank = " ".join(args.split()[1:])
+                rank = html.escape(" ".join(args.split()[1:]))
 
         if (not chat.admin_rights or not chat.admin_rights.add_admins) and not chat.creator:
             return await utils.answer(message, self.strings("no_rights", message))
@@ -730,22 +735,22 @@ class CMDDJ(loader.Module):
 
     @loader.owner
     async def useridcmd(self, message):
-        """[reply] | Get User ID"""
+        """[reply] | Получить айди пользователя"""
         reply = await message.get_reply_message()
         if reply != None:
-            await utils.answer(message, f"<emoji document_id=5436024756610546212>⚡</emoji> <b>User ID</b>: <code>{reply.sender_id}</code>")
+            await utils.answer(message, self.strings("users_id", message).format(id=reply.sender_id))
         else:
             await utils.answer(message, self.strings["Error_reply"])
 
     @loader.owner
     async def idcmd(self, message):
-        """| Get your ID"""
-        await utils.answer(message, f"<emoji document_id=5436024756610546212>⚡</emoji> <b>Your ID</b>: <code>{message.sender_id}</code>")
+        """| Получить свой айди"""
+        await utils.answer(message, self.strings("my_id", message).format(id=message.sender_id))
 
     @loader.owner
     async def chatidcmd(self, message):
-        """| Get chat ID"""
-        await utils.answer(message, f"<emoji document_id=5436024756610546212>⚡</emoji> <b>Chat ID</b>: <code>{message.peer_id.channel_id}</code>")
+        """| Получить айди чата"""
+        await utils.answer(message, self.strings("chat_id", message).format(id=message.peer_id.channel_id))
 
     @loader.owner
     async def delcmd(self, event):
