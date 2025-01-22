@@ -14,7 +14,7 @@ class AsciiMod(loader.Module):
         if len(event.text.split(" ", maxsplit=1)) > 1:
             text = event.text.split(" ", maxsplit=1)[1]
         else:
-            await utils.answer(message, "❌ Пожалуйста, укажите текст для генерации.")
+            await utils.answer(event, "❌ Пожалуйста, укажите текст для генерации.")
             return
         art = pyfiglet.figlet_format(text)
-        await utils.answer(message, f"```\n⁠{art}\n```", parse_mode="markdown")
+        await utils.answer(event, f"```\n⁠{art}\n```", parse_mode="markdown")
