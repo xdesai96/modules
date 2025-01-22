@@ -295,7 +295,7 @@ class CMDDJ(loader.Module):
             self.strings("promoted_full", message).format(
                 name=user.first_name,
                 rank=rank
-            ), parse_mode='markdown'
+            )
         )
 
     @loader.owner
@@ -469,7 +469,6 @@ class CMDDJ(loader.Module):
                 name=user.first_name,
                 rank=rank
             ),
-            parse_mode='markdown',
             silent=True,
             reply_markup=reply_markup
         )
@@ -634,7 +633,6 @@ class CMDDJ(loader.Module):
                 name=user.first_name,
                 rank=rank
             ),
-            parse_mode='markdown',
             reply_markup=reply_markup
         )
 
