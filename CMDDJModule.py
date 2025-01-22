@@ -749,7 +749,7 @@ class CMDDJ(loader.Module):
     @loader.owner
     async def chatidcmd(self, message):
         """| Получить айди чата"""
-        await utils.answer(message, self.strings("chat_id", message).format(id=message.peer_id.channel_id))
+        await utils.answer(message, self.strings("chat_id", message).format(id=message.chat_id))
 
     @loader.owner
     async def delcmd(self, event):
