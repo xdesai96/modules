@@ -17,13 +17,13 @@ class TextToSpeechMod(loader.Module):
         if len(event.text.split(" ", maxsplit=1)) > 1:
             text = event.text.split(" ", maxsplit=1)[1]
         else:
-            await event.edit("❌ Пожалуйста, укажите текст для генерации.")
+            await utils.answer(event, "❌ Пожалуйста, укажите текст для генерации.")
             return
         try:
             lang = detect(text)
             voice = "en-US-GuyNeural" if lang == 'en' else "ru-RU-DmitryNeural"
         except Exception as e:
-            await event.reply("Не удалось определить язык текста.")
+            await utils.answer(event, "Не удалось определить язык текста.")
             return
         communicate = edge_tts.Communicate(text, voice=voice)
         await communicate.save("voice.mp3")
