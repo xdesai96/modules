@@ -18,7 +18,7 @@ class URLMod(loader.Module):
         """Extracts and processes data from the specified URL."""
         args = utils.get_args_raw(message)
         if not args:
-            await message.edit("<b>Please provide a URL to parse.</b>")
+            await utils.answer(message, "<b>Please provide a URL to parse.</b>")
             return
         url = args.strip()
         try:
@@ -32,29 +32,29 @@ class URLMod(loader.Module):
                 os.remove("response.txt")
                 await message.delete()
             else:
-                await message.edit(f"<b>Response:</b>\n<pre>{response_text}</pre>")
+                await utils.answer(message, f"<b>Response:</b>\n<pre>{response_text}</pre>")
         except requests.exceptions.RequestException as e:
-            await message.edit(f"<b>An error occurred:</b> {e}")
+            await utils.answer(message, f"<b>An error occurred:</b> {e}")
 
     async def shurlcmd(self, message):
         """Shortens the given URL."""
         args = utils.get_args_raw(message)
         if not args:
-            await message.edit("<b>Please provide a URL to shorten.</b>")
+            await utils.answer(message, "<b>Please provide a URL to shorten.</b>")
             return
         url = args.strip()
         try:
             shortener = pyshorteners.Shortener().tinyurl
             short_url = shortener.short(url)
-            await message.edit(f"<b>Shortened URL:</b> <a href='{short_url}'>{short_url}</a>")
+            await utils.answer(message, f"<b>Shortened URL:</b> <a href='{short_url}'>{short_url}</a>")
         except Exception as e:
-            await message.edit(f"<b>An error occurred:</b> {e}")
+            await utils.answer(message, f"<b>An error occurred:</b> {e}")
 
     async def expandurlcmd(self, message):
         """Expands the given shortened URL."""
         args = utils.get_args_raw(message)
         if not args:
-            await message.edit("<b>Please provide a shortened URL to expand.</b>")
+            await utils.answer(message, "<b>Please provide a shortened URL to expand.</b>")
             return
         short_url = args.strip()
         try:
@@ -68,20 +68,20 @@ class URLMod(loader.Module):
             response = session.get(short_url, headers=headers, allow_redirects=True)
             response.raise_for_status()
             expanded_url = response.url
-            await message.edit(f"<b>Expanded URL:</b> <a href='{expanded_url}'>{expanded_url}</a>")
+            await utils.answer(message, f"<b>Expanded URL:</b> <a href='{expanded_url}'>{expanded_url}</a>")
         except requests.exceptions.RequestException as e:
-            await message.edit(f"<b>An error occurred:</b> {e}")
+            await utils.answer(message, f"<b>An error occurred:</b> {e}")
 
     async def ipurlcmd(self, message):
         """Gets the IP address of the given URL."""
         args = utils.get_args_raw(message)
         if not args:
-            await message.edit("<b>Please provide a URL to get the IP address.</b>")
+            await utils.answer(message, "<b>Please provide a URL to get the IP address.</b>")
             return
         url = args.strip()
         try:
             hostname = url.split("//")[-1].split("/")[0]
             ip_address = socket.gethostbyname(hostname)
-            await message.edit(f"<b>IP address of {url}:</b> {ip_address}")
+            await utils.answer(message, f"<b>IP address of {url}:</b> {ip_address}")
         except socket.gaierror as e:
-            await message.edit(f"<b>An error occurred:</b> {e}")
+            await utils.answer(message, f"<b>An error occurred:</b> {e}")
