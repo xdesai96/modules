@@ -52,18 +52,18 @@ class IrFarmMod(loader.Module, IrisFarm):
         self.set("Iris_time", int(time.time()))
         self.main_loop.start()
         self.config['IrisFarm'] = True
-        await message.edit("Auto farm restarted")
+        await utils.answer(message, "Auto farm restarted")
 
     @loader.command()
     async def irfarm(self, message):
         """turn on auto farm"""
         self.config['IrisFarm'] = True
         self.main_loop.start()
-        await message.edit(self.strings("on"))
+        await utils.answer(message, self.strings("on"))
 
     @loader.command()
     async def irfarmstop(self, message):
         """turn off auto farm"""
         self.config['IrisFarm'] = False
         self.main_loop.stop()
-        await message.edit(self.strings("off"))
+        await utils.answer(message, self.strings("off"))
