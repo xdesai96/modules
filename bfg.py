@@ -126,7 +126,7 @@ class BfgMod(loader.Module, Farm):
         """Начать автоматическую фарму."""
         self.config["AutoFarm"] = True
         self.main_loop.start()
-        await message.edit("Автоматическая фарма включена.")
+        await utils.answer(message, "Автоматическая фарма включена.")
 
     @loader.command()
     async def rstbfg(self, message):
@@ -138,11 +138,11 @@ class BfgMod(loader.Module, Farm):
         self.set("Tree_time", time.time() + 3600)
         self.config["AutoFarm"] = True
         self.main_loop.start()
-        await message.edit("Автоматическая фарма перезапущена.")
+        await utils.answer(message, "Автоматическая фарма перезапущена.")
         
     @loader.command()
     async def bfgstop(self, message):
         """Остановить автоматическую фарму."""
         self.config["AutoFarm"] = False
         self.main_loop.stop()
-        await message.edit("Автоматическая фарма остановлена.")
+        await utils.answer(message, "Автоматическая фарма остановлена.")
