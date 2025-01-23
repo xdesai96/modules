@@ -44,17 +44,17 @@ class CipherMod(loader.Module):
         """{text} - Encrypts the given text"""
         text = utils.get_args_raw(message)
         if not text:
-            await message.edit("Please provide text to encrypt.")
+            await utils.answer(message, "Please provide text to encrypt.")
             return
         encrypted_text, key, second_key, indices, noise_length = encrypt(text)
-        await message.edit(f"Encrypted text: <b>{encrypted_text}</b>\nKey 1: <b>{key}</b>\nKey 2: <b>{second_key}</b>\nIndices: <b>{','.join(map(str, indices))}</b>\nNoise length: <b>{noise_length}</b>")
+        await utils.answer(message, f"Encrypted text: <b>{encrypted_text}</b>\nKey 1: <b>{key}</b>\nKey 2: <b>{second_key}</b>\nIndices: <b>{','.join(map(str, indices))}</b>\nNoise length: <b>{noise_length}</b>")
 
     async def deccmd(self, message):
         """{encrypted text}, {key1}, {key2}, {indices}, {noise length} or <reply> - Decrypts the given text"""
         args = utils.get_args_raw(message).split()
         reply = await message.get_reply_message()
         if len(args) < 5 and not reply:
-            await message.edit("Please reply to a message or provide <b>encrypted text</b>, <b>key1</b>, <b>key2</b>, <b>indices</b>, <b>noise length</b>.")
+            await utils.answer(message, "Please reply to a message or provide <b>encrypted text</b>, <b>key1</b>, <b>key2</b>, <b>indices</b>, <b>noise length</b>.")
             return
         if reply:
             enc_data = ""
@@ -69,4 +69,4 @@ class CipherMod(loader.Module):
         indices = list(map(int, args[3].split(','))) if not reply else list(map(int, enc_data.split()[3].split(',')))
         noise_length = int(args[4]) if not reply else int(enc_data.split()[4])
         decrypted_text = decrypt(encrypted_text, key, second_key, indices, noise_length)
-        await message.edit(f"Decrypted text: <b>{decrypted_text}</b>")
+        await utils.answer(message, f"Decrypted text: <b>{decrypted_text}</b>")
