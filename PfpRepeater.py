@@ -47,15 +47,15 @@ class PfpRepeaterMod(loader.Module):
         elif message.media and message.photo:
             photo_path = await message.client.download_media(message)
         else:
-            await message.edit("Please provide the photo or reply to a photo.")
+            await utils.answer(message, "Please provide the photo or reply to a photo.")
             return
 
         if not self.running:
             self.running = True
             self.task = asyncio.create_task(self.set_profile_photo(photo_path))
-            await message.edit(f"Started repeating profile photo every {self.config['DELAY']} seconds.")
+            await utils.answer(message, f"Started repeating profile photo every {self.config['DELAY']} seconds.")
         else:
-            await message.edit("Profile photo repeater is already running.")
+            await utils.answer(message, "Profile photo repeater is already running.")
 
     @loader.command()
     async def pfpstop(self, message):
@@ -63,6 +63,6 @@ class PfpRepeaterMod(loader.Module):
         if self.running:
             self.running = False
             self.task.cancel()
-            await message.edit("Stopped repeating profile photo.")
+            await utils.answer(message, "Stopped repeating profile photo.")
         else:
-            await message.edit("Profile photo repeater is not running.")
+            await utils.answer(message, "Profile photo repeater is not running.")
