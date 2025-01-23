@@ -58,7 +58,7 @@ class CMDDJ(loader.Module):
         "no_user": "Пользователь не найден.",
         "unknown_user": "Неизвестный пользователь.",
         "unmuted": "Пользователь {first_name}(<code>{user_id}</code>) был размучен.",
-        "muted": "Пользователь {first_name}(<code>{user_id}</code>) был замучен на {mute_time} миинут.",
+        "muted": "Пользователь {first_name} (<code>{user_id}</code>) был замучен на {mute_time} {unit}.",
         "users_too_much": "Лимит приглашения пользователей достигнут.",
         "kick_all": "{user_count} участников будут кикнуты.",
         "kicked": "Пользователь {name}(<code>{id}</code>) был кикнут.",
@@ -120,7 +120,11 @@ class CMDDJ(loader.Module):
         "steal_complete": "({count}) Просто прикол)",
         "my_id": "<emoji document_id=5208454037531280484>💜</emoji> <b>Мой ID</b>: <code>{id}</code>",
         "users_id": "<emoji document_id=6035084557378654059>👤</emoji> <b>ID пользователя</b>: <code>{id}</code>",
-        "chat_id": "<emoji document_id=5886436057091673541>💬</emoji> <b>ID чата</b>: <code>{id}</code>"
+        "chat_id": "<emoji document_id=5886436057091673541>💬</emoji> <b>ID чата</b>: <code>{id}</code>",
+        "minutes": "минут",
+        "hours": "часов",
+        "days": "дней",
+        "weeks": "недели",
     }
 
     strings = {
@@ -164,7 +168,7 @@ class CMDDJ(loader.Module):
         "no_user": "User not found.",
         "unknown_user": "Unknown user.",
         "unmuted": "User {first_name}(<code>{user_id}</code>) was unmuted.",
-        "muted": "User {first_name}(<code>{user_id}</code>) was muted for {mute_time} minutes.",
+        "muted": "User {first_name} (<code>{user_id}</code>) was muted for {mute_time} {unit}.",
         "users_too_much": "The user invitation limit has been reached.",
         "kick_all": "{user_count} participants will be kicked.",
         "kicked": "User {name}(<code>{id}</code>) was kicked.",
@@ -226,7 +230,11 @@ class CMDDJ(loader.Module):
         "steal_complete": "({count}) just for fun)",
         "my_id": "<emoji document_id=5208454037531280484>💜</emoji> <b>My ID</b>: <code>{id}</code>",
         "users_id": "<emoji document_id=6035084557378654059>👤</emoji> <b>User's ID</b>: <code>{id}</code>",
-        "chat_id": "<emoji document_id=5886436057091673541>💬</emoji> <b>Chat ID</b>: <code>{id}</code>"
+        "chat_id": "<emoji document_id=5886436057091673541>💬</emoji> <b>Chat ID</b>: <code>{id}</code>",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
     }
 
     @loader.owner
@@ -1040,15 +1048,32 @@ class CMDDJ(loader.Module):
 
     @loader.owner
     async def mutecmd(self, message):
-        """Мут пользователя. Использование: .mute <reply | ID | username> <time> - мутит на определенное время (в минутах)."""
+        """Мут пользователя. Использование: .mute <reply | ID | username> <time> - мутит на определенное время."""
         args = message.raw_text.split(maxsplit=2)
 
         if len(args) < 2:
             await utils.answer(message, self.strings("invalid_args", message))
             return
         try:
-            mute_time = int(args[-1])
+            unit = args[-1][-1]
+            mute_time = int(args[-1][:-1])
             duration = timedelta(minutes=mute_time)
+            if unit == "m":
+                duration = timedelta(minutes=mute_time)
+                unit = self.strings("minutes", message)
+            elif unit == "h":
+                duration = timedelta(hours=mute_time)
+                unit = self.strings("hours", message)
+            elif unit == "d":
+                duration = timedelta(days=mute_time)
+                unit = self.strings("days", message)
+            elif unit == "w":
+                duration = timedelta(weeks=mute_time)
+                unit = self.strings("weeks", message)
+            else:
+                await utils.answer(message, self.strings("invalid_args", message))
+                return
+
         except ValueError:
             await utils.answer(message, self.strings("invalid_args", message))
             return
@@ -1092,11 +1117,11 @@ class CMDDJ(loader.Module):
                 self.strings("muted", message).format(
                     user_id=user_id,
                     first_name=first_name,
-                    mute_time=mute_time
+                    mute_time=mute_time,
+                    unit=unit
                 ),
                 parse_mode="html"
             )
-
             await asyncio.sleep(duration.total_seconds())
             if user_id in self.muted:
                 await message.client.send_message(
