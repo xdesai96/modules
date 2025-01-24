@@ -1461,19 +1461,19 @@ class CMDDJ(loader.Module):
 
         except ValueError:
             m = self.strings("no_user", message)
-            await utils.answer(m)
+            await utils.answer(message, m)
         except UserIdInvalidError:
             m = self.strings("no_user", message)
-            await utils.answer(m)
+            await utils.answer(message, m)
         except UserPrivacyRestrictedError:
             m = self.strings("privacy_settings_error", message)
-            await utils.answer(m)
+            await utils.answer(message, m)
         except UserNotMutualContactError:
             m = self.strings("privacy_settings_error", message)
-            await utils.answer(m)
+            await utils.answer(message, m)
         except ChatAdminRequiredError:
             m = self.strings("no_rights", message)
-            await utils.answer(m)
+            await utils.answer(message, m)
         except UserBotError:
             group = await message.client.get_entity(message.chat_id)
             if args:
@@ -1497,16 +1497,16 @@ class CMDDJ(loader.Module):
             ))
         except ChatWriteForbiddenError:
             m = self.strings("no_rights", message)
-            await utils.answer(m)
+            await utils.answer(message, m)
         except ChannelPrivateError:
             m = self.strings("no_rights", message)
-            await utils.answer(m)
+            await utils.answer(message, m)
         except InputUserDeactivatedError:
             m = self.strings("deleted_account", message)
-            await utils.answer(m)
+            await utils.answer(message, m)
         except YouBlockedUserError:
             m = self.strings("blocked_contact", message)
-            await utils.answer(m)
+            await utils.answer(message, m)
         return
 
     @loader.owner
