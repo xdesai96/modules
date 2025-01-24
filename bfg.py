@@ -3,7 +3,7 @@
 import asyncio
 import time
 from telethon import functions
-from .. import loader
+from .. import loader, utils
 
 class Farm:
 
@@ -134,11 +134,11 @@ class BfgMod(loader.Module, Farm):
         self.config["AutoFarm"] = False
         self.main_loop.stop()
         await asyncio.sleep(1)
+        await utils.answer(message, "Автоматическая фарма перезапущена.")
         await self.autofarm()
         self.set("Tree_time", time.time() + 3600)
         self.config["AutoFarm"] = True
         self.main_loop.start()
-        await utils.answer(message, "Автоматическая фарма перезапущена.")
         
     @loader.command()
     async def bfgstop(self, message):
