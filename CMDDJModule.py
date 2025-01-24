@@ -65,8 +65,8 @@ class CMDDJ(loader.Module):
         "chat_type_error": "Не удалось определить тип чата.",
         "invite_success": "<b>Пользователь приглашён успешно!</b>",
         "privacy_settings_error": "<b>Настройки приватности пользователя не позволяют пригласить его.</b>",
-        "deleted_account": "<b>Аккаунт пользователя удалён.</b>",
-        "blocked_contact": "<b>Вы заблокировали этого пользователя.</b>",
+        "deleted_account": "<b>Аккаунт пользователя удалён.</b>\n",
+        "blocked_contact": "<b>Вы заблокировали этого пользователя.</b>\n",
         "search_deleted_accounts": "<emoji document_id=5188311512791393083>🔎</emoji> <b>Поиск удалённых аккаунтов</b>",
         "no_deleted_accounts": "<emoji document_id=5341509066344637610>😎</emoji> <b>Здесь нет ни одного удалённого аккаунта</b>",
         "kicked_deleted_accounts": "<emoji document_id=5328302454226298081>🫥</emoji> <b>Удалено {count} удалённых аккаунтов</b>",
@@ -175,8 +175,8 @@ class CMDDJ(loader.Module):
         "chat_type_error": "Failed to determine chat type.",
         "invite_success": "<b>User successfully invited!</b>",
         "privacy_settings_error": "<b>The user's privacy settings do not allow inviting them.</b>",
-        "deleted_account": "<b>The user's account is deleted.</b>",
-        "blocked_contact": "<b>You have blocked this user.</b>",
+        "deleted_account": "<b>The user's account is deleted.</b>\n",
+        "blocked_contact": "<b>You have blocked this user.</b>\n",
         "search_deleted_accounts": "<emoji document_id=5188311512791393083>🔎</emoji> <b>Searching for deleted accounts</b>",
         "no_deleted_accounts": "<emoji document_id=5341509066344637610>😎</emoji> <b>No deleted accounts found here</b>",
         "kicked_deleted_accounts": "<emoji document_id=5328302454226298081>🫥</emoji> <b>Removed {count} deleted accounts</b>",
@@ -925,7 +925,7 @@ class CMDDJ(loader.Module):
 
     @loader.owner
     async def chatinfocmd(self, chatinfo):
-        """Используй .chatinfo <айди чата>; ничего"""
+        """ <айди чата>"""
         if chatinfo.chat:
             await utils.answer(chatinfo, self.strings("loading", chatinfo))
             await chatinfo.delete()
@@ -949,7 +949,7 @@ class CMDDJ(loader.Module):
 
     @loader.owner
     async def owncmd(self, message):
-        """Выводит список чатов, каналов и групп где вы владелец."""
+        """Выводит список чатов, каналов и групп где вы владелец/админ."""
         await utils.answer(message, self.strings("loading", message))
         
         count = 0
