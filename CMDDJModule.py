@@ -125,11 +125,22 @@ class CMDDJ(loader.Module):
         "hours": "часов",
         "days": "дней",
         "weeks": "недели",
+        "get_rights_header": "<b>Ваши права в этом чате:</b>\n\n",
+        "admin_rights": "🔹 <u>Права администратора:</u>\n",
+        "not_admin": "🔹 <u>Права администратора:</u> ❌ Вы не администратор\n",
+        "restricts": "\n🔹 <u>Ограничения:</u>\n",
+        "no_restricts": "\n🔹 <u>Ограничения:</u> ✅ Нет ограничений\n",
     }
 
     strings = {
         "name": "ChatModule",
         "loading": "🕐 <b>Processing data...</b>",
+        "restricts": "\n🔹 <u>Restrictions:</u>\n",
+        "no_restricts": "\n🔹 <u>Restrictions:</u> ✅ No restrictions\n",
+        "admin_rights": "🔹 <u>Admin rights:</u>\n",
+        "failed_get_rights": "<b>Your rights cannot be determined in this chat.</b>",
+        "get_rights_header": "<b>Your rights in this chat:</b>\n\n",
+        "not_admin": "🔹 <u>Admin rights:</u> ❌ You are not an admin\n",
         "not_a_chat": "<emoji document_id=5312526098750252863>❌</emoji> <b>The command cannot be run in private messages.</b>",
         "no_rights": "<emoji document_id=5318764049121420145>🫤</emoji> <b>I don't have enough rights.</b>",
         "no_user": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>You did not specify a user.</b>",
@@ -305,6 +316,41 @@ class CMDDJ(loader.Module):
                 rank=rank
             )
         )
+
+    @loader.command()
+    async def myrights(self, message):
+        """Проверить ваши права в текущем чате"""
+        chat = await message.get_chat()
+        user = await message.get_sender()
+        chat_id = message.chat_id
+
+        if not chat or not chat_id:
+            return await utils.answer(message, self.strings("not_a_chat", message))
+
+        if not hasattr(chat, "admin_rights") and not hasattr(chat, "banned_rights"):
+            return await utils.answer(message, "failed_get_rights")
+
+
+        admin_rights = getattr(chat, "admin_rights", None)
+        banned_rights = getattr(chat, "banned_rights", None)
+
+        result = self.strings('get_rights_header')
+
+        if admin_rights and isinstance(admin_rights, ChatAdminRights):
+            result += self.strings('admin_rights')
+            for right, value in admin_rights.to_dict().items():
+                result += f"  - {right}: {'✅' if value else '❌'}\n"
+        else:
+            result += self.strings('not_admin')
+
+        if banned_rights and isinstance(banned_rights, ChatBannedRights):
+            result += self.strings('restricts')
+            for right, value in banned_rights.to_dict().items():
+                result += f"  - {right}: {'❌' if value else '✅'}\n"
+        else:
+            result += self.strings('no_restricts')
+
+        await utils.answer(message, result)
 
     @loader.owner
     async def promotecmd(self, message: Message):
