@@ -66,7 +66,10 @@ class Farm:
                     r = await conv.get_response(timeout=15)
                 except asyncio.exceptions.TimeoutError:
                     continue
-
+    
+                if not r.buttons:
+                    continue
+    
                 for click in clicks:
                     await asyncio.sleep(3)
                     try:
@@ -107,19 +110,22 @@ class BfgMod(loader.Module, Farm):
 
     @loader.loop(interval=1, autostart=True)
     async def main_loop(self):
-        if self.config["AutoFarm"] and (not self.get("Tree_time") or (time.time() - self.get("Tree_time")) >= 3600):
-            await self.autofarm()
-            self.set("Tree_time", int(time.time()))
+        try:
+            if self.config["AutoFarm"] and (not self.get("Tree_time") or (time.time() - self.get("Tree_time")) >= 3600):
+                await self.autofarm()
+                self.set("Tree_time", int(time.time()))
+    
+            if self.config["AutoMining"] and (not self.get("Mining_time") or (time.time() - self.get("Mining_time")) >= 3600*2+10):
+                await self.automining()
+                self.set("Mining_time", int(time.time()))
+    
+            if self.config["EveryDayBonus"] and (not self.get("Bonus_time") or (time.time() - self.get("Bonus_time")) >= 3600*24+10):
+                await self.everyday_bonus()
+                self.set("Bonus_time", int(time.time()))
 
-        if self.config["AutoMining"] and (not self.get("Mining_time") or (time.time() - self.get("Mining_time")) >= 3600*2+10):
-            await self.automining()
-            self.set("Mining_time", int(time.time()))
-
-        if self.config["EveryDayBonus"] and (not self.get("Bonus_time") or (time.time() - self.get("Bonus_time")) >= 3600*24+10):
-            await self.everyday_bonus()
-            self.set("Bonus_time", int(time.time()))
-
-        await self._client(functions.messages.ReadMentionsRequest(self._bot))
+            await self._client(functions.messages.ReadMentionsRequest(self._bot))
+        except Excesption as e:
+            self.log.error(f"Error in main_loop: {e}")
 
     @loader.command()
     async def bfg(self, message):
