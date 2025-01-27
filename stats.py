@@ -72,21 +72,25 @@ class Stats(loader.Module):
             offset += limit
 
         async for dialog in self._client.iter_dialogs():
-            all_chats += 1
             if getattr(dialog, "archived", False):
                 archived += 1
             if dialog.is_user:
                 if getattr(dialog.entity, "bot", False):
                     bots += 1
+                    all_chats += 1
                 else:
                     users += 1
+                    all_chats += 1
             elif getattr(dialog, "is_group", False):
                 groups += 1
+                all_chats += 1
             elif dialog.is_channel:
                 if getattr(dialog.entity, "megagroup", False) or getattr(dialog.entity, "gigagroup", False):
                     groups += 1
+                    all_chats += 1
                 elif getattr(dialog.entity, "broadcast", False):
                     channels += 1
+                    all_chats += 1
 
         await utils.answer(message, self.strings("stats", message).format(users=users, bots=bots, channels=channels,
                                                                           groups=groups, all_chats=all_chats,
