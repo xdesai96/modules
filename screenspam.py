@@ -1,3 +1,4 @@
+# meta developer: @xdesai
 
 from .. import loader, utils
 from telethon import events, errors, functions, types
