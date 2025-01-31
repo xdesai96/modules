@@ -8,7 +8,7 @@ def register(cb):
 
 
 class ScrSpamMod(loader.Module):
-	"""Screenshot Spammer by @KeyZenD"""
+	"""Screenshot Spammer"""
 
 	strings = {'name': 'ScrSpam'}
 
