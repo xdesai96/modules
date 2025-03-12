@@ -1,4 +1,4 @@
-CMDDJModule
+ChatModule
 MentionNotifier
 PfpRepeater
 URLModule
@@ -14,3 +14,4 @@ weather
 InlineButtons
 p2g
 screenspam
+InfoIP
