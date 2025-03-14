@@ -5,8 +5,8 @@ from .. import loader, utils
 from telethon import types, functions
 
 @loader.tds
-class RBSMod(loader.Module):
-    strings = {"name": "ReactByStatus",
+class ReactMod(loader.Module):
+    strings = {"name": "React",
                "no_reply": "<b>No reply.</b>",
                "no_user": "<b>Failed to get user info.</b>",
                "no_premium": "<b>No premium.</b>",
