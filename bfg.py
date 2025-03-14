@@ -7,7 +7,6 @@ from telethon import functions
 from .. import loader, utils
 
 class Farm:
-
     async def automining(self, conv):
         check_mine = "моя шахта"
         await conv.send_message(check_mine)
@@ -125,7 +124,7 @@ class BfgMod(loader.Module, Farm):
             )
         )
 
-    @loader.loop(interval=60, autostart=True)
+    @loader.loop(interval=30, autostart=True)
     async def main_loop(self):
         try:
             now = time.time()
