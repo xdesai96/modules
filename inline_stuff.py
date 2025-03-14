@@ -124,5 +124,5 @@ class InlineStuff(loader.Module):
 
         await message.answer_photo(
             "https://upload.kshteam.top/u/QjbhVbc.jpg",
-            caption="👋 <b>Hello!</b>\nThis bot will help you contact <a href='https://xdesai.t.me/'>Desai</a>.\n\n📩 <b>Send your message</b>, and it will be delivered to me.\n❗ <i>Please be polite and keep it to the point.</i>\n\n🔹 <b>It may take some time to respond</b>, but I will get back to you as soon as possible.", disable_web_preview=True
+            caption="👋 <b>Hello!</b>\nThis bot will help you contact <a href='https://xdesai.t.me/'>Desai</a>.\n\n📩 <b>Send your message</b>, and it will be delivered to me.\n❗ <i>Please be polite and keep it to the point.</i>\n\n🔹 <b>It may take some time to respond</b>, but I will get back to you as soon as possible."
         )
