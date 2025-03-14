@@ -37,11 +37,11 @@ class RBSMod(loader.Module):
         if not reply:
             return await utils.answer(message, self.strings("no_reply", message))
         if self.config['like'].isdigit() and me.premium:
-            await self._client(functions.messages.SendReactionRequest(peer=message.chat_id, msg_id=reply.id, reaction=[types.ReactionCustomEmoji(document_id=int(self.config['like']))]))
+            await self._client(functions.messages.SendReactionRequest(msg_id=reply.id, reaction=[types.ReactionCustomEmoji(document_id=int(self.config['like']))]))
         elif self.config['like'].isdigit() and not me.premium:
             await utils.answer(message, self.strings("no_premium", message))
         else:
-            await self._client(functions.messages.SendReactionRequest(message, reply.id, reaction=[types.ReactionEmoji(emoticon=self.config['like'])]))
+            await self._client(functions.messages.SendReactionRequest(reply.id, reaction=[types.ReactionEmoji(emoticon=self.config['like'])]))
         await asyncio.sleep(1)
         await message.delete()
 
@@ -52,10 +52,10 @@ class RBSMod(loader.Module):
         if not reply:
             return await utils.answer(message, self.strings("no_reply", message))
         if self.config['love'].isdigit() and me.premium:
-            await self._client(functions.messages.SendReactionRequest(peer=message.chat_id, msg_id=reply.id, reaction=[types.ReactionCustomEmoji(document_id=int(self.config['love']))]))
+            await self._client(functions.messages.SendReactionRequest(msg_id=reply.id, reaction=[types.ReactionCustomEmoji(document_id=int(self.config['love']))]))
         elif self.config['love'].isdigit() and not me.premium:
             await utils.answer(message, self.strings("no_premium", message))
         else:
-            await self._client(functions.messages.SendReactionRequest(message, reply.id, reaction=[types.ReactionEmoji(emoticon=self.config['love'])]))
+            await self._client(functions.messages.SendReactionRequest(reply.id, reaction=[types.ReactionEmoji(emoticon=self.config['love'])]))
         await asyncio.sleep(1)
         await message.delete()
