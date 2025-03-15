@@ -1599,10 +1599,16 @@ class ChatModule(loader.Module):
                 return await utils.answer(message, self.strings("no_one_banned"))
             if args[0].isdigit():
                 who = int(args[0])
-                reason = args[1] or self.strings("no_reason", message)
+                if args[1]:
+                    reason = args[1]
+                else:
+                    reason = self.strings("no_reason", message)
             else:
                 who = args[0]
-                reason = args[1] or self.strings("no_reason", message)
+                if args[1]:
+                    reason = args[1]
+                else:
+                    reason = self.strings("no_reason", message)
             user = await self.client.get_entity(who)
         if not user:
             return await utils.answer(message, self.strings("no_user", message))
