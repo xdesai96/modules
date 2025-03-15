@@ -1602,7 +1602,7 @@ class ChatModule(loader.Module):
                 reason = args[1]
             else:
                 who = args[0]
-                reason = args[1]
+                reason = args[1] or self.strings("no_reason", message)
             user = await self.client.get_entity(who)
         if not user:
             return await utils.answer(message, self.strings("no_user", message))
