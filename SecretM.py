@@ -13,7 +13,8 @@ class SecretMessageMod(loader.Module):
         "no_user_or_message": "Specify the user and the message",
         "secret_message": "Secret message",
         "send_message": "Send secret message for {name}",
-        "help_message": "<b>Usage:</b>\n<code>@{bot} whisper (id/username) (text)</code>"
+        "help_message": "<b>Usage:</b>\n<code>@{bot} whisper (id/username) (text)</code>",
+        "not_for_you": "❌ Not for you"
     }
 
     strings_ru = {
@@ -23,7 +24,8 @@ class SecretMessageMod(loader.Module):
         "no_user_or_message": "Укажите пользователя и сообщение",
         "secret_message": "Секретное сообщение",
         "send_message": "Отправить секретное сообщение для {name}",
-        "help_message": "<b>Использование:</b>\n<code>@{bot} whisper (id/username) (текст)</code>"
+        "help_message": "<b>Использование:</b>\n<code>@{bot} whisper (id/username) (текст)</code>",
+        "not_for_you": "❌ Не для тебя"
     }
 
     @loader.inline_handler(ru_doc="Секретное сообщение для пользователя")
@@ -53,10 +55,13 @@ class SecretMessageMod(loader.Module):
             "reply_markup": {
                 "text": self.strings("open"),
                 "callback": self._handler,
-                "args": (text,),
-                "always_allow": [for_user]
+                "args": (text, for_user),
+                "disable_security": True
             },
         }
 
-    async def _handler(self, call: InlineCall, text: str):
-        await call.answer(f"{text}", show_alert=True)
+    async def _handler(self, call: InlineCall, text: str, for_user):
+        if call.from_user.id != for_user.id:
+            await call.answer(f"{self.strings("not_for_you")}", show_alert=True)
+        else:
+            await call.answer(f"{text}", show_alert=True)
