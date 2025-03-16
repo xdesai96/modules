@@ -15,7 +15,7 @@ class SecretMessageMod(loader.Module):
         "send_message": "Send secret message for {name}",
         "help_message": "<b>Usage:</b>\n<code>@{bot} whisper (id/username) (text)</code>",
         "not_for_you": "❌ Not for you",
-        "eaten": "😽 Сообщение было съедено кошечкой"
+        "eaten": "😽 The message was eaten by cats"
     }
 
     strings_ru = {
@@ -27,7 +27,7 @@ class SecretMessageMod(loader.Module):
         "send_message": "Отправить секретное сообщение для {name}",
         "help_message": "<b>Использование:</b>\n<code>@{bot} whisper (id/username) (текст)</code>",
         "not_for_you": "❌ Не для тебя",
-        "eaten": "😽 The message was eaten by cats"
+        "eaten": "😽 Сообщение было съедено кошечкой"
     }
 
     async def client_ready(self, client, db):
