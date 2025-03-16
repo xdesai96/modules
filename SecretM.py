@@ -14,7 +14,8 @@ class SecretMessageMod(loader.Module):
         "secret_message": "Secret message",
         "send_message": "Send secret message for {name}",
         "help_message": "<b>Usage:</b>\n<code>@{bot} whisper (id/username) (text)</code>",
-        "not_for_you": "❌ Not for you"
+        "not_for_you": "❌ Not for you",
+        "eaten": "😽 Сообщение было съедено кошечкой"
     }
 
     strings_ru = {
@@ -25,8 +26,14 @@ class SecretMessageMod(loader.Module):
         "secret_message": "Секретное сообщение",
         "send_message": "Отправить секретное сообщение для {name}",
         "help_message": "<b>Использование:</b>\n<code>@{bot} whisper (id/username) (текст)</code>",
-        "not_for_you": "❌ Не для тебя"
+        "not_for_you": "❌ Не для тебя",
+        "eaten": "😽 The message was eaten by cats"
     }
+
+    async def client_ready(self, client, db):
+        self.client = client
+        self.db = db
+        self._cache = []
 
     @loader.inline_handler(ru_doc="Секретное сообщение для пользователя")
     async def whisper(self, query: InlineQuery):
@@ -61,7 +68,12 @@ class SecretMessageMod(loader.Module):
         }
 
     async def _handler(self, call: InlineCall, text: str, for_user):
+        if call.from_user.id == self._tg_id:
+            return await call.answer(f"{text}", show_alert=True)
         if call.from_user.id != for_user.id:
             await call.answer(self.strings("not_for_you"), show_alert=True)
+        elif call.from_user.id in self._cache:
+            await call.answer(self.strings("eaten"), show_alert=True)
         else:
             await call.answer(f"{text}", show_alert=True)
+            self._cache.append(call.from_user.id)
