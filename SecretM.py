@@ -62,6 +62,6 @@ class SecretMessageMod(loader.Module):
 
     async def _handler(self, call: InlineCall, text: str, for_user):
         if call.from_user.id != for_user.id:
-            await call.answer(f"{self.strings("not_for_you")}", show_alert=True)
+            await call.answer(self.strings("not_for_you"), show_alert=True)
         else:
             await call.answer(f"{text}", show_alert=True)
