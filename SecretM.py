@@ -53,7 +53,7 @@ class SecretMessageMod(loader.Module):
             "reply_markup": {
                 "text": self.strings("open"),
                 "callback": self._handler,
-                "args": (text, query),
+                "args": (text),
                 "always_allow": [for_user]
             },
         }
