@@ -7,7 +7,6 @@ tts
 irisfarm
 bfg
 encmod
-send
 memberslist
 stats
 weather
