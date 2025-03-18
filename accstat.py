@@ -1,3 +1,5 @@
+# meta developer: @xdesai
+
 import asyncio
 from .. import loader, utils
 
