@@ -5,13 +5,20 @@ import os
 from .. import loader, utils
 
 @loader.tds
-class AliasMangerMod(loader.Module):
+class AliasManagerMod(loader.Module):
     strings = {
-        "name": "AliasManger",
+        "name": "AliasManager",
         "no_reply": "<blockquote>❌ <b>Reply to the file</b></blockquote>",
         "restored": "<blockquote>✅ Aliases restored successfully!</blockquote>",
         "cleared": "<blockquote>✅ All aliases cleared successfully!</blockquote>",
         "backed_up": "<blockquote>✅ Aliases backed up successfully!</blockquote>"
+    }
+
+    strings_ru = {
+        "no_reply": "<blockquote>❌ <b>Ответьте на файл</b></blockquote>",
+        "restored": "<blockquote>✅ Псевдонимы успешно восстановлены!</blockquote>",
+        "cleared": "<blockquote>✅ Все псевдонимы успешно очищены!</blockquote>",
+        "backed_up": "<blockquote>✅ Псевдонимы успешно сохранены!</blockquote>"
     }
 
     async def client_ready(self, client, db):
