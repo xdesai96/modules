@@ -17,4 +17,3 @@ InfoIP
 rbs
 react
 SecretM
-accstat
