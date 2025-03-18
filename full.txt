@@ -18,3 +18,4 @@ rbs
 react
 SecretM
 accstat
+aliasmanager
