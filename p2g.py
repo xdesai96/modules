@@ -3,6 +3,7 @@
 from telethon.tl.types import Message
 import os, subprocess
 from .. import loader, utils
+from PIL import Image
 
 @loader.tds
 class P2G(loader.Module):
