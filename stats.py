@@ -9,7 +9,6 @@ class Stats(loader.Module):
 
     strings = {
 "name": "Stats",
-
 "stats": """
 <emoji document_id=5774022692642492953>✅</emoji><b> Account Statistics</b>
 
@@ -29,7 +28,6 @@ class Stats(loader.Module):
 
     strings_ru = {
 "name": "Stats",
-
 "stats": """
 <emoji document_id=5774022692642492953>✅</emoji><b> Статистика аккаунта
 
