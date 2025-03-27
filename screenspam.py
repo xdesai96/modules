@@ -19,7 +19,7 @@ class ScrSpamMod(loader.Module):
     @loader.command(ru_doc="<кол-во> | Спам скриншотами")
     async def scrs(self, message):
         """<amount> | Screenshot spam"""
-        args = utils.get_args(message)
+        args = utils.get_args_raw(message)
         if args and args.isdigit():
             amount = int(amount)
         else:
