@@ -21,7 +21,7 @@ class ScrSpamMod(loader.Module):
         """<amount> | Screenshot spam"""
         args = utils.get_args_raw(message)
         if args and args.isdigit():
-            amount = int(amount)
+            amount = int(args)
         else:
             return await utils.answer(message, self.strings('invalid_number', message))
 
