@@ -8,7 +8,7 @@ class ScrSpamMod(loader.Module):
     strings = {'name': 'ScrSpam',
                'invalid_number': '❌ <b>Invalid number.</b>'}
 
-    strings = {
+    strings_ru = {
         'invalid_number': '❌ <b>Неверное кол-во.</b>'
     }
 
