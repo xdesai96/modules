@@ -112,7 +112,7 @@ class CheckAdminRightsMod(loader.Module):
                             has_permission = getattr(permissions, right, False)
                             result += f"{'<emoji document_id=5021905410089550576>✅</emoji>' if has_permission else '<emoji document_id=5019523782004441717>❌</emoji>'} {self.strings(right)}\n"
 
-                await utils.answer(message, f"<blockquote><b>{header}</blockquote><blockquote>{result}</b></blockquote>")
+                await utils.answer(message, f"<blockquote><b>{header}</blockquote>\n\n<blockquote>{result}</b></blockquote>")
         else:
             args = utils.get_args_raw(message).split()
             user = await self.client.get_entity(int(args[0]) if args[0].isdigit() else args[0])
@@ -141,4 +141,4 @@ class CheckAdminRightsMod(loader.Module):
                             has_permission = getattr(permissions, right, False)
                             result += f"{'<emoji document_id=5021905410089550576>✅</emoji>' if has_permission else '<emoji document_id=5019523782004441717>❌</emoji>'} {self.strings(right)}\n"
 
-            await utils.answer(message, f"<blockquote><b>{header}</blockquote><blockquote>{result}</b></blockquote>")
+            await utils.answer(message, f"<blockquote><b>{header}</blockquote>\n\n<blockquote>{result}</b></blockquote>")
