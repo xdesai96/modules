@@ -1,6 +1,7 @@
 ChatModule
 CheckAdminRights
 weather
+ToDo
 URLModule
 p2g
 screenspam
