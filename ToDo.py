@@ -12,7 +12,7 @@
 # meta banner: https://mods.hikariatama.ru/badges/todo.jpg
 # meta developer: @hikarimods
 # scope: hikka_only
-# edited: @xdesai
+# edited by: @xdesai
 
 from random import randint
 
