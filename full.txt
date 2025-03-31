@@ -6,11 +6,12 @@ URLModule
 p2g
 screenspam
 InfoIP
-rbs
+FancyFonts
 react
 SecretM
 accstat
 stats
+rbs
 MentionNotifier
 PfpRepeater
 ascii
