@@ -23,7 +23,7 @@ class DBMod(loader.Module):
         if item[0] in self._db.keys():
             self._db.pop(f"{item[0]}")
             self._db.save()
-            await call.edit("Database", reply_markup=self.generate_markup("del"))
+            await call.edit(self.strings("del_text"), reply_markup=self.generate_markup("del"))
             await call.answer(self.strings("deleted").format(key=item[0]))
             return True
         await call.answer(self.strings("not_found").format(key=item[0]))
