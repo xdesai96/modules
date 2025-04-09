@@ -5,17 +5,15 @@ from telethon import functions, types
 
 class ScrSpamMod(loader.Module):
     """Screenshot Spammer"""
-    strings = {'name': 'ScrSpam',
-               'invalid_number': '❌ <b>Invalid number.</b>'}
-
-    strings_ru = {
-        'invalid_number': '❌ <b>Неверное кол-во.</b>'
+    strings = {
+	    'name': 'ScrSpam',
+	    'invalid_number': '❌ <b>Invalid number.</b>'
     }
 
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
-	
+    strings_ru = {
+	    'invalid_number': '❌ <b>Неверное кол-во.</b>'
+	    }
+
     @loader.command(ru_doc="<кол-во> | Спам скриншотами")
     async def scrs(self, message):
         """<amount> | Screenshot spam"""
