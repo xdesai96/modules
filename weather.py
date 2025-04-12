@@ -8,28 +8,24 @@ import requests
 class Weather(loader.Module):
     strings_ru = {'name': 'Weather',
                'url': 'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric&lang=ru',
-               'weather_info': """
-<emoji document_id=5884330496619450755>☁️</emoji> Погода в городе {city}, {country}:
-<emoji document_id=5199707727475007907>🌡️</emoji> Температура: {temperature}°C (ощущается как {feels_like}°C)
-<emoji document_id=6050944866580435869>💧</emoji> Влажность: {humidity}%
-<emoji document_id=5415843564280107382>🌀</emoji> Скорость ветра: {wind_speed} м/с
-<emoji document_id=5417937876232983047>⛅️</emoji> Небо: {description}
-               """,
-                  'error': "<b>Ошибка:</b> {e}",
-                  'api_error': "Город не найден: {city}\nОтвет API: {data}",
+               'weather_info': """<emoji document_id=5884330496619450755>☁️</emoji> <b>Погода в городе {city}, {country}:</b>
+<emoji document_id=5199707727475007907>🌡️</emoji> <b>Температура: {temperature}°C (ощущается как {feels_like}°C)</b>
+<emoji document_id=6050944866580435869>💧</emoji> <b>Влажность: {humidity}%</b>
+<emoji document_id=5415843564280107382>🌀</emoji> <b>Скорость ветра: {wind_speed} м/с</b>
+<emoji document_id=5417937876232983047>⛅️</emoji> <b>Небо: {description}</b>""",
+                  'error': "<b>Ошибка:</b> <code>{e}</code>",
+                  'api_error': "<b>Город не найден: {city}\nОтвет API:</b> <code></code>",
                   'invalid_args': '<emoji document_id=5019523782004441717>❌</emoji> <b>Укажите город.</b>'}
 
     strings = {'name': 'Weather',
                'url': 'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric&lang=en',
-               'weather_info': """
-<emoji document_id=5884330496619450755>☁️</emoji> Weather in {city}, {country}:
-<emoji document_id=5199707727475007907>🌡️</emoji> Temperature: {temperature}°C (feels like {feels_like}°C)
-<emoji document_id=6050944866580435869>💧</emoji> Humidity: {humidity}%
-<emoji document_id=5415843564280107382>🌀</emoji> Wind speed: {wind_speed} m/s
-<emoji document_id=5417937876232983047>⛅️</emoji> Sky: {description}
-                   """,
-               'error': "<b>Error:</b> {e}",
-               'api_error': "City not found: {city}\API response: {data}",
+               'weather_info': """<emoji document_id=5884330496619450755>☁️</emoji> <b>Weather in {city}, {country}:</b>
+<emoji document_id=5199707727475007907>🌡️</emoji> <b>Temperature: {temperature}°C (feels like {feels_like}°C)</b>
+<emoji document_id=6050944866580435869>💧</emoji> <b>Humidity: {humidity}%</b>
+<emoji document_id=5415843564280107382>🌀</emoji> <b>Wind speed: {wind_speed} m/s</b>
+<emoji document_id=5417937876232983047>⛅️</emoji> <b>Sky: {description}</b>""",
+               'error': "<b>Error:</b> <code>{e}</code>",
+               'api_error': "<b>City not found: {city}\nAPI response:</b> <code>{data}</code>",
                'invalid_args': '<emoji document_id=5019523782004441717>❌</emoji> <b>Specify the city.</b>'}
 
     async def client_ready(self, db, client):
