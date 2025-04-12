@@ -4,7 +4,7 @@ from .. import loader, utils
 
 @loader.tds
 class ID(loader.Module):
-    """Module to checks ids"""
+    """Module to check the ids"""
 
     strings = {
         "name": "ID",
