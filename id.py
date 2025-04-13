@@ -25,5 +25,8 @@ class ID(loader.Module):
         r = await m.get_reply_message()
         output = self.strings("id_info").format(my_id=self.tg_id, chat_id=m.chat_id)
         if r:
-            output += self.strings("id_user").format(user_id=r.from_id.user_id)
+            if not m.is_private:
+                output += self.strings("id_user").format(user_id=r.from_id.user_id)
+            else:
+                output += self.strings("id_user").format(user_id=r.peer_id.user_id)
         await utils.answer(m, output)
