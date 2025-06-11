@@ -1,6 +1,7 @@
 id
 ChatModule
 CheckAdminRights
+chatmembers
 weather
 ToDo
 URLModule
