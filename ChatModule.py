@@ -59,6 +59,7 @@ class ChatModuleMod(loader.Module):
         "error": "<b>Error:</b> <code>{error}</code>",
         "of_chat": "Chat",
         "of_channel": "Channel",
+        "loading": "<emoji document_id=5021712394259268143>🟡</emoji> <b>Loading data ...</b>",
         "own_list": "<b>My possessions ({count}):</b>\n\n{msg}",
         "no_ownerships": "<emoji document_id=5019523782004441717>❌</emoji> <b>No possessions.</b>",
         "not_a_chat": "<emoji document_id=5276240711795107620>⚠️</emoji> <b>It works only in groups!</b>",
