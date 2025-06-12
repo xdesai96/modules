@@ -595,7 +595,7 @@ class ChatModuleMod(loader.Module):
         now = None
         if not reply and args:
             if args[0].startswith("@"):
-                id = "".join(args[0][0:])
+                id = "".join(args[0][1:])
             elif args[1].startswith("@"):
                 time = int(args[0][:-1])
                 unit = args[0][-1]
