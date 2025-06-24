@@ -490,7 +490,7 @@ class ChatModuleMod(loader.Module):
     async def unban(self, message):
         """Unban a user"""
         if message.is_private:
-            return await utils.answer(self.strings("not_a_chat"))
+            return await utils.answer(message, self.strings("not_a_chat"))
         reply = await message.get_reply_message()
         user = None
         if reply:
@@ -498,7 +498,7 @@ class ChatModuleMod(loader.Module):
         else:
             user = await self._client.get_entity(await utils.get_target(message))
         if not user:
-            return await utils.answer(self.strings("no_user"))
+            return await utils.answer(message, self.strings("no_user"))
         chat = await message.get_chat()
         await self._client.edit_permissions(chat, user, view_messages=True)
         return await utils.answer(
