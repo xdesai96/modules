@@ -250,7 +250,7 @@ class ChatModuleMod(loader.Module):
         "user_invited": "<emoji document_id=6296367896398399651>✅</emoji> <b>ユーザー <a href='tg://user?id={id}'>{user}</a> がチャットに招待されました。</b>",
     }
 
-    @loader.command(ru_doc="[reply] - Узнать ID")
+    @loader.command(ru_doc="[reply] - Узнать ID", jp_doc="[reply] - IDを知る")
     async def id(self, message):
         """[reply] - Get the ID"""
         my_id = (await self._client.get_me()).id
@@ -266,7 +266,8 @@ class ChatModuleMod(loader.Module):
         return await utils.answer(message, output)
 
     @loader.command(
-        ru_doc="[reply/username/id] - Посмотреть права администратора пользователя"
+        ru_doc="[reply/username/id] - Посмотреть права администратора пользователя",
+        jp_doc="[reply/username/id] - ユーザーの管理者権限を確認する",
     )
     async def rights(self, message):
         """[reply/username/id] - Check user's admin rights"""
@@ -333,7 +334,7 @@ class ChatModuleMod(loader.Module):
                 message, f"<blockquote expandable><b>{output}</b></blockquote>"
             )
 
-    @loader.command(ru_doc="Покинуть чат")
+    @loader.command(ru_doc="Покинуть чат", jp_doc="チャットから離脱する")
     async def leave(self, message):
         """Leave chat"""
         if message.is_private:
@@ -341,7 +342,7 @@ class ChatModuleMod(loader.Module):
         await message.delete()
         await self._client(LeaveChannelRequest((await message.get_chat()).id))
 
-    @loader.command(ru_doc="[a[1-100] b[1-100]] | [reply] Удалить сообщения")
+    @loader.command(ru_doc="[a[1-100] b[1-100]] | [reply] Удалить сообщения", jp_doc="[a[1-100] b[1-100]] | [reply] メッセージを削除する")
     async def d(self, message):
         """[a[1-100] b[1-100]] | [reply] - Delete messages"""
         args = utils.get_args(message)
@@ -383,7 +384,8 @@ class ChatModuleMod(loader.Module):
                 return
 
     @loader.command(
-        ru_doc="Показывает список чатов, каналов и групп где вы админ/владелец"
+        ru_doc="Показывает список чатов, каналов и групп где вы админ/владелец",
+        jp_doc="管理者であるかオーナーであるかのチャット、チャンネル、グループの一覧を表示する",
     )
     async def own(self, message):
         """Shows the list of chats, channels and groups where you are an admin/owner"""
@@ -411,7 +413,7 @@ class ChatModuleMod(loader.Module):
         else:
             await utils.answer(message, self.strings("no_ownerships", message))
 
-    @loader.command(ru_doc="[link/id] Удаляет группу/канал")
+    @loader.command(ru_doc="[link/id] Удаляет группу/канал", jp_doc="[link/id] グループ・チャンネルを削除する")
     async def dgc(self, message):
         """[link/id] Delete chat/channel"""
         args = utils.get_args(message)
@@ -444,7 +446,7 @@ class ChatModuleMod(loader.Module):
             message, self.strings("successful_delete").format(chat_type=chat_type)
         )
 
-    @loader.command(ru_doc="Очищает группу/канал от удаленных аккаунтов")
+    @loader.command(ru_doc="Очищает группу/канал от удаленных аккаунтов", jp_doc="グループ・チャンネルから削除されたアカウントを削除する")
     async def flush(self, message):
         """Removes deleted accounts from the chat/channel"""
         if message.is_private:
@@ -477,7 +479,7 @@ class ChatModuleMod(loader.Module):
                 self.strings("kicked_deleted_accounts").format(count=removed_count),
             )
 
-    @loader.command(ru_doc="Показывает админов в группе/канале")
+    @loader.command(ru_doc="Показывает админов в группе/канале", jp_doc="グループ・チャンネルの管理者を表示する")
     async def admins(self, message):
         """Shows the admins in the chat/channel"""
         if message.is_private:
@@ -516,7 +518,7 @@ class ChatModuleMod(loader.Module):
                 os.remove("adminlist.md")
                 await message.delete()
 
-    @loader.command(ru_doc="Показывает ботов в группе/канале")
+    @loader.command(ru_doc="Показывает ботов в группе/канале", jp_doc="グループ・チャンネルのボットを表示する")
     async def bots(self, message):
         """Shows the bots in the chat/channel"""
         if message.is_private:
@@ -549,7 +551,7 @@ class ChatModuleMod(loader.Module):
                 os.remove("botlist.md")
                 await message.delete()
 
-    @loader.command(ru_doc="Показывает простых участников чата/канала")
+    @loader.command(ru_doc="Показывает простых участников чата/канала", jp_doc="グループ・チャンネルのユーザーを表示する")
     async def users(self, message):
         """Shows the users in the chat/channel"""
         if message.is_private:
@@ -588,7 +590,7 @@ class ChatModuleMod(loader.Module):
             await message.delete()
             return
 
-    @loader.command(ru_doc="Забанить участника")
+    @loader.command(ru_doc="Забанить участника", jp_doc="ユーザーを一時的または永久に禁止する")
     async def ban(self, message):
         """Ban a participant temporarily or permanently"""
         if message.is_private:
@@ -652,7 +654,7 @@ class ChatModuleMod(loader.Module):
             ),
         )
 
-    @loader.command(ru_doc="Разбанить пользователя")
+    @loader.command(ru_doc="Разбанить пользователя", jp_doc="ユーザーを解除する")
     async def unban(self, message):
         """Unban a user"""
         if message.is_private:
@@ -672,7 +674,7 @@ class ChatModuleMod(loader.Module):
             self.strings("user_is_unbanned").format(id=user.id, name=user.first_name),
         )
 
-    @loader.command(ru_doc="Кикнуть участника")
+    @loader.command(ru_doc="Кикнуть участника", jp_doc="ユーザーをキックする")
     async def kick(self, message):
         """Kick a participant"""
         if message.is_private:
@@ -704,7 +706,7 @@ class ChatModuleMod(loader.Module):
             )
         )
 
-    @loader.command(ru_doc="Замутить участника")
+    @loader.command(ru_doc="Замутить участника", jp_doc="ユーザーを一時的または永久にミュートする")
     async def mute(self, message):
         """Mute a participant temporarily or permanently"""
         if message.is_private:
@@ -767,7 +769,7 @@ class ChatModuleMod(loader.Module):
             ),
         )
 
-    @loader.command(ru_doc="Размутить участника")
+    @loader.command(ru_doc="Размутить участника", jp_doc="ユーザーをミュートを解除する")
     async def unmute(self, message):
         """Unmute a participant"""
         if message.is_private:
@@ -788,7 +790,7 @@ class ChatModuleMod(loader.Module):
             self.strings("user_is_unmuted").format(id=user.id, name=user.first_name),
         )
 
-    @loader.command(ru_doc="Закрыть чат для всех кроме админов")
+    @loader.command(ru_doc="Закрыть чат для всех кроме админов", jp_doc="チャットを管理者以外のユーザーに限定して閉じる")
     async def mc(self, message):
         """Mute the chat for everyone except admins"""
         if message.is_private:
@@ -807,7 +809,7 @@ class ChatModuleMod(loader.Module):
         else:
             return await utils.answer(message, self.strings("chat_muted"))
 
-    @loader.command(ru_doc="Переименовать группу/канал")
+    @loader.command(ru_doc="Переименовать группу/канал", jp_doc="グループ・チャンネルの名前を変更する")
     async def rename(self, message):
         """Rename the chat/channel"""
         if message.is_private:
@@ -831,7 +833,7 @@ class ChatModuleMod(loader.Module):
             ),
         )
 
-    @loader.command(ru_doc="[g/c] [title] - Создать группу/канал")
+    @loader.command(ru_doc="[g/c] [title] - Создать группу/канал", jp_doc="[g/c] [title] - グループ・チャンネルを作成する")
     async def create(self, message):
         """[g/c] [title] - Create group/channel"""
         args = utils.get_args(message)
@@ -867,7 +869,7 @@ class ChatModuleMod(loader.Module):
         else:
             return await utils.answer(message, self.strings("invalid_args"))
 
-    @loader.command(ru_doc="Пригласить пользователя в чат")
+    @loader.command(ru_doc="Пригласить пользователя в чат", jp_doc="ユーザーをチャットに招待する")
     async def invite(self, message):
         """Invite a user to the chat"""
         chat = await message.get_chat()
