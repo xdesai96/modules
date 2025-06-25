@@ -1,7 +1,8 @@
 # meta developer: @xdesai
 
-from datetime import timedelta, datetime, timezone
+from datetime import timedelta
 import os
+import asyncio
 import re
 from .. import loader, utils
 from telethon.tl.functions.channels import (
@@ -9,26 +10,33 @@ from telethon.tl.functions.channels import (
     LeaveChannelRequest,
     DeleteChannelRequest,
     EditTitleRequest,
-    EditPhotoRequest,
-    CreateChannelRequest
+    CreateChannelRequest,
+    InviteToChannelRequest,
 )
 from telethon.errors import (
     UserNotParticipantError,
     UserIdInvalidError,
     MessageTooLongError,
+    BotsTooMuchError,
+    ChatAdminRequiredError,
+    UsersTooMuchError,
+    UserBlockedError,
+    UserPrivacyRestrictedError,
+    UserNotMutualContactError,
+    UserKickedError,
 )
 from telethon.tl.types import (
     Channel,
     Chat,
     ChannelParticipantsAdmins,
     ChannelParticipantsBots,
-    ChatBannedRights
+    ChatBannedRights,
 )
 from telethon.tl.functions.messages import (
     DeleteChatRequest,
     EditChatDefaultBannedRightsRequest,
     EditChatTitleRequest,
-    ExportChatInviteRequest
+    ExportChatInviteRequest,
 )
 
 
@@ -42,7 +50,7 @@ class ChatModuleMod(loader.Module):
         "user_not_participant": "<emoji document_id=5019523782004441717>❌</emoji> <b>User is not in this group.</b>",
         "rights_header": '<b><a href="tg://user?id={id}">{name}</a>\'s rights in this chat\n\n',
         "not_an_admin": "<emoji document_id=5019523782004441717>❌</emoji> {user} is not an admin.",
-        "no_rights": "<emoji document_id=5019523782004441717>❌</emoji> <b>I don't have enough rights :(</b>",
+        "no_rights": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> doesn't have enough rights :(</b>",
         "no_user": "<emoji document_id=5019523782004441717>❌</emoji> <b>User not found.</b>",
         "change_info": "Change Info",
         "delete_messages": "Delete Messages",
@@ -96,7 +104,12 @@ class ChatModuleMod(loader.Module):
         "chat_unmuted": "✅ <b>The chat is now open to all participants.</b>",
         "title_changed": "<b>The {type_of} title was successfully changed from <code>{old_title}</code> to <code>{new_title}</code>.</b>",
         "channel_created": "<emoji document_id=6296367896398399651>✅</emoji> <b>The channel <code>{title}</code> is created.\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> Invite link: {link}</b>",
-        "group_created": "<emoji document_id=6296367896398399651>✅</emoji> <b>The group <code>{title}</code> is created.\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> Invite link: {link}</b>"
+        "group_created": "<emoji document_id=6296367896398399651>✅</emoji> <b>The group <code>{title}</code> is created.\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> Invite link: {link}</b>",
+        "user_blocked": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> is blocked.</b>",
+        "user_privacy_restricted": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a>'s privacy settings restrict this action.</b>",
+        "user_not_mutual_contact": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> is not a mutual contact.</b>",
+        "user_kicked": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> is kicked from the chat.</b>",
+        "user_invited": "<emoji document_id=6296367896398399651>✅</emoji> <b>User <a href='tg://user?id={id}'>{user}</a> is invited to the chat.</b>",
     }
 
     strings_ru = {
@@ -106,7 +119,7 @@ class ChatModuleMod(loader.Module):
         "user_not_participant": "<emoji document_id=5019523782004441717>❌</emoji> <b>Пользователь не состоит в этой группе.</b>",
         "rights_header": '<b><a href="tg://user?id={id}">{name}</a> — права в этом чате\n\n',
         "not_an_admin": "<emoji document_id=5019523782004441717>❌</emoji> {user} не является админом.",
-        "no_rights": "<emoji document_id=5019523782004441717>❌</emoji> <b>У меня недостаточно прав :(</b>",
+        "no_rights": "<emoji document_id=5019523782004441717>❌</emoji> <b>У <a href=\"tg://user?id={user_id}\">{user}</a> недостаточно прав :(</b>",
         "no_user": "<emoji document_id=5019523782004441717>❌</emoji> <b>Пользователь не найден.</b>",
         "change_info": "Изменение информации",
         "delete_messages": "Удаление сообщений",
@@ -160,7 +173,12 @@ class ChatModuleMod(loader.Module):
         "chat_unmuted": "✅ <b>Чат снова открыт для участников.</b>",
         "title_changed": "<b>{type_of} успешно переименован с <code>{old_title}</code> на <code>{new_title}</code>.</b>",
         "channel_created": "<emoji document_id=6296367896398399651>✅</emoji> <b>Канал <code>{title}</code> создан.\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> Ссылка: {link}</b>",
-        "group_created": "<emoji document_id=6296367896398399651>✅</emoji> <b>Группа <code>{title}</code> создана.\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> Ссылка: {link}</b>"
+        "group_created": "<emoji document_id=6296367896398399651>✅</emoji> <b>Группа <code>{title}</code> создана.\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> Ссылка: {link}</b>",
+        "user_blocked": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> заблокирован.</b>",
+        "user_privacy_restricted": "<emoji document_id=5019523782004441717>❌</emoji> <b>Настройки конфиденциальности <a href=\"tg://user?id={user_id}\">{user}</a> ограничивают это действие.</b>",
+        "user_not_mutual_contact": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> не является взаимным контактом.</b>",
+        "user_kicked": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> кикнут из чата.</b>",
+        "user_invited": "<emoji document_id=6296367896398399651>✅</emoji> <b>Пользователь <a href='tg://user?id={id}'>{user}</a> приглашён в чат.</b>",
     }
 
     strings_jp = {
@@ -170,7 +188,7 @@ class ChatModuleMod(loader.Module):
         "user_not_participant": "<emoji document_id=5019523782004441717>❌</emoji> <b>このグループにユーザーはいません。</b>",
         "rights_header": '<b><a href="tg://user?id={id}">{name}</a>のこのチャットでの権限\n\n',
         "not_an_admin": "<emoji document_id=5019523782004441717>❌</emoji> {user} は管理者ではありません。",
-        "no_rights": "<emoji document_id=5019523782004441717>❌</emoji> <b>十分な権限がありません :(</b>",
+        "no_rights": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> の権限が十分ではありません :(</b>",
         "no_user": "<emoji document_id=5019523782004441717>❌</emoji> <b>ユーザーが見つかりません。</b>",
         "change_info": "Change Info",
         "delete_messages": "Delete Messages",
@@ -224,7 +242,12 @@ class ChatModuleMod(loader.Module):
         "chat_unmuted": "✅ <b>このチャットは再び開かれました。</b>",
         "title_changed": "<b>{type_of} のタイトルを <code>{old_title}</code> から <code>{new_title}</code> に変更しました。</b>",
         "channel_created": "<emoji document_id=6296367896398399651>✅</emoji> <b>チャンネル <code>{title}</code> が作成されました。\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> 招待リンク: {link}</b>",
-        "group_created": "<emoji document_id=6296367896398399651>✅</emoji> <b>グループ <code>{title}</code> が作成されました。\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> 招待リンク: {link}</b>"
+        "group_created": "<emoji document_id=6296367896398399651>✅</emoji> <b>グループ <code>{title}</code> が作成されました。\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> 招待リンク: {link}</b>",
+        "user_blocked": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> はブロックされています。</b>",
+        "user_privacy_restricted": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> のプライバシー設定により、このアクションが制限されています。</b>",
+        "user_not_mutual_contact": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> は相互連絡先ではありません。</b>",
+        "user_kicked": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> をキックしました。</b>",
+        "user_invited": "<emoji document_id=6296367896398399651>✅</emoji> <b>ユーザー <a href='tg://user?id={id}'>{user}</a> がチャットに招待されました。</b>",
     }
 
     @loader.command(ru_doc="[reply] - Узнать ID")
@@ -590,18 +613,25 @@ class ChatModuleMod(loader.Module):
             until_date = self.parse_time(duration_str)
             time_info = self.parse_time_info(duration_str)
 
-            await self._client.edit_permissions(chat, user, until_date=until_date, view_messages=False)
+            await self._client.edit_permissions(
+                chat, user, until_date=until_date, view_messages=False
+            )
 
             if reason:
                 return await utils.answer(
                     message,
                     self.strings("user_is_banned_with_reason").format(
-                        id=user.id, name=user.first_name, reason=reason, time_info=time_info[0],
+                        id=user.id,
+                        name=user.first_name,
+                        reason=reason,
+                        time_info=time_info[0],
                     ),
                 )
             return await utils.answer(
                 message,
-                self.strings("user_is_banned").format(id=user.id, name=user.first_name, time_info=time_info[0])
+                self.strings("user_is_banned").format(
+                    id=user.id, name=user.first_name, time_info=time_info[0]
+                ),
             )
 
         await self._client.edit_permissions(chat, user, view_messages=False)
@@ -610,12 +640,16 @@ class ChatModuleMod(loader.Module):
             return await utils.answer(
                 message,
                 self.strings("user_is_banned_with_reason_forever").format(
-                    id=user.id, name=user.first_name, reason=reason,
+                    id=user.id,
+                    name=user.first_name,
+                    reason=reason,
                 ),
             )
         return await utils.answer(
             message,
-            self.strings("user_is_banned_forever").format(id=user.id, name=user.first_name),
+            self.strings("user_is_banned_forever").format(
+                id=user.id, name=user.first_name
+            ),
         )
 
     @loader.command(ru_doc="Разбанить пользователя")
@@ -694,18 +728,25 @@ class ChatModuleMod(loader.Module):
             until_date = self.parse_time(duration_str)
             time_info = self.parse_time_info(duration_str)
 
-            await self._client.edit_permissions(chat, user, until_date=until_date, send_messages=False)
+            await self._client.edit_permissions(
+                chat, user, until_date=until_date, send_messages=False
+            )
 
             if reason:
                 return await utils.answer(
                     message,
                     self.strings("user_is_muted_with_reason").format(
-                        id=user.id, name=user.first_name, reason=reason, time_info=time_info[0],
+                        id=user.id,
+                        name=user.first_name,
+                        reason=reason,
+                        time_info=time_info[0],
                     ),
                 )
             return await utils.answer(
                 message,
-                self.strings("user_is_muted").format(id=user.id, name=user.first_name, time_info=time_info[0])
+                self.strings("user_is_muted").format(
+                    id=user.id, name=user.first_name, time_info=time_info[0]
+                ),
             )
 
         await self._client.edit_permissions(chat, user, send_messages=False)
@@ -714,12 +755,16 @@ class ChatModuleMod(loader.Module):
             return await utils.answer(
                 message,
                 self.strings("user_is_muted_with_reason_forever").format(
-                    id=user.id, name=user.first_name, reason=reason,
+                    id=user.id,
+                    name=user.first_name,
+                    reason=reason,
                 ),
             )
         return await utils.answer(
             message,
-            self.strings("user_is_muted_forever").format(id=user.id, name=user.first_name),
+            self.strings("user_is_muted_forever").format(
+                id=user.id, name=user.first_name
+            ),
         )
 
     @loader.command(ru_doc="Размутить участника")
@@ -754,10 +799,7 @@ class ChatModuleMod(loader.Module):
         await self._client(
             EditChatDefaultBannedRightsRequest(
                 chat,
-                ChatBannedRights(
-                    until_date=0,
-                    send_messages=not is_muted
-                ),
+                ChatBannedRights(until_date=0, send_messages=not is_muted),
             )
         )
         if is_muted:
@@ -795,22 +837,72 @@ class ChatModuleMod(loader.Module):
         args = utils.get_args(message)
         type_of = args[0]
         if type_of == "g":
-            result = await self._client(CreateChannelRequest(title=args[1], megagroup=True, about=""))
+            result = await self._client(
+                CreateChannelRequest(title=args[1], megagroup=True, about="")
+            )
             chat = result.chats[0]
-            invite_link = await self._client(ExportChatInviteRequest(peer=chat.id, title="Invite link"))
-            return await utils.answer(message, self.strings("group_created").format(link=invite_link.link, title=args[1]))
+            invite_link = await self._client(
+                ExportChatInviteRequest(peer=chat.id, title="Invite link")
+            )
+            return await utils.answer(
+                message,
+                self.strings("group_created").format(
+                    link=invite_link.link, title=args[1]
+                ),
+            )
         elif type_of == "c":
-            result = await self._client(CreateChannelRequest(title=args[1], broadcast=True, about=""))
+            result = await self._client(
+                CreateChannelRequest(title=args[1], broadcast=True, about="")
+            )
             chat = result.chats[0]
-            invite_link = await self._client(ExportChatInviteRequest(peer=chat.id, title="Invite link"))
-            return await utils.answer(message, self.strings("channel_created").format(link=invite_link.link, title=args[1]))
+            invite_link = await self._client(
+                ExportChatInviteRequest(peer=chat.id, title="Invite link")
+            )
+            return await utils.answer(
+                message,
+                self.strings("channel_created").format(
+                    link=invite_link.link, title=args[1]
+                ),
+            )
         else:
             return await utils.answer(message, self.strings("invalid_args"))
 
+    @loader.command(ru_doc="Пригласить пользователя в чат")
+    async def invite(self, message):
+        chat = await message.get_chat()
+        reply = await message.get_reply_message()
+        args = utils.get_args(message)
+        exceptions_map = {
+            ChatAdminRequiredError: "no_rights",
+            UserBlockedError: "user_blocked",
+            UserPrivacyRestrictedError: "user_privacy_restricted",
+            UserNotMutualContactError: "user_not_mutual_contact",
+        }
+        if reply:
+            user = await self._client.get_entity(reply.sender_id)
+            result = await self.invite_user(message, chat, user, exceptions_map)
+            if result:
+                return result
+        else:
+            for user in args:
+                entity = await self._client.get_entity(user)
+                result = await self.invite_user(message, chat, entity, exceptions_map)
+                if result:
+                    return result
+
+    async def invite_user(self, message, chat, user, exceptions_map):
+        try:
+            await self._client(InviteToChannelRequest(channel=chat, users=[user]))
+        except tuple(exceptions_map.keys()) as e:
+            return await utils.answer(message, self.strings(exceptions_map[type(e)]).format(user=user.first_name, user_id=user.id))
+        await utils.answer(message, self.strings("user_invited").format(user=user.first_name, id=user.id))
+        await asyncio.sleep(3)
+        return None
+
     def parse_time(self, time: str) -> timedelta:
         unit_to_days = {
-            "m": 1/1440,
-            "h": 1/24,
+            "m": 1 / 1440,
+            "h": 1 / 24,
             "d": 1,
             "w": 7,
             "mo": 30,
