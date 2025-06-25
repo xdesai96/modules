@@ -119,6 +119,8 @@ class ChatModuleMod(loader.Module):
     )
     async def rights(self, message):
         """[reply/username/id] - Check user's admin rights"""
+        if message.is_private:
+            return await utils.answer(message, self.strings("not_a_chat"))
         chat = await message.get_chat()
         reply = await message.get_reply_message()
         args = utils.get_args(message)
@@ -183,6 +185,8 @@ class ChatModuleMod(loader.Module):
     @loader.command(ru_doc="Покинуть чат")
     async def leave(self, message):
         """Leave chat"""
+        if message.is_private:
+            return await utils.answer(message, self.strings("not_a_chat"))
         await message.delete()
         await self._client(LeaveChannelRequest((await message.get_chat()).id))
 
@@ -492,7 +496,7 @@ class ChatModuleMod(loader.Module):
         if message.is_private:
             return await utils.answer(message, self.strings("not_a_chat"))
         reply = await message.get_reply_message()
-        user = None
+        user = Noneп
         if reply:
             user = await self._client.get_entity(reply.sender_id)
         else:
@@ -509,6 +513,8 @@ class ChatModuleMod(loader.Module):
     @loader.command(ru_doc="Кикнуть участника")
     async def kick(self, message):
         """Kick a participant"""
+        if message.is_private:
+            return await utils.answer(message, self.strings("not_a_chat"))
         reply = await message.get_reply_message()
         reason = ""
         user = None
@@ -541,8 +547,6 @@ class ChatModuleMod(loader.Module):
         """Mute a participant temporarily or permanently"""
         if message.is_private:
             return await utils.answer(message, self.strings("not_a_chat"))
-
-
         text = message.text.split("\n", 1)
         first_line = text[0]
         reason = text[1] if len(text) > 1 else ""
