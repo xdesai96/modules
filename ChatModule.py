@@ -500,23 +500,23 @@ class ChatModuleMod(loader.Module):
         for user in real_members:
             if not user.deleted:
                 admins_header += f'<emoji document_id=5316712579467321913>🔴</emoji> <a href="tg://user?id={user.id}">{user.first_name}</a> | <code>{user.id}</code>\n'
-            try:
-                await utils.answer(
-                    message,
-                    f"<blockquote expandable><b>{admins_header}</b></blockquote>",
-                )
-            except MessageTooLongError:
-                await utils.answer(message, self.strings("too_many_admins"))
-                with open("adminlist.md", "w+") as file:
-                    file.write(admins_header)
-                await message.client.send_file(
-                    message.chat_id,
-                    "adminlist.md",
-                    caption=self.strings("admins_in_chat_caption").format(title),
-                    reply_to=message.id,
-                )
-                os.remove("adminlist.md")
-                await message.delete()
+        try:
+            await utils.answer(
+                message,
+                f"<blockquote expandable><b>{admins_header}</b></blockquote>",
+            )
+        except MessageTooLongError:
+            await utils.answer(message, self.strings("too_many_admins"))
+            with open("adminlist.md", "w+") as file:
+                file.write(admins_header)
+            await message.client.send_file(
+                message.chat_id,
+                "adminlist.md",
+                caption=self.strings("admins_in_chat_caption").format(title),
+                reply_to=message.id,
+            )
+            os.remove("adminlist.md")
+            await message.delete()
 
     @loader.command(ru_doc="Показывает ботов в группе/канале", jp_doc="グループ・チャンネルのボットを表示する")
     async def bots(self, message):
@@ -534,22 +534,22 @@ class ChatModuleMod(loader.Module):
         for user in bots:
             if not user.deleted:
                 bots_header += f'<emoji document_id=5316712579467321913>🔴</emoji> <a href="tg://user?id={user.id}">{user.first_name}</a> | <code>{user.id}</code>\n'
-            try:
-                await utils.answer(
-                    message, f"<blockquote expandable><b>{bots_header}</b></blockquote>"
-                )
-            except MessageTooLongError:
-                await utils.answer(message, self.strings("too_many_bots"))
-                with open("botlist.md", "w+") as file:
-                    file.write(bots_header)
-                await message.client.send_file(
-                    message.chat_id,
-                    "adminlist.md",
-                    caption=self.strings("bots_in_chat_caption").format(title),
-                    reply_to=message.id,
-                )
-                os.remove("botlist.md")
-                await message.delete()
+        try:
+            await utils.answer(
+                message, f"<blockquote expandable><b>{bots_header}</b></blockquote>"
+            )
+        except MessageTooLongError:
+            await utils.answer(message, self.strings("too_many_bots"))
+            with open("botlist.md", "w+") as file:
+                file.write(bots_header)
+            await message.client.send_file(
+                message.chat_id,
+                "adminlist.md",
+                caption=self.strings("bots_in_chat_caption").format(title),
+                reply_to=message.id,
+            )
+            os.remove("botlist.md")
+            await message.delete()
 
     @loader.command(ru_doc="Показывает простых участников чата/канала", jp_doc="グループ・チャンネルのユーザーを表示する")
     async def users(self, message):
