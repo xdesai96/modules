@@ -597,9 +597,9 @@ class ChatModuleMod(loader.Module):
             return await utils.answer(message, self.strings("not_a_chat"))
 
         text = message.text.split("\n", 1)
-        first_line = text[0]
         reason = text[1] if len(text) > 1 else ""
         reply = await message.get_reply_message()
+        args = utils.get_args_raw(message)
         user = None
         if reply:
             user = await self._client.get_entity(reply.sender_id)
@@ -608,7 +608,7 @@ class ChatModuleMod(loader.Module):
         if not user:
             return await utils.answer(message, self.strings("invalid_args"))
 
-        time_match = re.search(r"(\d+)\s*(mo|y|w|d|h|m)", first_line)
+        time_match = re.search(r"(\d+)\s*(mo|y|w|d|h|m)", args)
         chat = await message.get_chat()
         if time_match:
             duration_str = time_match.group(0)
@@ -712,7 +712,7 @@ class ChatModuleMod(loader.Module):
         if message.is_private:
             return await utils.answer(message, self.strings("not_a_chat"))
         text = message.text.split("\n", 1)
-        first_line = text[0]
+        args = utils.get_args_raw(message)
         reason = text[1] if len(text) > 1 else ""
         reply = await message.get_reply_message()
         user = None
@@ -723,7 +723,7 @@ class ChatModuleMod(loader.Module):
         if not user:
             return await utils.answer(message, self.strings("invalid_args"))
 
-        time_match = re.search(r"(\d+)\s*(mo|y|w|d|h|m)", first_line)
+        time_match = re.search(r"(\d+)\s*(mo|y|w|d|h|m)", args)
         chat = await message.get_chat()
         if time_match:
             duration_str = time_match.group(0)
