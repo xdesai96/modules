@@ -840,7 +840,7 @@ class ChatModuleMod(loader.Module):
         type_of = args[0]
         if type_of == "g":
             result = await self._client(
-                CreateChannelRequest(title=args[1], megagroup=True, about="")
+                CreateChannelRequest(title=" ".join(args[1:]), megagroup=True, about="")
             )
             chat = result.chats[0]
             invite_link = await self._client(
@@ -849,12 +849,12 @@ class ChatModuleMod(loader.Module):
             return await utils.answer(
                 message,
                 self.strings("group_created").format(
-                    link=invite_link.link, title=args[1]
+                    link=invite_link.link, title=" ".join(args[1:])
                 ),
             )
         elif type_of == "c":
             result = await self._client(
-                CreateChannelRequest(title=args[1], broadcast=True, about="")
+                CreateChannelRequest(title=" ".join(args[1:]), broadcast=True, about="")
             )
             chat = result.chats[0]
             invite_link = await self._client(
@@ -863,7 +863,7 @@ class ChatModuleMod(loader.Module):
             return await utils.answer(
                 message,
                 self.strings("channel_created").format(
-                    link=invite_link.link, title=args[1]
+                    link=invite_link.link, title=" ".join(args[1:])
                 ),
             )
         else:
