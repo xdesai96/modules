@@ -884,12 +884,14 @@ class ChatModuleMod(loader.Module):
             result = await self.invite_user(message, chat, user, exceptions_map)
             if result:
                 return result
-        else:
+        elif args:
             for user in args:
                 entity = await self._client.get_entity(user)
                 result = await self.invite_user(message, chat, entity, exceptions_map)
                 if result:
                     return result
+        else:
+            return await utils.answer(message, self.strings("no_user"))
 
     async def invite_user(self, message, chat, user, exceptions_map):
         try:
