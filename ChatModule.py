@@ -869,6 +869,7 @@ class ChatModuleMod(loader.Module):
 
     @loader.command(ru_doc="Пригласить пользователя в чат")
     async def invite(self, message):
+        """Пригласить пользователя в чат"""
         chat = await message.get_chat()
         reply = await message.get_reply_message()
         args = utils.get_args(message)
