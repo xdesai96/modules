@@ -693,7 +693,7 @@ class ChatModuleMod(loader.Module):
         if message.is_private:
             return await utils.answer(message, self.strings("not_a_chat"))
         reply = await message.get_reply_message()
-        user = Noneп
+        user = None
         if reply:
             user = await self._client.get_entity(reply.sender_id)
         else:
