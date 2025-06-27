@@ -674,7 +674,7 @@ class ChatModuleMod(loader.Module):
         if reason:
             return await utils.answer(
                 message,
-                self.strings("user_is_banned_with_reason_forever").format(
+                self.strings("user_is_banned_forever_with_reason").format(
                     id=user.id,
                     name=user.first_name,
                     reason=reason,
