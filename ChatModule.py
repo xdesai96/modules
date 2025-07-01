@@ -5,41 +5,10 @@ import os
 import asyncio
 import re
 from .. import loader, utils
-from telethon.tl.functions.channels import (
-    GetParticipantRequest,
-    GetParticipantsRequest,
-    LeaveChannelRequest,
-    DeleteChannelRequest,
-    EditTitleRequest,
-    CreateChannelRequest,
-    InviteToChannelRequest,
-)
-from telethon.errors import (
-    UserNotParticipantError,
-    UserIdInvalidError,
-    MessageTooLongError,
-    BotsTooMuchError,
-    ChatAdminRequiredError,
-    UsersTooMuchError,
-    UserBlockedError,
-    UserPrivacyRestrictedError,
-    UserNotMutualContactError,
-    UserKickedError,
-)
-from telethon.tl.types import (
-    Channel,
-    Chat,
-    ChannelParticipantsAdmins,
-    ChannelParticipantCreator,
-    ChannelParticipantsBots,
-    ChatBannedRights,
-)
-from telethon.tl.functions.messages import (
-    DeleteChatRequest,
-    EditChatDefaultBannedRightsRequest,
-    EditChatTitleRequest,
-    ExportChatInviteRequest,
-)
+from telethon.tl.functions import channels
+from telethon import errors
+from telethon.tl import types
+from telethon.tl.functions import messages
 
 
 @loader.tds
@@ -52,7 +21,7 @@ class ChatModuleMod(loader.Module):
         "user_not_participant": "<emoji document_id=5019523782004441717>❌</emoji> <b>User is not in this group.</b>",
         "rights_header": '<b><a href="tg://user?id={id}">{name}</a>\'s rights in this chat\n\n',
         "not_an_admin": "<emoji document_id=5019523782004441717>❌</emoji> {user} is not an admin.",
-        "no_rights": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> doesn't have enough rights :(</b>",
+        "no_rights": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> doesn\'t have enough rights :(</b>',
         "no_user": "<emoji document_id=5019523782004441717>❌</emoji> <b>User not found.</b>",
         "change_info": "Change Info",
         "delete_messages": "Delete Messages",
@@ -107,10 +76,10 @@ class ChatModuleMod(loader.Module):
         "title_changed": "<b>The {type_of} title was successfully changed from <code>{old_title}</code> to <code>{new_title}</code>.</b>",
         "channel_created": "<emoji document_id=6296367896398399651>✅</emoji> <b>The channel <code>{title}</code> is created.\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> Invite link: {link}</b>",
         "group_created": "<emoji document_id=6296367896398399651>✅</emoji> <b>The group <code>{title}</code> is created.\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> Invite link: {link}</b>",
-        "user_blocked": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> is blocked.</b>",
-        "user_privacy_restricted": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a>'s privacy settings restrict this action.</b>",
-        "user_not_mutual_contact": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> is not a mutual contact.</b>",
-        "user_kicked": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> is kicked from the chat.</b>",
+        "user_blocked": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> is blocked.</b>',
+        "user_privacy_restricted": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a>\'s privacy settings restrict this action.</b>',
+        "user_not_mutual_contact": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> is not a mutual contact.</b>',
+        "user_kicked": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> is kicked from the chat.</b>',
         "user_invited": "<emoji document_id=6296367896398399651>✅</emoji> <b>User <a href='tg://user?id={id}'>{user}</a> is invited to the chat.</b>",
         "creator": "<emoji document_id=5433758796289685818>👑</emoji> <b>The creator is <a href='tg://user?id={id}'>{creator}</a>.</b>",
         "no_creator": "<emoji document_id=5019523782004441717>❌</emoji> <b>No creator found.</b>",
@@ -123,7 +92,7 @@ class ChatModuleMod(loader.Module):
         "user_not_participant": "<emoji document_id=5019523782004441717>❌</emoji> <b>Пользователь не состоит в этой группе.</b>",
         "rights_header": '<b><a href="tg://user?id={id}">{name}</a> — права в этом чате\n\n',
         "not_an_admin": "<emoji document_id=5019523782004441717>❌</emoji> {user} не является админом.",
-        "no_rights": "<emoji document_id=5019523782004441717>❌</emoji> <b>У <a href=\"tg://user?id={user_id}\">{user}</a> недостаточно прав :(</b>",
+        "no_rights": '<emoji document_id=5019523782004441717>❌</emoji> <b>У <a href="tg://user?id={user_id}">{user}</a> недостаточно прав :(</b>',
         "no_user": "<emoji document_id=5019523782004441717>❌</emoji> <b>Пользователь не найден.</b>",
         "change_info": "Изменение информации",
         "delete_messages": "Удаление сообщений",
@@ -178,10 +147,10 @@ class ChatModuleMod(loader.Module):
         "title_changed": "<b>{type_of} успешно переименован с <code>{old_title}</code> на <code>{new_title}</code>.</b>",
         "channel_created": "<emoji document_id=6296367896398399651>✅</emoji> <b>Канал <code>{title}</code> создан.\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> Ссылка: {link}</b>",
         "group_created": "<emoji document_id=6296367896398399651>✅</emoji> <b>Группа <code>{title}</code> создана.\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> Ссылка: {link}</b>",
-        "user_blocked": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> заблокирован.</b>",
-        "user_privacy_restricted": "<emoji document_id=5019523782004441717>❌</emoji> <b>Настройки конфиденциальности <a href=\"tg://user?id={user_id}\">{user}</a> ограничивают это действие.</b>",
-        "user_not_mutual_contact": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> не является взаимным контактом.</b>",
-        "user_kicked": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> кикнут из чата.</b>",
+        "user_blocked": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> заблокирован.</b>',
+        "user_privacy_restricted": '<emoji document_id=5019523782004441717>❌</emoji> <b>Настройки конфиденциальности <a href="tg://user?id={user_id}">{user}</a> ограничивают это действие.</b>',
+        "user_not_mutual_contact": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> не является взаимным контактом.</b>',
+        "user_kicked": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> кикнут из чата.</b>',
         "user_invited": "<emoji document_id=6296367896398399651>✅</emoji> <b>Пользователь <a href='tg://user?id={id}'>{user}</a> приглашён в чат.</b>",
         "creator": "<emoji document_id=5433758796289685818>👑</emoji> <b>Создатель: <a href='tg://user?id={id}'>{creator}</a>.</b>",
         "no_creator": "<emoji document_id=5019523782004441717>❌</emoji> <b>Создатель не найден.</b>",
@@ -194,7 +163,7 @@ class ChatModuleMod(loader.Module):
         "user_not_participant": "<emoji document_id=5019523782004441717>❌</emoji> <b>このグループにユーザーはいません。</b>",
         "rights_header": '<b><a href="tg://user?id={id}">{name}</a>のこのチャットでの権限\n\n',
         "not_an_admin": "<emoji document_id=5019523782004441717>❌</emoji> {user} は管理者ではありません。",
-        "no_rights": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> の権限が十分ではありません :(</b>",
+        "no_rights": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> の権限が十分ではありません :(</b>',
         "no_user": "<emoji document_id=5019523782004441717>❌</emoji> <b>ユーザーが見つかりません。</b>",
         "change_info": "Change Info",
         "delete_messages": "Delete Messages",
@@ -249,10 +218,10 @@ class ChatModuleMod(loader.Module):
         "title_changed": "<b>{type_of} のタイトルを <code>{old_title}</code> から <code>{new_title}</code> に変更しました。</b>",
         "channel_created": "<emoji document_id=6296367896398399651>✅</emoji> <b>チャンネル <code>{title}</code> が作成されました。\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> 招待リンク: {link}</b>",
         "group_created": "<emoji document_id=6296367896398399651>✅</emoji> <b>グループ <code>{title}</code> が作成されました。\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> 招待リンク: {link}</b>",
-        "user_blocked": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> はブロックされています。</b>",
-        "user_privacy_restricted": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> のプライバシー設定により、このアクションが制限されています。</b>",
-        "user_not_mutual_contact": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> は相互連絡先ではありません。</b>",
-        "user_kicked": "<emoji document_id=5019523782004441717>❌</emoji> <b><a href=\"tg://user?id={user_id}\">{user}</a> をキックしました。</b>",
+        "user_blocked": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> はブロックされています。</b>',
+        "user_privacy_restricted": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> のプライバシー設定により、このアクションが制限されています。</b>',
+        "user_not_mutual_contact": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> は相互連絡先ではありません。</b>',
+        "user_kicked": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> をキックしました。</b>',
         "user_invited": "<emoji document_id=6296367896398399651>✅</emoji> <b>ユーザー <a href='tg://user?id={id}'>{user}</a> がチャットに招待されました。</b>",
         "creator": "<emoji document_id=5433758796289685818>👑</emoji> <b>クリエイター: <a href='tg://user?id={id}'>{creator}</a>.</b>",
         "no_creator": "<emoji document_id=5019523782004441717>❌</emoji> <b>クリエイターが見つかりません。</b>",
@@ -305,21 +274,21 @@ class ChatModuleMod(loader.Module):
                 participant_id = reply.sender_id
             else:
                 if args:
-                    participant_id = (
-                        args[0] if not args[0].strip().isdigit() else int(args[0])
-                    )
+                    participant_id = await utils.get_target(message)
                 else:
                     return await utils.answer(message, self.strings("no_user"))
             try:
                 result = await self._client(
-                    GetParticipantRequest(channel=chat, participant=participant_id)
+                    channels.GetParticipantRequest(
+                        channel=chat, participant=participant_id
+                    )
                 )
-            except UserNotParticipantError:
+            except errors.UserNotParticipantError:
                 return await utils.answer(
                     message,
                     self.strings("user_not_participant").format(user=participant_id),
                 )
-            except (UserIdInvalidError, ValueError):
+            except (errors.UserIdInvalidError, ValueError):
                 return await utils.answer(
                     message, self.strings("no_user").format(user=participant_id)
                 )
@@ -348,9 +317,12 @@ class ChatModuleMod(loader.Module):
         if message.is_private:
             return await utils.answer(message, self.strings("not_a_chat"))
         await message.delete()
-        await self._client(LeaveChannelRequest((await message.get_chat()).id))
+        await self._client(channels.LeaveChannelRequest((await message.get_chat()).id))
 
-    @loader.command(ru_doc="[a[1-100] b[1-100]] | [reply] Удалить сообщения", jp_doc="[a[1-100] b[1-100]] | [reply] メッセージを削除する")
+    @loader.command(
+        ru_doc="[a[1-100] b[1-100]] | [reply] Удалить сообщения",
+        jp_doc="[a[1-100] b[1-100]] | [reply] メッセージを削除する",
+    )
     async def d(self, message):
         """[a[1-100] b[1-100]] | [reply] - Delete messages"""
         args = utils.get_args(message)
@@ -421,7 +393,10 @@ class ChatModuleMod(loader.Module):
         else:
             await utils.answer(message, self.strings("no_ownerships", message))
 
-    @loader.command(ru_doc="[link/id] Удаляет группу/канал", jp_doc="[link/id] グループ・チャンネルを削除する")
+    @loader.command(
+        ru_doc="[link/id] Удаляет группу/канал",
+        jp_doc="[link/id] グループ・チャンネルを削除する",
+    )
     async def dgc(self, message):
         """[link/id] Delete chat/channel"""
         args = utils.get_args(message)
@@ -431,10 +406,10 @@ class ChatModuleMod(loader.Module):
             chat = await self._client.get_entity(message.chat_id)
             if message.is_channel:
                 chat_type = self.strings("of_channel")
-                await self._client(DeleteChannelRequest(chat.id))
+                await self._client(channels.DeleteChannelRequest(chat.id))
             else:
                 chat_type = self.strings("of_chat")
-                await self._client(DeleteChatRequest(chat.id))
+                await self._client(messages.DeleteChatRequest(chat.id))
             return
         else:
             link = (
@@ -442,19 +417,22 @@ class ChatModuleMod(loader.Module):
                 if args[0].isdigit()
                 else await self._client.get_entity(args[0])
             )
-            if isinstance(link, Channel):
+            if isinstance(link, types.Channel):
                 chat_type = self.strings("of_channel")
-                await self._client(DeleteChannelRequest(link.id))
-            elif isinstance(link, Chat):
+                await self._client(channels.DeleteChannelRequest(link.id))
+            elif isinstance(link, types.Chat):
                 chat_type = self.strings("of_chat")
-                await self._client(DeleteChatRequest(link.id))
+                await self._client(messages.DeleteChatRequest(link.id))
             else:
                 return await utils.answer(message, self.strings("invalid_args"))
         return await utils.answer(
             message, self.strings("successful_delete").format(chat_type=chat_type)
         )
 
-    @loader.command(ru_doc="Очищает группу/канал от удаленных аккаунтов", jp_doc="グループ・チャンネルから削除されたアカウントを削除する")
+    @loader.command(
+        ru_doc="Очищает группу/канал от удаленных аккаунтов",
+        jp_doc="グループ・チャンネルから削除されたアカウントを削除する",
+    )
     async def flush(self, message):
         """Removes deleted accounts from the chat/channel"""
         if message.is_private:
@@ -472,7 +450,7 @@ class ChatModuleMod(loader.Module):
                 try:
                     await self._client.kick_participant(chat, user)
                     removed_count += 1
-                except ChatAdminRequiredError:
+                except errors.ChatAdminRequiredError:
                     return await utils.answer(message, self.strings("no_rights"))
                 except Exception as e:
                     return await utils.answer(
@@ -487,21 +465,26 @@ class ChatModuleMod(loader.Module):
                 self.strings("kicked_deleted_accounts").format(count=removed_count),
             )
 
-    @loader.command(ru_doc="Показывает создателя группы/канала", jp_doc="グループ・チャンネルの管理者を表示する")
+    @loader.command(
+        ru_doc="Показывает создателя группы/канала",
+        jp_doc="グループ・チャンネルの管理者を表示する",
+    )
     async def creator(self, message):
         """Shows the creator of the chat/channel"""
         if message.is_private:
             return await utils.answer(message, self.strings("not_a_chat"))
-        participants = await self._client(GetParticipantsRequest(
-            channel=await message.get_chat(),
-            filter=ChannelParticipantsAdmins(),
-            offset=0,
-            limit=20,
-            hash=0,
-        ))
+        participants = await self._client(
+            channels.GetParticipantsRequest(
+                channel=await message.get_chat(),
+                filter=types.ChannelParticipantsAdmins(),
+                offset=0,
+                limit=20,
+                hash=0,
+            )
+        )
         creator = None
         for participant in participants.participants:
-            if isinstance(participant, ChannelParticipantCreator):
+            if isinstance(participant, types.ChannelParticipantCreator):
                 creator = participant
                 break
         if not creator:
@@ -512,7 +495,10 @@ class ChatModuleMod(loader.Module):
             self.strings("creator").format(id=creator.id, creator=creator.first_name),
         )
 
-    @loader.command(ru_doc="Показывает админов в группе/канале", jp_doc="グループ・チャンネルの管理者を表示する")
+    @loader.command(
+        ru_doc="Показывает админов в группе/канале",
+        jp_doc="グループ・チャンネルの管理者を表示する",
+    )
     async def admins(self, message):
         """Shows the admins in the chat/channel"""
         if message.is_private:
@@ -538,7 +524,7 @@ class ChatModuleMod(loader.Module):
                 message,
                 f"<blockquote expandable><b>{admins_header}</b></blockquote>",
             )
-        except MessageTooLongError:
+        except errors.MessageTooLongError:
             await utils.answer(message, self.strings("too_many_admins"))
             with open("adminlist.md", "w+") as file:
                 file.write(admins_header)
@@ -551,7 +537,10 @@ class ChatModuleMod(loader.Module):
             os.remove("adminlist.md")
             await message.delete()
 
-    @loader.command(ru_doc="Показывает ботов в группе/канале", jp_doc="グループ・チャンネルのボットを表示する")
+    @loader.command(
+        ru_doc="Показывает ботов в группе/канале",
+        jp_doc="グループ・チャンネルのボットを表示する",
+    )
     async def bots(self, message):
         """Shows the bots in the chat/channel"""
         if message.is_private:
@@ -559,7 +548,7 @@ class ChatModuleMod(loader.Module):
         chat = await message.get_chat()
         title = chat.title
         bots = await self._client.get_participants(
-            message.chat_id, filter=ChannelParticipantsBots()
+            message.chat_id, filter=types.ChannelParticipantsBots()
         )
         bots_header = self.strings("bots_in_chat").format(title=title, count=len(bots))
         if len(bots) == 0:
@@ -571,7 +560,7 @@ class ChatModuleMod(loader.Module):
             await utils.answer(
                 message, f"<blockquote expandable><b>{bots_header}</b></blockquote>"
             )
-        except MessageTooLongError:
+        except errors.MessageTooLongError:
             await utils.answer(message, self.strings("too_many_bots"))
             with open("botlist.md", "w+") as file:
                 file.write(bots_header)
@@ -584,7 +573,10 @@ class ChatModuleMod(loader.Module):
             os.remove("botlist.md")
             await message.delete()
 
-    @loader.command(ru_doc="Показывает простых участников чата/канала", jp_doc="グループ・チャンネルのユーザーを表示する")
+    @loader.command(
+        ru_doc="Показывает простых участников чата/канала",
+        jp_doc="グループ・チャンネルのユーザーを表示する",
+    )
     async def users(self, message):
         """Shows the users in the chat/channel"""
         if message.is_private:
@@ -608,7 +600,7 @@ class ChatModuleMod(loader.Module):
                 message, f"<blockquote expandable><b>{users_header}</b></blockquote>"
             )
             return
-        except MessageTooLongError:
+        except errors.MessageTooLongError:
             await utils.answer(message, self.strings("large_chat_loading"))
             file = open("userslist.md", "w+")
             file.write(users_header)
@@ -623,7 +615,9 @@ class ChatModuleMod(loader.Module):
             await message.delete()
             return
 
-    @loader.command(ru_doc="Забанить участника", jp_doc="ユーザーを一時的または永久に禁止する")
+    @loader.command(
+        ru_doc="Забанить участника", jp_doc="ユーザーを一時的または永久に禁止する"
+    )
     async def ban(self, message):
         """Ban a participant temporarily or permanently"""
         if message.is_private:
@@ -739,7 +733,9 @@ class ChatModuleMod(loader.Module):
             )
         )
 
-    @loader.command(ru_doc="Замутить участника", jp_doc="ユーザーを一時的または永久にミュートする")
+    @loader.command(
+        ru_doc="Замутить участника", jp_doc="ユーザーを一時的または永久にミュートする"
+    )
     async def mute(self, message):
         """Mute a participant temporarily or permanently"""
         if message.is_private:
@@ -823,7 +819,10 @@ class ChatModuleMod(loader.Module):
             self.strings("user_is_unmuted").format(id=user.id, name=user.first_name),
         )
 
-    @loader.command(ru_doc="Закрыть чат для всех кроме админов", jp_doc="チャットを管理者以外のユーザーに限定して閉じる")
+    @loader.command(
+        ru_doc="Закрыть чат для всех кроме админов",
+        jp_doc="チャットを管理者以外のユーザーに限定して閉じる",
+    )
     async def mc(self, message):
         """Mute the chat for everyone except admins"""
         if message.is_private:
@@ -832,9 +831,9 @@ class ChatModuleMod(loader.Module):
         current = chat.default_banned_rights
         is_muted = current.send_messages is True
         await self._client(
-            EditChatDefaultBannedRightsRequest(
+            messages.EditChatDefaultBannedRightsRequest(
                 chat,
-                ChatBannedRights(until_date=0, send_messages=not is_muted),
+                types.ChatBannedRights(until_date=0, send_messages=not is_muted),
             )
         )
         if is_muted:
@@ -842,7 +841,10 @@ class ChatModuleMod(loader.Module):
         else:
             return await utils.answer(message, self.strings("chat_muted"))
 
-    @loader.command(ru_doc="Переименовать группу/канал", jp_doc="グループ・チャンネルの名前を変更する")
+    @loader.command(
+        ru_doc="Переименовать группу/канал",
+        jp_doc="グループ・チャンネルの名前を変更する",
+    )
     async def rename(self, message):
         """Rename the chat/channel"""
         if message.is_private:
@@ -855,10 +857,12 @@ class ChatModuleMod(loader.Module):
                 type_of = self.strings("of_chat")
             else:
                 type_of = self.strings("of_channel")
-            await self._client(EditTitleRequest(channel=chat, title=new_title))
+            await self._client(channels.EditTitleRequest(channel=chat, title=new_title))
         else:
             type_of = self.strings("of_chat")
-            await self._client(EditChatTitleRequest(chat_id=chat.id, title=new_title))
+            await self._client(
+                messages.EditChatTitleRequest(chat_id=chat.id, title=new_title)
+            )
         return await utils.answer(
             message,
             self.strings("title_changed").format(
@@ -866,18 +870,23 @@ class ChatModuleMod(loader.Module):
             ),
         )
 
-    @loader.command(ru_doc="[g/c] [title] - Создать группу/канал", jp_doc="[g/c] [title] - グループ・チャンネルを作成する")
+    @loader.command(
+        ru_doc="[g/c] [title] - Создать группу/канал",
+        jp_doc="[g/c] [title] - グループ・チャンネルを作成する",
+    )
     async def create(self, message):
         """[g/c] [title] - Create group/channel"""
         args = utils.get_args(message)
         type_of = args[0]
         if type_of == "g":
             result = await self._client(
-                CreateChannelRequest(title=" ".join(args[1:]), megagroup=True, about="")
+                channels.CreateChannelRequest(
+                    title=" ".join(args[1:]), megagroup=True, about=""
+                )
             )
             chat = result.chats[0]
             invite_link = await self._client(
-                ExportChatInviteRequest(peer=chat.id, title="Invite link")
+                messages.ExportChatInviteRequest(peer=chat.id, title="Invite link")
             )
             return await utils.answer(
                 message,
@@ -887,11 +896,13 @@ class ChatModuleMod(loader.Module):
             )
         elif type_of == "c":
             result = await self._client(
-                CreateChannelRequest(title=" ".join(args[1:]), broadcast=True, about="")
+                channels.CreateChannelRequest(
+                    title=" ".join(args[1:]), broadcast=True, about=""
+                )
             )
             chat = result.chats[0]
             invite_link = await self._client(
-                ExportChatInviteRequest(peer=chat.id, title="Invite link")
+                messages.ExportChatInviteRequest(peer=chat.id, title="Invite link")
             )
             return await utils.answer(
                 message,
@@ -902,17 +913,19 @@ class ChatModuleMod(loader.Module):
         else:
             return await utils.answer(message, self.strings("invalid_args"))
 
-    @loader.command(ru_doc="Пригласить пользователя в чат", jp_doc="ユーザーをチャットに招待する")
+    @loader.command(
+        ru_doc="Пригласить пользователя в чат", jp_doc="ユーザーをチャットに招待する"
+    )
     async def invite(self, message):
         """Invite a user to the chat"""
         chat = await message.get_chat()
         reply = await message.get_reply_message()
         args = utils.get_args(message)
         exceptions_map = {
-            ChatAdminRequiredError: "no_rights",
-            UserBlockedError: "user_blocked",
-            UserPrivacyRestrictedError: "user_privacy_restricted",
-            UserNotMutualContactError: "user_not_mutual_contact",
+            errors.ChatAdminRequiredError: "no_rights",
+            errors.UserBlockedError: "user_blocked",
+            errors.UserPrivacyRestrictedError: "user_privacy_restricted",
+            errors.UserNotMutualContactError: "user_not_mutual_contact",
         }
         if reply:
             user = await self._client.get_entity(reply.sender_id)
@@ -928,12 +941,108 @@ class ChatModuleMod(loader.Module):
         else:
             return await utils.answer(message, self.strings("no_user"))
 
+    @loader.command(
+        ru_doc="Выдать полные права", jp_doc="完全な権限を持つ参加者を昇格させる"
+    )
+    async def fullrights(self, message):
+        """Promote a participant with full rights"""
+        chat = await message.get_chat()
+        reply = await message.get_reply_message()
+        args = utils.get_args(message)
+        if reply and args:
+            user = await self._client.get_entity(reply.sender_id)
+            rank = " ".join(args)
+        elif reply:
+            user = await self._client.get_entity(reply.sender_id)
+            rank = "admin" if not user.bot else "bot"
+        elif args:
+            user = await self._client.get_entity(await utils.get_target(message))
+            if len(args) >= 2:
+                rank = " ".join(args[1:])
+            else:
+                rank = "admin" if not user.bot else "bot"
+        else:
+            return await utils.answer(message, self.strings("no_user"))
+        try:
+            await self._client(
+                channels.EditAdminRequest(
+                    channel=chat,
+                    user_id=user.id,
+                    admin_rights=types.ChatAdminRights(
+                        other=True,
+                        change_info=True,
+                        post_messages=True if chat.broadcast else None,
+                        edit_messages=True if chat.broadcast else None,
+                        delete_messages=True,
+                        ban_users=True,
+                        invite_users=True,
+                        add_admins=True,
+                        anonymous=None,
+                        pin_messages=True if not chat.broadcast else None,
+                        manage_call=True if not chat.broadcast else None,
+                        manage_topics=True if not chat.broadcast else None,
+                    ),
+                    rank=rank,
+                )
+            )
+            return await utils.answer(message, "done")
+        except Exception as e:
+            return await utils.answer(message, self.strings("error").format(error=e))
+
+    @loader.command(ru_doc="Снять с админки", jp_doc="参加者の降格")
+    async def demote(self, message):
+        """Demote a participant"""
+        chat = await message.get_chat()
+        reply = await message.get_reply_message()
+        args = utils.get_args(message)
+        if reply:
+            user = await self._client.get_entity(reply.sender_id)
+        elif args:
+            user = await self._client.get_entity(await utils.get_target(message))
+        else:
+            return await utils.answer(message, self.strings("no_user"))
+        try:
+            await self._client(
+                channels.EditAdminRequest(
+                    channel=chat,
+                    user_id=user.id,
+                    admin_rights=types.ChatAdminRights(
+                        other=False,
+                        change_info=None,
+                        post_messages=None,
+                        edit_messages=None,
+                        delete_messages=None,
+                        ban_users=None,
+                        invite_users=None,
+                        pin_messages=None,
+                        add_admins=None,
+                        anonymous=None,
+                        manage_call=None,
+                        manage_topics=None,
+                    ),
+                    rank="",
+                )
+            )
+            return await utils.answer(message, "done")
+        except Exception as e:
+            return await utils.answer(message, self.strings("error").format(error=e))
+
     async def invite_user(self, message, chat, user, exceptions_map):
         try:
-            await self._client(InviteToChannelRequest(channel=chat, users=[user]))
+            await self._client(
+                channels.InviteToChannelRequest(channel=chat, users=[user])
+            )
         except tuple(exceptions_map.keys()) as e:
-            return await utils.answer(message, self.strings(exceptions_map[type(e)]).format(user=user.first_name, user_id=user.id))
-        await utils.answer(message, self.strings("user_invited").format(user=user.first_name, id=user.id))
+            return await utils.answer(
+                message,
+                self.strings(exceptions_map[type(e)]).format(
+                    user=user.first_name, user_id=user.id
+                ),
+            )
+        await utils.answer(
+            message,
+            self.strings("user_invited").format(user=user.first_name, id=user.id),
+        )
         await asyncio.sleep(3)
         return None
 
