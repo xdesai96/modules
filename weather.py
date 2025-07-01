@@ -44,16 +44,12 @@ class Weather(loader.Module):
         "invalid_args": "<emoji document_id=5019523782004441717>❌</emoji> <b>Specify the city.</b>",
     }
 
-    async def client_ready(self, db, client):
-        self.db = db
-        self._client = client
-
     @loader.command(
-        ru_doc="Посмотрите погоду в указанном городе.",
-        en_doc="Check the weather in the specified city.",
+        ru_doc="Посмотреть погоду в указанном городе",
+        jp_doc="指定された都市の天気を確認してください",
     )
     async def weather(self, message):
-        """Check the weather in the specified city."""
+        """Check the weather in the specified city"""
         args = utils.get_args_raw(message).split()
         if len(args) < 1:
             await utils.answer(message, self.strings("invalid_args", message))
