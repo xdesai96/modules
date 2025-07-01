@@ -1,7 +1,4 @@
-id
 ChatModule
-CheckAdminRights
-chatmembers
 weather
 ToDo
 URLModule
@@ -14,12 +11,7 @@ react
 SecretM
 stats
 rbs
-MentionNotifier
 PfpRepeater
-ascii
-tts
-irisfarm
 bfg
 encmod
-memberslist
 aliasmanager
