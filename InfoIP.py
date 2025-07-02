@@ -25,13 +25,9 @@ class InfoIPMod(loader.Module):
         "data": "<blockquote><emoji document_id=5447410659077661506>🌐</emoji><b> IP情報</b></blockquote>\n<blockquote><emoji document_id=6334617384782923882>📟</emoji><b> IP: <code>{ip}</code></b></blockquote>\n<blockquote><emoji document_id=5235794253149394263>🗺</emoji><b> 国: {country}</b></blockquote>\n<blockquote><emoji document_id=5247209275494769660>🕓</emoji><b> タイムゾーン: {timezone}</b></blockquote>\n<blockquote><emoji document_id=5330371855368866588>🌇</emoji><b> 市: {city}</b></blockquote>\n<blockquote><emoji document_id=5308028293033764449>⚡️</emoji><b> 地域: {region}</b></blockquote>\n<blockquote><emoji document_id=5391032818111363540>📍</emoji><b> 座標: <code>{coordinates}</code></b></blockquote><blockquote><emoji document_id=5447410659077661506>🌐</emoji> <b>プロバイダー: {provider}</b></blockquote>",
     }
 
-    async def client_ready(self, client, db):
-        self.client = client
-        self.db = db
-
-    @loader.command(ru_doc="<ip> | Информация об IP")
+    @loader.command(ru_doc="<ip> | Информация об IP", jp_doc="IPに関する情報")
     async def ipi(self, message):
-        """<ip> | Information about IP."""
+        """<ip> | Information about IP"""
         args = utils.get_args_raw(message)
         if not args:
             return await utils.answer(message, self.strings("invalid_ip"))
