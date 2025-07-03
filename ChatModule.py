@@ -512,7 +512,7 @@ class ChatModuleMod(loader.Module):
         chat = await message.get_chat()
         title = chat.title
         admins = await self._client.get_participants(
-            message.chat_id, filter=ChannelParticipantsAdmins()
+            message.chat_id, filter=types.ChannelParticipantsAdmins()
         )
         real_members = [
             member for member in admins if not member.bot and not member.deleted
