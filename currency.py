@@ -7,33 +7,7 @@ import logging
 logger = logging.getLogger("CurrencyMod")
 
 
-class Currency:
-    api_endpoints = [
-        "https://open.er-api.com/v6/latest/{}",
-    ]
-
-    async def fetch_rates(self, session, base_currency):
-        for url in self.api_endpoints:
-            try:
-                async with session.get(
-                    url.format(base_currency.upper()), timeout=10
-                ) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        if "rates" in data and data["rates"]:
-                            return data["rates"]
-                        else:
-                            logger.error("No rates in response")
-                            return None
-                    else:
-                        logger.error(f"HTTP {response.status}")
-                        return None
-            except Exception as e:
-                logger.error(f"API error ({url.format(base_currency.upper())}): {e}")
-                return None
-
-
-class CurrencyMod(loader.Module, Currency):
+class Currency(loader.Module):
     strings = {
         "name": "Currency",
         "rate": "<b>Rates for {amount} {currency}:\n<blockquote expandable>{rates}</blockquote></b>",
@@ -56,12 +30,16 @@ class CurrencyMod(loader.Module, Currency):
         "invalid_args": "<emoji document_id=5017058788604117831>❌</emoji> <b>無効な引数です</b>",
     }
 
+    api_endpoints = [
+        "https://open.er-api.com/v6/latest/{}",
+    ]
+
     def __init__(self):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "currency",
                 ["PLN", "AZN", "USD", "EUR", "RUB", "UAH"],
-                "List of currencies in which you want to show",
+                lambda: "List of currencies in which you want to show",
                 validator=loader.validators.Series(),
             ),
         )
@@ -71,7 +49,7 @@ class CurrencyMod(loader.Module, Currency):
         jp_doc="<amount> <currency> - 為替レートを表示",
     )
     async def cr(self, message):
-        """<currency> <amount> - Show Exchange Rates"""
+        """<amount> <currency> - Show Exchange Rates"""
         args = utils.get_args(message)
         if len(args) < 2:
             return await utils.answer(message, self.strings("invalid_args"))
@@ -114,3 +92,23 @@ class CurrencyMod(loader.Module, Currency):
             amount=amount, currency=base_currency, rates="\n".join(result_lines)
         )
         await utils.answer(message, text)
+
+    async def fetch_rates(self, session, base_currency):
+        for url in self.api_endpoints:
+            try:
+                async with session.get(
+                    url.format(base_currency.upper()), timeout=10
+                ) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        if "rates" in data and data["rates"]:
+                            return data["rates"]
+                        else:
+                            logger.error("No rates in response")
+                            return None
+                    else:
+                        logger.error(f"HTTP {response.status}")
+                        return None
+            except Exception as e:
+                logger.error(f"API error ({url.format(base_currency.upper())}): {e}")
+                return None
