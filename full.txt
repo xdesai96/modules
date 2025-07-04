@@ -1,5 +1,6 @@
 ChatModule
 weather
+currency
 ToDo
 URLModule
 p2g
