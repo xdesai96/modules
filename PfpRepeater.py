@@ -1,18 +1,22 @@
-#meta developer: @xdesai
+# meta developer: @xdesai
 
 import asyncio
 from telethon import functions
-from .. import loaders
+from .. import loader, utils
+
 
 @loader.tds
 class PfpRepeaterMod(loader.Module):
     """Profile Photo Repeater Module"""
+
     strings = {"name": "PfpRepeater"}
 
     def __init__(self):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
-                "DELAY", 900, validator=loader.validators.Integer(),
+                "DELAY",
+                900,
+                validator=loader.validators.Integer(),
             ),
         )
 
@@ -25,7 +29,11 @@ class PfpRepeaterMod(loader.Module):
     async def set_profile_photo(self, photo_path):
         while self.running:
             file = await self.client.upload_file(photo_path)
-            await self.client(functions.photos.UploadProfilePhotoRequest(file=await self.client.upload_file(file)))
+            await self.client(
+                functions.photos.UploadProfilePhotoRequest(
+                    file=await self.client.upload_file(file)
+                )
+            )
             await asyncio.sleep(self.config["DELAY"])
 
     @loader.command()
@@ -43,7 +51,10 @@ class PfpRepeaterMod(loader.Module):
         if not self.running:
             self.running = True
             self.task = asyncio.create_task(self.set_profile_photo(photo_path))
-            await utils.answer(message, f"Started repeating profile photo every {self.config['DELAY']} seconds.")
+            await utils.answer(
+                message,
+                f"Started repeating profile photo every {self.config['DELAY']} seconds.",
+            )
         else:
             await utils.answer(message, "Profile photo repeater is already running.")
 

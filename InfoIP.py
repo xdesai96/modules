@@ -30,7 +30,7 @@ class InfoIPMod(loader.Module):
         """<ip> | Information about IP"""
         args = utils.get_args_raw(message)
         if not args:
-            return await utils.answer(message, self.strings("invalid_ip"))
+            return await utils.answer(message, self.strings["invalid_ip"])
 
         ip = await self.get_location_by_ip(str(args))
         await utils.answer(message, ip)
@@ -41,9 +41,9 @@ class InfoIPMod(loader.Module):
         if response.status_code == 200:
             data = response.json()
             if data["status"] == "fail":
-                return self.strings("no_data")
+                return self.strings["no_data"]
             else:
-                return self.strings("data").format(
+                return self.strings["data"].format(
                     ip=data.get("query"),
                     country=data.get("country"),
                     timezone=data.get("timezone"),
