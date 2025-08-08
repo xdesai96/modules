@@ -44,7 +44,7 @@ class PfpRepeaterMod(loader.Module):
         if reply and reply.photo:
             photo_path = await message.client.download_media(reply.photo)
         elif message.media and message.photo:
-            photo_path = await message.client.download_media(message)Ё
+            photo_path = await message.client.download_media(message)
         else:
             await utils.answer(message, "Please provide the photo or reply to a photo.")
             return
