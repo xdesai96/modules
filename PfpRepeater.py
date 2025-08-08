@@ -16,6 +16,7 @@ class PfpRepeaterMod(loader.Module):
             loader.ConfigValue(
                 "DELAY",
                 900,
+                lambda: "Delay in seconds"
                 validator=loader.validators.Integer(),
             ),
         )
@@ -43,7 +44,7 @@ class PfpRepeaterMod(loader.Module):
         if reply and reply.photo:
             photo_path = await message.client.download_media(reply.photo)
         elif message.media and message.photo:
-            photo_path = await message.client.download_media(message)
+            photo_path = await message.client.download_media(message)Ё
         else:
             await utils.answer(message, "Please provide the photo or reply to a photo.")
             return
