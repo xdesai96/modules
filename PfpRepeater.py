@@ -16,7 +16,7 @@ class PfpRepeaterMod(loader.Module):
             loader.ConfigValue(
                 "DELAY",
                 900,
-                lambda: "Delay in seconds"
+                lambda: "Delay in seconds",
                 validator=loader.validators.Integer(),
             ),
         )
