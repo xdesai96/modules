@@ -19,7 +19,7 @@ class ChatModuleMod(loader.Module):
         "chat_id": "<emoji document_id=5886436057091673541>💬</emoji> <b>Chat ID:</b> <code>{chat_id}</code>",
         "user_id": "<emoji document_id=6035084557378654059>👤</emoji> <b>User's ID:</b> <code>{user_id}</code>",
         "user_not_participant": "<emoji document_id=5019523782004441717>❌</emoji> <b>User is not in this group.</b>",
-        "rights_header": '<b><a href="tg://user?id={id}">{name}</a>\'s rights in this chat\n\n',
+        "rights_header": '<><a href="tg://user?id={id}">{name}</a>\'s rights in this chat\n\n',
         "not_an_admin": "<emoji document_id=5019523782004441717>❌</emoji> {user} is not an admin.",
         "no_rights": "<emoji document_id=5019523782004441717>❌</emoji> <b>I don't have enough rights :(</b>",
         "no_user": "<emoji document_id=5019523782004441717>❌</emoji> <b>User not found.</b>",
@@ -85,6 +85,8 @@ class ChatModuleMod(loader.Module):
         "no_creator": "<emoji document_id=5019523782004441717>❌</emoji> <b>No creator found.</b>",
         "promoted_fullrights": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> is promoted with fullrights</b>',
         "demoted": "<emoji document_id=5447183459602669338>🔽</emoji> <b><a href='tg://user?id={id}'>{name}</a> is demoted</b>",
+        "dnd": "<emoji document_id=5384262794306669858>🔕</emoji> <b>Chat muted and archived</b>",
+        "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>Failed to mute and archive chat</b>"
     }
 
     strings_ru = {
@@ -158,6 +160,8 @@ class ChatModuleMod(loader.Module):
         "no_creator": "<emoji document_id=5019523782004441717>❌</emoji> <b>Создатель не найден.</b>",
         "promoted_fullrights": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> повышен с полными правами</b>',
         "demoted": "<emoji document_id=5447183459602669338>🔽</emoji> <b><a href='tg://user?id={id}'>{name}</a> снят с роли администратора</b>",
+        "dnd": "<emoji document_id=5384262794306669858>🔕</emoji> <b>Чат отключён и архивирован</b>",
+        "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>Не удалось отключить и архивировать чат</b>"
     }
 
     strings_jp = {
@@ -231,6 +235,8 @@ class ChatModuleMod(loader.Module):
         "no_creator": "<emoji document_id=5019523782004441717>❌</emoji> <b>クリエイターが見つかりません。</b>",
         "promoted_fullrights": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> がフル権限で昇進しました</b>',
         "demoted": "<emoji document_id=5447183459602669338>🔽</emoji> <b><a href='tg://user?id={id}'>{name}</a>が降格されました",
+        "dnd": "<emoji document_id=5384262794306669858>🔕</emoji> <b>チャットをミュートしてアーカイブしました</b>",
+        "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>チャットのミュートとアーカイブに失敗しました</b>"
     }
 
     @loader.command(ru_doc="[reply] - Узнать ID", jp_doc="[rbeply] - IDを知る")
@@ -990,6 +996,17 @@ class ChatModuleMod(loader.Module):
             )
         else:
             return await utils.answer(message, self.strings["invalid_args"])
+        
+    @loader.command(
+        ru_doc="Отключает звук и архивирует чат", jp_doc="チャットをミュートしてアーカイブします"
+    )
+    async def dnd(self, message):
+        """Mutes and archives the current chat"""
+        dnd = await utils.dnd(self._client, message.get_chat())
+        if dnd:
+            return await utils.answer(message, self.strings["dnd"])
+        else:
+            return await utils.answer(message, self.strings["dnd_failed"])
 
     @loader.command(
         ru_doc="Пригласить пользователя в чат", jp_doc="ユーザーをチャットに招待する"
