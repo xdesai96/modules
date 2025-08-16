@@ -1002,7 +1002,7 @@ class ChatModuleMod(loader.Module):
     )
     async def dnd(self, message):
         """Mutes and archives the current chat"""
-        dnd = await utils.dnd(self._client, message.get_chat())
+        dnd = await utils.dnd(self._client, await message.get_chat())
         if dnd:
             return await utils.answer(message, self.strings["dnd"])
         else:
