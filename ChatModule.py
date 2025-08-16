@@ -19,7 +19,7 @@ class ChatModuleMod(loader.Module):
         "chat_id": "<emoji document_id=5886436057091673541>💬</emoji> <b>Chat ID:</b> <code>{chat_id}</code>",
         "user_id": "<emoji document_id=6035084557378654059>👤</emoji> <b>User's ID:</b> <code>{user_id}</code>",
         "user_not_participant": "<emoji document_id=5019523782004441717>❌</emoji> <b>User is not in this group.</b>",
-        "rights_header": '<><a href="tg://user?id={id}">{name}</a>\'s rights in this chat\n\n',
+        "rights_header": '<a href="tg://user?id={id}">{name}</a>\'s rights in this chat\n\n',
         "not_an_admin": "<emoji document_id=5019523782004441717>❌</emoji> {user} is not an admin.",
         "no_rights": "<emoji document_id=5019523782004441717>❌</emoji> <b>I don't have enough rights :(</b>",
         "no_user": "<emoji document_id=5019523782004441717>❌</emoji> <b>User not found.</b>",
