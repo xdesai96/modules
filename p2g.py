@@ -80,12 +80,7 @@ class P2G(loader.Module):
 
             subprocess.run(ffmpeg_command, check=True)
 
-            async with message.client.action(message.chat_id, "document"):
-                await message.client.send_file(
-                    message.chat_id, mp4_path, reply_to=reply.id
-                )
-
-            await message.delete()
+            await utils.answer_file(message, mp4_path, "")
         finally:
             if os.path.exists(file):
                 os.remove(file)
