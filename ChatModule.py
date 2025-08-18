@@ -1,12 +1,10 @@
 # meta developer: @xdesai
 
 from datetime import timedelta
-import os
 import asyncio
 import re
 from .. import loader, utils
 from telethon.tl.functions import channels
-from telethon import errors
 from telethon.tl import types
 from telethon.tl.functions import messages
 
@@ -49,15 +47,10 @@ class ChatModuleMod(loader.Module):
         "no_deleted_accounts": "<emoji document_id=5341509066344637610>😎</emoji> <b>No deleted accounts found here</b>",
         "kicked_deleted_accounts": "<emoji document_id=5328302454226298081>🫥</emoji> <b>Removed {count} deleted accounts</b>",
         "admins_in_chat": "<emoji document_id=5276229330131772747>👑</emoji> <b>Admins in <code>{title}</code> ({count}):</b>\n\n",
-        "admins_in_chat_caption": '<b>Admins in "{}":</b>',
-        "too_many_admins": "Damn, too many admins here. Loading the list of admins into a file...",
         "no_admins_in_chat": "<b>No admins in this chat.</b>",
         "bots_in_chat": "<emoji document_id=5276127848644503161>🤖</emoji> <b>Bots in <code>{title}</code> ({count}):</b>\n\n",
-        "bots_in_chat_caption": "<b>Bots in <code>{}</code>:</b>",
-        "too_many_bots": "Damn, too many bots here. Loading the list of bots into a file...",
         "no_bots_in_chat": "<b>No bots in this chat.</b>",
         "users_in_chat": "<emoji document_id=5275979556308674886>👤</emoji> <b>Users in <code>{title}</code> ({count}):</b>\n\n",
-        "users_in_chat_caption": "<b>Users in <code>{}</code>:</b>",
         "no_user_in_chat": "<b>No users in this chat.</b>",
         "user_is_banned": "⛔️ <b>{name} [<code>{id}</code>] has been banned for {time_info}.</b>",
         "user_is_banned_with_reason": "⛔️ <b>{name} [<code>{id}</code>] has been banned for {time_info}.</b>\n<i>Reason: {reason}</i>",
@@ -124,15 +117,10 @@ class ChatModuleMod(loader.Module):
         "no_deleted_accounts": "<emoji document_id=5341509066344637610>😎</emoji> <b>Удалённые аккаунты не найдены</b>",
         "kicked_deleted_accounts": "<emoji document_id=5328302454226298081>🫥</emoji> <b>Удалено {count} удалённых аккаунтов</b>",
         "admins_in_chat": "<emoji document_id=5276229330131772747>👑</emoji> <b>Админы в <code>{title}</code> ({count}):</b>\n\n",
-        "admins_in_chat_caption": '<b>Админы в "{title}":</b>',
-        "too_many_admins": "Слишком много админов. Загружаю список в файл...",
         "no_admins_in_chat": "<b>В чате нет админов.</b>",
         "bots_in_chat": "<emoji document_id=5276127848644503161>🤖</emoji> <b>Боты в <code>{title}</code> ({count}):</b>\n\n",
-        "bots_in_chat_caption": "<b>Боты в <code>{}</code>:</b>",
-        "too_many_bots": "Слишком много ботов. Загружаю список в файл...",
         "no_bots_in_chat": "<b>В чате нет ботов.</b>",
         "users_in_chat": "<emoji document_id=5275979556308674886>👤</emoji> <b>Пользователи в <code>{title}</code> ({count}):</b>\n\n",
-        "users_in_chat_caption": "<b>Пользователи в <code>{}</code>:</b>",
         "no_user_in_chat": "<b>В чате нет пользователей.</b>",
         "user_is_banned": "⛔️ <b>{name} [<code>{id}</code>] забанен на {time_info}.</b>",
         "user_is_banned_with_reason": "⛔️ <b>{name} [<code>{id}</code>] забанен на {time_info}.</b>\n<i>Причина: {reason}</i>",
@@ -199,15 +187,10 @@ class ChatModuleMod(loader.Module):
         "no_deleted_accounts": "<emoji document_id=5341509066344637610>😎</emoji> <b>削除されたアカウントは見つかりません</b>",
         "kicked_deleted_accounts": "<emoji document_id=5328302454226298081>🫥</emoji> <b>{count} 件の削除されたアカウントを削除しました</b>",
         "admins_in_chat": "<emoji document_id=5276229330131772747>👑</emoji> <b><code>{title}</code> の管理者 ({count}):</b>\n\n",
-        "admins_in_chat_caption": '<b>"{title}" の管理者:</b>',
-        "too_many_admins": "管理者が多すぎます。ファイルにエクスポートしています...",
         "no_admins_in_chat": "<b>このチャットに管理者がいません。</b>",
         "bots_in_chat": "<emoji document_id=5276127848644503161>🤖</emoji> <b><code>{title}</code> のボット ({count}):</b>\n\n",
-        "bots_in_chat_caption": "<b><code>{}</code> のボット:</b>",
-        "too_many_bots": "ボットが多すぎます。ファイルにエクスポートしています...",
         "no_bots_in_chat": "<b>このチャットにボットはいません。</b>",
         "users_in_chat": "<emoji document_id=5275979556308674886>👤</emoji> <b><code>{title}</code> のユーザー ({count}):</b>\n\n",
-        "users_in_chat_caption": "<b><code>{}</code> のユーザー:</b>",
         "no_user_in_chat": "<b>このチャットにユーザーはいません。</b>",
         "user_is_banned": "⛔️ <b>{name} [<code>{id}</code>] は {time_info} の間禁止されました。</b>",
         "user_is_banned_with_reason": "⛔️ <b>{name} [<code>{id}</code>] は {time_info} の間禁止されました。</b>\n<i>理由: {reason}</i>",
@@ -526,25 +509,10 @@ class ChatModuleMod(loader.Module):
         for user in real_members:
             if not user.deleted:
                 admins_header += f'<emoji document_id=5316712579467321913>🔴</emoji> <a href="tg://user?id={user.id}">{user.first_name}</a> | <code>{user.id}</code>\n'
-        try:
-            await utils.answer(
-                message,
-                f"<blockquote expandable><b>{admins_header}</b></blockquote>",
-            )
-        except errors.MessageTooLongError:
-            await utils.answer(message, self.strings["too_many_admins"])
-            with open("adminlist.md", "w+") as file:
-                file.write(admins_header)
-            await message.client.send_file(
-                message.chat_id,
-                "adminlist.md",
-                caption=self.strings["admins_in_chat_caption"].format(title),
-                reply_to=message.id,
-            )
-            os.remove("adminlist.md")
-            await message.delete()
-        except Exception as e:
-            return await utils.answer(message, self.strings["error"].format(str(e)))
+        await utils.answer(
+            message,
+            f"<blockquote expandable><b>{admins_header}</b></blockquote>",
+        )
 
     @loader.command(
         ru_doc="Показывает ботов в группе/канале",
@@ -565,26 +533,10 @@ class ChatModuleMod(loader.Module):
         for user in bots:
             if not user.deleted:
                 bots_header += f'<emoji document_id=5316712579467321913>🔴</emoji> <a href="tg://user?id={user.id}">{user.first_name}</a> | <code>{user.id}</code>\n'
-        try:
-            await utils.answer(
-                message, f"<blockquote expandable><b>{bots_header}</b></blockquote>"
-            )
-        except errors.MessageTooLongError:
-            await utils.answer(message, self.strings["too_many_bots"])
-            with open("botlist.md", "w+") as file:
-                file.write(bots_header)
-            await message.client.send_file(
-                message.chat_id,
-                "adminlist.md",
-                caption=self.strings["bots_in_chat_caption"].format(title),
-                reply_to=message.id,
-            )
-            os.remove("botlist.md")
-            await message.delete()
-        except Exception as e:
-            return await utils.answer(
-                message, self.strings["error"].format(error=str(e))
-            )
+
+        await utils.answer(
+            message, f"<blockquote expandable><b>{bots_header}</b></blockquote>"
+        )
 
     @loader.command(
         ru_doc="Показывает простых участников чата/канала",
@@ -608,29 +560,9 @@ class ChatModuleMod(loader.Module):
         for user in users:
             if not user.bot and not user.deleted:
                 users_header += f'<emoji document_id=5314378500965145730>🔵</emoji> <a href ="tg://user?id={user.id}">{user.first_name}</a> | <code>{user.id}</code>\n'
-        try:
-            await utils.answer(
-                message, f"<blockquote expandable><b>{users_header}</b></blockquote>"
-            )
-            return
-        except errors.MessageTooLongError:
-            await utils.answer(message, self.strings["large_chat_loading"])
-            file = open("userslist.md", "w+")
-            file.write(users_header)
-            file.close()
-            await message.client.send_file(
-                message.chat_id,
-                "userslist.md",
-                caption=self.strings["users_in_chat_caption"].format(title),
-                reply_to=message.id,
-            )
-            os.remove("userslist.md")
-            await message.delete()
-            return
-        except Exception as e:
-            return await utils.answer(
-                message, self.strings["error"].format(error=str(e))
-            )
+        return await utils.answer(
+            message, f"<blockquote expandable><b>{users_header}</b></blockquote>"
+        )
 
     @loader.command(
         ru_doc="Забанить участника", jp_doc="ユーザーを一時的または永久に禁止する"
