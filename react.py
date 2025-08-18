@@ -92,4 +92,3 @@ class ReactMod(loader.Module):
             )
         await asyncio.sleep(1)
         await message.delete()
-

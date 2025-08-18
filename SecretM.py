@@ -84,4 +84,3 @@ class SecretMessageMod(loader.Module):
         else:
             await call.answer(f"{text}", show_alert=True)
             self._oppened_messages.append(call.inline_message_id)
-

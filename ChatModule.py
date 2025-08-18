@@ -79,7 +79,7 @@ class ChatModuleMod(loader.Module):
         "promoted_fullrights": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> is promoted with fullrights</b>',
         "demoted": "<emoji document_id=5447183459602669338>🔽</emoji> <b><a href='tg://user?id={id}'>{name}</a> is demoted</b>",
         "dnd": "<emoji document_id=5384262794306669858>🔕</emoji> <b>Chat muted and archived</b>",
-        "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>Failed to mute and archive chat</b>"
+        "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>Failed to mute and archive chat</b>",
     }
 
     strings_ru = {
@@ -149,7 +149,7 @@ class ChatModuleMod(loader.Module):
         "promoted_fullrights": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> повышен с полными правами</b>',
         "demoted": "<emoji document_id=5447183459602669338>🔽</emoji> <b><a href='tg://user?id={id}'>{name}</a> снят с роли администратора</b>",
         "dnd": "<emoji document_id=5384262794306669858>🔕</emoji> <b>Чат отключён и архивирован</b>",
-        "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>Не удалось отключить и архивировать чат</b>"
+        "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>Не удалось отключить и архивировать чат</b>",
     }
 
     strings_jp = {
@@ -219,7 +219,7 @@ class ChatModuleMod(loader.Module):
         "promoted_fullrights": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> がフル権限で昇進しました</b>',
         "demoted": "<emoji document_id=5447183459602669338>🔽</emoji> <b><a href='tg://user?id={id}'>{name}</a>が降格されました",
         "dnd": "<emoji document_id=5384262794306669858>🔕</emoji> <b>チャットをミュートしてアーカイブしました</b>",
-        "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>チャットのミュートとアーカイブに失敗しました</b>"
+        "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>チャットのミュートとアーカイブに失敗しました</b>",
     }
 
     @loader.command(ru_doc="[reply] - Узнать ID", jp_doc="[rbeply] - IDを知る")
@@ -928,9 +928,10 @@ class ChatModuleMod(loader.Module):
             )
         else:
             return await utils.answer(message, self.strings["invalid_args"])
-        
+
     @loader.command(
-        ru_doc="Отключает звук и архивирует чат", jp_doc="チャットをミュートしてアーカイブします"
+        ru_doc="Отключает звук и архивирует чат",
+        jp_doc="チャットをミュートしてアーカイブします",
     )
     async def dnd(self, message):
         """Mutes and archives the current chat"""
