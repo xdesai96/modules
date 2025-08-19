@@ -80,6 +80,8 @@ class ChatModuleMod(loader.Module):
         "demoted": "<emoji document_id=5447183459602669338>🔽</emoji> <b><a href='tg://user?id={id}'>{name}</a> is demoted</b>",
         "dnd": "<emoji document_id=5384262794306669858>🔕</emoji> <b>Chat muted and archived</b>",
         "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>Failed to mute and archive chat</b>",
+        "msg_link": "<emoji document_id=5271604874419647061>🔗</emoji> <b>The message link: {link}</b>",
+        "msg_link_failed": "<emoji document_id=5019523782004441717>❌</emoji> <b>Failed to get the link</b>",
     }
 
     strings_ru = {
@@ -150,6 +152,8 @@ class ChatModuleMod(loader.Module):
         "demoted": "<emoji document_id=5447183459602669338>🔽</emoji> <b><a href='tg://user?id={id}'>{name}</a> снят с роли администратора</b>",
         "dnd": "<emoji document_id=5384262794306669858>🔕</emoji> <b>Чат отключён и архивирован</b>",
         "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>Не удалось отключить и архивировать чат</b>",
+        "msg_link": "<emoji document_id=5271604874419647061>🔗</emoji> <b>Ссылка на сообщение: {link}</b>",
+        "msg_link_failed": "<emoji document_id=5019523782004441717>❌</emoji> <b>Не удалось получить ссылку</b>",
     }
 
     strings_jp = {
@@ -220,6 +224,8 @@ class ChatModuleMod(loader.Module):
         "demoted": "<emoji document_id=5447183459602669338>🔽</emoji> <b><a href='tg://user?id={id}'>{name}</a>が降格されました",
         "dnd": "<emoji document_id=5384262794306669858>🔕</emoji> <b>チャットをミュートしてアーカイブしました</b>",
         "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>チャットのミュートとアーカイブに失敗しました</b>",
+        "msg_link": "<emoji document_id=5271604874419647061>🔗</emoji> <b>メッセージリンク: {link}</b>",
+        "msg_link_failed": "<emoji document_id=5019523782004441717>❌</emoji> <b>リンクの取得に失敗しました</b>",
     }
 
     @loader.command(ru_doc="[reply] - Узнать ID", jp_doc="[rbeply] - IDを知る")
@@ -940,6 +946,20 @@ class ChatModuleMod(loader.Module):
             return await utils.answer(message, self.strings["dnd"])
         else:
             return await utils.answer(message, self.strings["dnd_failed"])
+
+    @loader.command(
+        ru_doc="Получить ссылку на сообщение", jp_doc="メッセージへのリンクを取得する"
+    )
+    async def geturl(self, message):
+        """Get the link to the replied messages"""
+        reply = await message.get_reply_message()
+        chat = await message.get_chat()
+        if reply := await message.get_reply_message():
+            link = await utils.get_message_link(reply, chat)
+            return await utils.answer(
+                message, self.strings["msg_link"].format(link=link)
+            )
+        return await utils.answer(message, self.strings["msg_link_failed"])
 
     @loader.command(
         ru_doc="Пригласить пользователя в чат", jp_doc="ユーザーをチャットに招待する"
