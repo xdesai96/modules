@@ -1,5 +1,6 @@
 aliasmanager
 bfg
+DziShazam
 ChatModule
 currency
 encmod
