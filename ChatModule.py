@@ -341,7 +341,7 @@ class ChatModuleMod(loader.Module):
                     ids.extend([msg.id for msg in messages])
                 elif direction == "b":
                     messages = await self._client.get_messages(
-                        reply.chat_id, max_id=reply.id, limit=count - 1
+                        reply.chat_id, max_id=reply.id, limit=count
                     )
                     ids.extend([msg.id for msg in messages])
                 else:
