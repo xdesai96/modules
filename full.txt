@@ -1,6 +1,7 @@
 aliasmanager
 bfg
 DziShazam
+hardspam
 ChatModule
 currency
 encmod
