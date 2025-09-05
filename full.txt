@@ -13,6 +13,7 @@ rbs
 react
 screenspam
 SecretM
+sendergifts
 stats
 ToDo
 URLModule
