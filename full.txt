@@ -1,0 +1,12 @@
+hardspam
+ChatModule
+currency
+InfoIP
+managedb
+p2g
+rbs
+react
+stats
+ToDo
+URLModule
+weather
