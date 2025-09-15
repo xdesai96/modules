@@ -6,9 +6,9 @@ from .. import loader, utils
 
 
 @loader.tds
-class InfoIPMod(loader.Module):
+class IPInfoMod(loader.Module):
     strings = {
-        "name": "InfoIP",
+        "name": "IPInfo",
         "invalid_ip": "❌ <b>Specify IP address</b>",
         "no_data": "😢 <b>No data available</b>",
         "data": "<blockquote><emoji document_id=5447410659077661506>🌐</emoji><b> Information about IP</b></blockquote>\n<blockquote><emoji document_id=6334617384782923882>📟</emoji><b> IP: <code>{ip}</code></b></blockquote>\n<blockquote><emoji document_id=5235794253149394263>🗺</emoji><b> Country: {country}</b></blockquote>\n<blockquote><emoji document_id=5247209275494769660>🕓</emoji><b> Timezone: {timezone}</b></blockquote>\n<blockquote><emoji document_id=5330371855368866588>🌇</emoji><b> City: {city}</b></blockquote>\n<blockquote><emoji document_id=5308028293033764449>⚡️</emoji><b> Region: {region}</b></blockquote>\n<blockquote><emoji document_id=5391032818111363540>📍</emoji><b> Coordinates: <code>{coordinates}</code></b></blockquote>\n<blockquote><emoji document_id=5447410659077661506>🌐</emoji> <b>Provider: {provider}</b></blockquote>",
