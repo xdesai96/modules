@@ -1,12 +1,10 @@
-hardspam
-ChatModule
+chatmodule
 currency
-InfoIP
-managedb
+dbmod
+hardspam
+ipinfo
 p2g
-rbs
-react
 stats
 ToDo
-URLModule
+url
 weather
