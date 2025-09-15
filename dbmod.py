@@ -284,8 +284,9 @@ class DBMod(loader.Module):
                 return key
         return None
 
-    @loader.command(ru_doc="Просмотр базы данных модуля")
+    @loader.command(ru_doc="Просмотр базы данных")
     async def mydb(self, message):
+        """Viewing the database"""
         args = utils.get_args_raw(message)
         if args:
             module_key = self.find_module_key(args)
