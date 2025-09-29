@@ -17,25 +17,26 @@ class ChatModuleMod(loader.Module):
         "chat_id": "<emoji document_id=5886436057091673541>💬</emoji> <b>Chat ID:</b> <code>{chat_id}</code>",
         "user_id": "<emoji document_id=6035084557378654059>👤</emoji> <b>User's ID:</b> <code>{user_id}</code>",
         "user_not_participant": "<emoji document_id=5019523782004441717>❌</emoji> <b>User is not in this group.</b>",
-        "rights_header": '<a href="tg://user?id={id}">{name}</a>\'s rights in this chat\n\n',
+        "_": '<a href="tg://user?id={id}">{name}</a>\'s rights in this chat',
         "not_an_admin": "<emoji document_id=5019523782004441717>❌</emoji> {user} is not an admin.",
         "no_rights": "<emoji document_id=5019523782004441717>❌</emoji> <b>I don't have enough rights :(</b>",
         "no_user": "<emoji document_id=5019523782004441717>❌</emoji> <b>User not found.</b>",
-        "change_info": "Change Info",
-        "delete_messages": "Delete Messages",
-        "ban_users": "Ban users",
-        "invite_users": "Invite Users",
-        "pin_messages": "Pin Messages",
-        "add_admins": "Add Admins",
-        "manage_call": "Manage Call",
-        "post_stories": "Post Stories",
-        "edit_stories": "Edit Stories",
-        "delete_stories": "Delete Stories",
-        "anonymous": "Anonymous",
-        "manage_topics": "Manage Topics",
-        "post_messages": "Post messages",
-        "edit_messages": "Edit messages",
-        "promoted_by": "\n<emoji document_id=5287734473775918473>🔼</emoji> Promoted by <a href='tg://user?id={id}'>{name}</a> [<code>{id}</code>]",
+        "change_info": "<emoji document_id=6296367896398399651>✅</emoji> Change Info",
+        "delete_messages": "<emoji document_id=6296367896398399651>✅</emoji> Delete Messages",
+        "other": "<emoji document_id=6296367896398399651>✅</emoji> Other",
+        "ban_users": "<emoji document_id=6296367896398399651>✅</emoji> Ban users",
+        "invite_users": "<emoji document_id=6296367896398399651>✅</emoji> Invite Users",
+        "pin_messages": "<emoji document_id=6296367896398399651>✅</emoji> Pin Messages",
+        "add_admins": "<emoji document_id=6296367896398399651>✅</emoji> Add Admins",
+        "manage_call": "<emoji document_id=6296367896398399651>✅</emoji> Manage Call",
+        "post_stories": "<emoji document_id=6296367896398399651>✅</emoji> Post Stories",
+        "edit_stories": "<emoji document_id=6296367896398399651>✅</emoji> Edit Stories",
+        "delete_stories": "<emoji document_id=6296367896398399651>✅</emoji> Delete Stories",
+        "anonymous": "<emoji document_id=6296367896398399651>✅</emoji> Anonymous",
+        "manage_topics": "<emoji document_id=6296367896398399651>✅</emoji> Manage Topics",
+        "post_messages": "<emoji document_id=6296367896398399651>✅</emoji> Post messages",
+        "edit_messages": "<emoji document_id=6296367896398399651>✅</emoji> Edit messages",
+        "promoted_by": "<emoji document_id=5287734473775918473>🔼</emoji> Promoted by <a href='tg://user?id={id}'>{name}</a> [<code>{id}</code>]",
         "invalid_args": "<emoji document_id=5019523782004441717>❌</emoji> <b>Invalid args.</b>",
         "error": "<b>Error:</b> <code>{error}</code>",
         "of_chat": "Chat",
@@ -89,25 +90,26 @@ class ChatModuleMod(loader.Module):
         "chat_id": "<emoji document_id=5886436057091673541>💬</emoji> <b>ID чата:</b> <code>{chat_id}</code>",
         "user_id": "<emoji document_id=6035084557378654059>👤</emoji> <b>ID пользователя:</b> <code>{user_id}</code>",
         "user_not_participant": "<emoji document_id=5019523782004441717>❌</emoji> <b>Пользователь не состоит в этой группе.</b>",
-        "rights_header": '<b><a href="tg://user?id={id}">{name}</a> — права в этом чате\n\n',
+        "_": '<b><a href="tg://user?id={id}">{name}</a> — права в этом чате',
         "not_an_admin": "<emoji document_id=5019523782004441717>❌</emoji> {user} не является админом.",
         "no_rights": "<emoji document_id=5019523782004441717>❌</emoji> <b>У меня недостаточно прав :(</b>",
         "no_user": "<emoji document_id=5019523782004441717>❌</emoji> <b>Пользователь не найден.</b>",
-        "change_info": "Изменение информации",
-        "delete_messages": "Удаление сообщений",
-        "ban_users": "Бан пользователей",
-        "invite_users": "Приглашение пользователей",
-        "pin_messages": "Закрепление сообщений",
-        "add_admins": "Назначение админов",
-        "manage_call": "Управление звонками",
-        "post_stories": "Публикация историй",
-        "edit_stories": "Редактирование историй",
-        "delete_stories": "Удаление историй",
-        "anonymous": "Анонимность",
-        "manage_topics": "Управление темами",
-        "post_messages": "Публикация сообщений",
-        "edit_messages": "Редактирование сообщений",
-        "promoted_by": "\n<emoji document_id=5287734473775918473>🔼</emoji> Назначил <a href='tg://user?id={id}'>{name}</a> [<code>{id}</code>]",
+        "change_info": "<emoji document_id=6296367896398399651>✅</emoji> Изменение информации",
+        "post_messages": "<emoji document_id=6296367896398399651>✅</emoji> Публикация сообщений",
+        "edit_messages": "<emoji document_id=6296367896398399651>✅</emoji> Редактирование сообщений",
+        "delete_messages": "<emoji document_id=6296367896398399651>✅</emoji> Удаление сообщений",
+        "ban_users": "<emoji document_id=6296367896398399651>✅</emoji> Бан пользователей",
+        "invite_users": "<emoji document_id=6296367896398399651>✅</emoji> Приглашение пользователей",
+        "pin_messages": "<emoji document_id=6296367896398399651>✅</emoji> Закрепление сообщений",
+        "add_admins": "<emoji document_id=6296367896398399651>✅</emoji> Назначение админов",
+        "anonymous": "<emoji document_id=6296367896398399651>✅</emoji> Анонимность",
+        "manage_call": "<emoji document_id=6296367896398399651>✅</emoji> Управление звонками",
+        "other": "<emoji document_id=6296367896398399651>✅</emoji> Другое",
+        "post_stories": "<emoji document_id=6296367896398399651>✅</emoji> Публикация историй",
+        "edit_stories": "<emoji document_id=6296367896398399651>✅</emoji> Редактирование историй",
+        "delete_stories": "<emoji document_id=6296367896398399651>✅</emoji> Удаление историй",
+        "manage_topics": "<emoji document_id=6296367896398399651>✅</emoji> Управление темами",
+        "promoted_by": "<emoji document_id=5287734473775918473>🔼</emoji> Назначил <a href='tg://user?id={id}'>{name}</a> [<code>{id}</code>]",
         "invalid_args": "<emoji document_id=5019523782004441717>❌</emoji> <b>Неверные аргументы.</b>",
         "error": "<b>Ошибка:</b> <code>{error}</code>",
         "of_chat": "Чат",
@@ -161,25 +163,26 @@ class ChatModuleMod(loader.Module):
         "chat_id": "<emoji document_id=5886436057091673541>💬</emoji> <b>チャットID:</b> <code>{chat_id}</code>",
         "user_id": "<emoji document_id=6035084557378654059>👤</emoji> <b>ユーザーID:</b> <code>{user_id}</code>",
         "user_not_participant": "<emoji document_id=5019523782004441717>❌</emoji> <b>このグループにユーザーはいません。</b>",
-        "rights_header": '<b><a href="tg://user?id={id}">{name}</a>のこのチャットでの権限\n\n',
+        "_": '<b><a href="tg://user?id={id}">{name}</a>のこのチャットでの権限',
         "not_an_admin": "<emoji document_id=5019523782004441717>❌</emoji> {user} は管理者ではありません。",
         "no_rights": "<emoji document_id=5019523782004441717>❌</emoji> <b>私の権限が十分ではありません :(</b>",
         "no_user": "<emoji document_id=5019523782004441717>❌</emoji> <b>ユーザーが見つかりません。</b>",
-        "change_info": "Change Info",
-        "delete_messages": "Delete Messages",
-        "ban_users": "Ban users",
-        "invite_users": "Invite Users",
-        "pin_messages": "Pin Messages",
-        "add_admins": "Add Admins",
-        "manage_call": "Manage Call",
-        "post_stories": "Post Stories",
-        "edit_stories": "Edit Stories",
-        "delete_stories": "Delete Stories",
-        "anonymous": "Anonymous",
-        "manage_topics": "Manage Topics",
-        "post_messages": "Post messages",
-        "edit_messages": "Edit messages",
-        "promoted_by": "\n<emoji document_id=5287734473775918473>🔼</emoji> 昇進させた人: <a href='tg://user?id={id}'>{name}</a> [<code>{id}</code>]",
+        "change_info": "<emoji document_id=6296367896398399651>✅</emoji> Change Info",
+        "delete_messages": "<emoji document_id=6296367896398399651>✅</emoji> Delete Messages",
+        "ban_users": "<emoji document_id=6296367896398399651>✅</emoji> Ban users",
+        "invite_users": "<emoji document_id=6296367896398399651>✅</emoji> Invite Users",
+        "pin_messages": "<emoji document_id=6296367896398399651>✅</emoji> Pin Messages",
+        "add_admins": "<emoji document_id=6296367896398399651>✅</emoji> Add Admins",
+        "manage_call": "<emoji document_id=6296367896398399651>✅</emoji> Manage Call",
+        "post_stories": "<emoji document_id=6296367896398399651>✅</emoji> Post Stories",
+        "edit_stories": "<emoji document_id=6296367896398399651>✅</emoji> Edit Stories",
+        "delete_stories": "<emoji document_id=6296367896398399651>✅</emoji> Delete Stories",
+        "anonymous": "<emoji document_id=6296367896398399651>✅</emoji> Anonymous",
+        "manage_topics": "<emoji document_id=6296367896398399651>✅</emoji> Manage Topics",
+        "post_messages": "<emoji document_id=6296367896398399651>✅</emoji> Post messages",
+        "edit_messages": "<emoji document_id=6296367896398399651>✅</emoji> Edit messages",
+        "other": "<emoji document_id=6296367896398399651>✅</emoji> Other",
+        "promoted_by": "<emoji document_id=5287734473775918473>🔼</emoji> 昇進させた人: <a href='tg://user?id={id}'>{name}</a> [<code>{id}</code>]",
         "invalid_args": "<emoji document_id=5019523782004441717>❌</emoji> <b>無効な引数です。</b>",
         "error": "<b>エラー:</b> <code>{error}</code>",
         "of_chat": "チャット",
@@ -253,63 +256,46 @@ class ChatModuleMod(loader.Module):
         chat = await message.get_chat()
         reply = await message.get_reply_message()
         args = utils.get_args(message)
-        if message.is_group and message.is_channel:
-            rights = [
-                "change_info",
-                "delete_messages",
-                "ban_users",
-                "invite_users",
-                "pin_messages",
-                "add_admins",
-                "manage_call",
-                "post_stories",
-                "edit_stories",
-                "delete_stories",
-                "anonymous",
-                "manage_topics",
-                "post_messages",
-                "edit_messages",
-            ]
-            if reply:
-                participant_id = reply.sender_id
+
+        if reply:
+            participant_id = reply.sender_id
+        else:
+            if args:
+                participant_id = await utils.get_target(message)
             else:
-                if args:
-                    participant_id = await utils.get_target(message)
-                else:
-                    return await utils.answer(message, self.strings["no_user"])
-            try:
-                result = await self._client(
-                    channels.GetParticipantRequest(
-                        channel=chat, participant=participant_id
-                    )
-                )
-            except Exception as e:
-                return await utils.answer(
-                    message, self.strings["error"].format(error=str(e))
-                )
-            user = await self._client.get_entity(participant_id)
-            participant = result.participant
-            output = f"{self.strings['not_an_admin'].format(user=user.first_name)}"
-            if hasattr(participant, "admin_rights") and participant.admin_rights:
-                output = self.strings["rights_header"].format(
-                    name=user.first_name, id=user.id
-                )
-                can_do = ""
-                for right in rights:
-                    if getattr(participant.admin_rights, right):
-                        can_do += f"<emoji document_id=6296367896398399651>✅</emoji> {self.strings[right]}\n"
-                if not can_do:
-                    can_do += "No rights"
-                output += can_do
-                if hasattr(participant, "promoted_by") and participant.promoted_by:
-                    promoter = await self._client.get_entity(participant.promoted_by)
-                    output += self.strings["promoted_by"].format(
+                return await utils.answer(message, self.strings["no_user"])
+        try:
+            result = await self._client.get_perms_cached(chat, participant_id)
+        except Exception as e:
+            return await utils.answer(
+                message, self.strings["error"].format(error=str(e))
+            )
+        participant = result.participant
+        user = await self._client.get_entity(participant.user_id)
+        output = f"{self.strings['not_an_admin'].format(user=user.first_name)}"
+        if hasattr(participant, "admin_rights") and participant.admin_rights:
+            can_do = ""
+            rights = participant.to_dict().get("admin_rights")
+            for right, is_permitted in rights.items():
+                if right == "_":
+                    output = f"{
+                        self.strings[right].format(name=user.first_name, id=user.id)
+                    }\n\n"
+                    continue
+                if is_permitted:
+                    can_do += f"{self.strings[right]}\n"
+            output += can_do
+            if hasattr(participant, "promoted_by") and participant.promoted_by:
+                promoter = await self._client.get_entity(participant.promoted_by)
+                output += f"\n{
+                    self.strings['promoted_by'].format(
                         id=participant.promoted_by, name=promoter.first_name
                     )
+                }"
 
-            return await utils.answer(
-                message, f"<blockquote expandable><b>{output}</b></blockquote>"
-            )
+        return await utils.answer(
+            message, f"<blockquote expandable><b>{output}</b></blockquote>"
+        )
 
     @loader.command(ru_doc="Покинуть чат", jp_doc="チャットから離脱する")
     @loader.tag("no_pm")
