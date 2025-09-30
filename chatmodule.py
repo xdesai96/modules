@@ -384,7 +384,6 @@ class ChatModuleMod(loader.Module):
         ru_doc="[link/id] Удаляет группу/канал",
         jp_doc="[link/id] グループ・チャンネルを削除する",
     )
-    @loader.tag("no_pm")
     async def dgc(self, message):
         """[link/id] Delete chat/channel"""
         args = utils.get_args(message)
@@ -394,8 +393,13 @@ class ChatModuleMod(loader.Module):
                 chat_type = self.strings["of_channel"]
                 await self._client(channels.DeleteChannelRequest(chat.id))
             else:
-                chat_type = self.strings["of_chat"]
-                await self._client(messages.DeleteChatRequest(chat.id))
+                try:
+                    chat_type = self.strings["of_chat"]
+                    await self._client(messages.DeleteChatRequest(chat.id))
+                except Exception as e:
+                    return await utils.answer(
+                        message, self.strings["error"].format(error=e)
+                    )
             return
         else:
             link = (
