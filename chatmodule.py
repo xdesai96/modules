@@ -278,9 +278,7 @@ class ChatModuleMod(loader.Module):
             rights = participant.to_dict().get("admin_rights")
             for right, is_permitted in rights.items():
                 if right == "_":
-                    output = f"{
-                        self.strings[right].format(name=user.first_name, id=user.id)
-                    }\n\n"
+                    output = f"{self.strings[right].format(name=user.first_name, id=user.id)}\n\n"
                     continue
                 if is_permitted:
                     can_do += f"{self.strings[right]}\n"
