@@ -285,11 +285,7 @@ class ChatModuleMod(loader.Module):
             output += can_do
             if hasattr(participant, "promoted_by") and participant.promoted_by:
                 promoter = await self._client.get_entity(participant.promoted_by)
-                output += f"\n{
-                    self.strings['promoted_by'].format(
-                        id=participant.promoted_by, name=promoter.first_name
-                    )
-                }"
+                output += f"\n{self.strings['promoted_by'].format(id=participant.promoted_by, name=promoter.first_name)}"
 
         return await utils.answer(
             message, f"<blockquote expandable><b>{output}</b></blockquote>"
