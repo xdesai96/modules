@@ -3,7 +3,7 @@ currency
 dbmod
 hardspam
 ipinfo
-p2g
+imagetogif
 stats
 ToDo
 url
