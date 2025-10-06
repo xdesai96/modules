@@ -13,7 +13,6 @@ from telethon.tl.functions import messages
 class ChatModuleMod(loader.Module):
     strings = {
         "name": "ChatModule",
-        "my_id": "<emoji document_id=5208454037531280484>💜</emoji> <b>My ID:</b> <code>{my_id}</code>",
         "chat_id": "<emoji document_id=5886436057091673541>💬</emoji> <b>Chat ID:</b> <code>{chat_id}</code>",
         "user_id": "<emoji document_id=6035084557378654059>👤</emoji> <b>User's ID:</b> <code>{user_id}</code>",
         "user_not_participant": "<emoji document_id=5019523782004441717>❌</emoji> <b>User is not in this group.</b>",
@@ -83,10 +82,11 @@ class ChatModuleMod(loader.Module):
         "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>Failed to mute and archive chat</b>",
         "msg_link": "<emoji document_id=5271604874419647061>🔗</emoji> <b>The message link: {link}</b>",
         "msg_link_failed": "<emoji document_id=5019523782004441717>❌</emoji> <b>Failed to get the link</b>",
+        "pinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Pinned the message</b>",
+        "unpinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Unpinned the message</b>",
     }
 
     strings_ru = {
-        "my_id": "<emoji document_id=5208454037531280484>💜</emoji> <b>Мой ID:</b> <code>{my_id}</code>",
         "chat_id": "<emoji document_id=5886436057091673541>💬</emoji> <b>ID чата:</b> <code>{chat_id}</code>",
         "user_id": "<emoji document_id=6035084557378654059>👤</emoji> <b>ID пользователя:</b> <code>{user_id}</code>",
         "user_not_participant": "<emoji document_id=5019523782004441717>❌</emoji> <b>Пользователь не состоит в этой группе.</b>",
@@ -156,10 +156,11 @@ class ChatModuleMod(loader.Module):
         "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>Не удалось отключить и архивировать чат</b>",
         "msg_link": "<emoji document_id=5271604874419647061>🔗</emoji> <b>Ссылка на сообщение: {link}</b>",
         "msg_link_failed": "<emoji document_id=5019523782004441717>❌</emoji> <b>Не удалось получить ссылку</b>",
+        "pinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Сообщение закреплено</b>",
+        "unpinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Сообщение откреплено</b>",
     }
 
     strings_jp = {
-        "my_id": "<emoji document_id=5208454037531280484>💜</emoji> <b>私のID:</b> <code>{my_id}</code>",
         "chat_id": "<emoji document_id=5886436057091673541>💬</emoji> <b>チャットID:</b> <code>{chat_id}</code>",
         "user_id": "<emoji document_id=6035084557378654059>👤</emoji> <b>ユーザーID:</b> <code>{user_id}</code>",
         "user_not_participant": "<emoji document_id=5019523782004441717>❌</emoji> <b>このグループにユーザーはいません。</b>",
@@ -229,22 +230,21 @@ class ChatModuleMod(loader.Module):
         "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>チャットのミュートとアーカイブに失敗しました</b>",
         "msg_link": "<emoji document_id=5271604874419647061>🔗</emoji> <b>メッセージリンク: {link}</b>",
         "msg_link_failed": "<emoji document_id=5019523782004441717>❌</emoji> <b>リンクの取得に失敗しました</b>",
+        "pinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>メッセージを固定しました</b>",
+        "unpinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>メッセージの固定を解除しました</b>",
     }
 
-    @loader.command(ru_doc="[reply] - Узнать ID", jp_doc="[rbeply] - IDを知る")
+    @loader.command(ru_doc="[reply] - Узнать ID", jp_doc="[reply] - IDを知る")
     async def id(self, message):
         """[reply] - Get the ID"""
-        my_id = (await self._client.get_me()).id
-        chat = await message.get_chat()
-        chat_id = chat.id
         reply = await message.get_reply_message()
-        user_id = None
-        if reply and not message.is_private:
-            user_id = reply.sender_id
-        output = f"{self.strings['my_id'].format(my_id=my_id)}\n{self.strings['chat_id'].format(chat_id=chat_id)}"
-        if user_id:
-            output += f"\n{self.strings['user_id'].format(user_id=user_id)}"
-        return await utils.answer(message, output)
+        if reply:
+            return await utils.answer(
+                message, self.strings["user_id"].format(user_id=reply.sender_id)
+            )
+        return await utils.answer(
+            message, self.strings["chat_id"].format(chat_id=message.chat_id)
+        )
 
     @loader.command(
         ru_doc="[reply/username/id] - Посмотреть права администратора пользователя",
@@ -373,6 +373,38 @@ class ChatModuleMod(loader.Module):
             )
         else:
             await utils.answer(message, self.strings["no_ownerships"])
+
+    @loader.command(
+        ru_doc="[reply] - Закрепить сообщение",
+        jp_doc="[reply] - メッセージを固定する",
+    )
+    @loader.tag("only_reply")
+    async def pin(self, message):
+        """[reply] - Pin a message"""
+        reply = await message.get_reply_message()
+        try:
+            await reply.pin(notify=True, pm_oneside=False)
+        except Exception as e:
+            return await utils.answer(
+                message, self.strings["error"].format(error=str(e))
+            )
+        await utils.answer(message, self.strings["pinned"])
+
+    @loader.command(
+        ru_doc="Открепить сообщение",
+        jp_doc="メッセージの固定を解除する",
+    )
+    @loader.tag("only_reply")
+    async def unpin(self, message):
+        """Unpin a message"""
+        reply = await message.get_reply_message()
+        try:
+            await reply.unpin()
+        except Exception as e:
+            return await utils.answer(
+                message, self.strings["error"].format(error=str(e))
+            )
+        await utils.answer(message, self.strings["unpinned"])
 
     @loader.command(
         ru_doc="[link/id] Удаляет группу/канал",
