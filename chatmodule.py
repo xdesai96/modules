@@ -1022,7 +1022,7 @@ class ChatModuleMod(loader.Module):
                     channel=chat,
                     user_id=user.id,
                     admin_rights=types.ChatAdminRights(
-                        other=False,
+                        other=True,
                         change_info=False,
                         post_messages=False if chat.broadcast else None,
                         edit_messages=False if chat.broadcast else None,
