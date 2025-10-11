@@ -84,6 +84,7 @@ class ChatModuleMod(loader.Module):
         "msg_link_failed": "<emoji document_id=5019523782004441717>❌</emoji> <b>Failed to get the link</b>",
         "pinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Pinned the message</b>",
         "unpinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Unpinned the message</b>",
+        "promoted_moder": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> has been promoted without rights</b>',
     }
 
     strings_ru = {
@@ -158,6 +159,7 @@ class ChatModuleMod(loader.Module):
         "msg_link_failed": "<emoji document_id=5019523782004441717>❌</emoji> <b>Не удалось получить ссылку</b>",
         "pinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Сообщение закреплено</b>",
         "unpinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Сообщение откреплено</b>",
+        "promoted_moder": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> повышен без прав</b>',
     }
 
     strings_jp = {
@@ -232,6 +234,7 @@ class ChatModuleMod(loader.Module):
         "msg_link_failed": "<emoji document_id=5019523782004441717>❌</emoji> <b>リンクの取得に失敗しました</b>",
         "pinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>メッセージを固定しました</b>",
         "unpinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>メッセージの固定を解除しました</b>",
+        "promoted_moder": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> は権限なしで昇進しました</b>',
     }
 
     @loader.command(ru_doc="[reply] - Узнать ID", jp_doc="[reply] - IDを知る")
@@ -990,8 +993,64 @@ class ChatModuleMod(loader.Module):
             return await utils.answer(message, self.strings["no_user"])
 
     @loader.command(
+        ru_doc="[reply/username/id] - Выдать админку без прав",
+        jp_doc="[reply/username/id] - 権限なしで参加者を昇格させる",
+    )
+    @loader.tag("no_pm")
+    async def moder(self, message):
+        """Promote a participant without rights"""
+        chat = await message.get_chat()
+        reply = await message.get_reply_message()
+        args = utils.get_args(message)
+        if reply and args:
+            user = await self._client.get_entity(reply.sender_id)
+            rank = " ".join(args)
+        elif reply:
+            user = await self._client.get_entity(reply.sender_id)
+            rank = "admin" if not user.bot else "bot"
+        elif args:
+            user = await self._client.get_entity(await utils.get_target(message))
+            if len(args) >= 2:
+                rank = " ".join(args[1:])
+            else:
+                rank = "admin" if not user.bot else "bot"
+        else:
+            return await utils.answer(message, self.strings["no_user"])
+        try:
+            await self._client(
+                channels.EditAdminRequest(
+                    channel=chat,
+                    user_id=user.id,
+                    admin_rights=types.ChatAdminRights(
+                        other=False,
+                        change_info=False,
+                        post_messages=False if chat.broadcast else None,
+                        edit_messages=False if chat.broadcast else None,
+                        delete_messages=False,
+                        ban_users=False,
+                        invite_users=False,
+                        add_admins=False,
+                        anonymous=None,
+                        pin_messages=False if not chat.broadcast else None,
+                        manage_call=False if not chat.broadcast else None,
+                        manage_topics=False if not chat.broadcast else None,
+                    ),
+                    rank=rank,
+                )
+            )
+            return await utils.answer(
+                message,
+                self.strings["promoted_moder"].format(
+                    id=user.id, name=user.first_name
+                ),
+            )
+        except Exception as e:
+            return await utils.answer(message, self.strings["error"].format(error=e))
+
+    @loader.command(
         ru_doc="Выдать полные права", jp_doc="完全な権限を持つ参加者を昇格させる"
     )
+    @loader.tag("no_pm")
     async def fullrights(self, message):
         """Promote a participant with full rights"""
         chat = await message.get_chat()
@@ -1043,6 +1102,7 @@ class ChatModuleMod(loader.Module):
             return await utils.answer(message, self.strings["error"].format(error=e))
 
     @loader.command(ru_doc="Снять с админки", jp_doc="参加者の降格")
+    @loader.tag("no_pm")
     async def demote(self, message):
         """Demote a participant"""
         chat = await message.get_chat()
