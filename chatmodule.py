@@ -481,35 +481,6 @@ class ChatModuleMod(loader.Module):
             )
 
     @loader.command(
-        ru_doc="Показывает создателя группы/канала",
-        jp_doc="グループ・チャンネルの管理者を表示する",
-    )
-    @loader.tag("no_pm")
-    async def creator(self, message):
-        """Shows the creator of the chat/channel"""
-        participants = await self._client(
-            channels.GetParticipantsRequest(
-                channel=await message.get_chat(),
-                filter=types.ChannelParticipantsAdmins(),
-                offset=0,
-                limit=20,
-                hash=0,
-            )
-        )
-        creator = None
-        for participant in participants.participants:
-            if isinstance(participant, types.ChannelParticipantCreator):
-                creator = participant
-                break
-        if not creator:
-            return await utils.answer(message, self.strings["no_creator"])
-        creator = await self._client.get_entity(creator.user_id)
-        return await utils.answer(
-            message,
-            self.strings["creator"].format(id=creator.id, creator=creator.first_name),
-        )
-
-    @loader.command(
         ru_doc="Показывает админов в группе/канале",
         jp_doc="グループ・チャンネルの管理者を表示する",
     )
@@ -524,17 +495,25 @@ class ChatModuleMod(loader.Module):
         real_members = [
             member for member in admins if not member.bot and not member.deleted
         ]
+        creator = ""
         admins_header = self.strings["admins_in_chat"].format(
             title=title, count=len(real_members)
         )
         if len(real_members) == 0:
             return await utils.answer(message, "no_admins_in_chat")
         for user in real_members:
-            if not user.deleted:
+            if hasattr(user, "participant") and isinstance(
+                user.participant, types.ChannelParticipantCreator
+            ):
+                creator += self.strings["creator"].format(
+                    id=user.id, creator=user.first_name
+                ) + "\n"
+                continue
+            else:
                 admins_header += f'<emoji document_id=5316712579467321913>🔴</emoji> <a href="tg://user?id={user.id}">{user.first_name}</a> | <code>{user.id}</code>\n'
-        await utils.answer(
+        return await utils.answer(
             message,
-            f"<blockquote expandable><b>{admins_header}</b></blockquote>",
+            f"<blockquote expandable><b>{creator}</b>\n<b>{admins_header}</b></blockquote>",
         )
 
     @loader.command(
