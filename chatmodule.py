@@ -424,7 +424,10 @@ class ChatModuleMod(loader.Module):
             else:
                 admins_list += f'<emoji document_id=5316712579467321913>🔴</emoji> <a href="tg://user?id={user.id}">{user.first_name}</a> | <code>{user.id}</code>\n'
         if num_of_admins == 0:
-            return await utils.answer(message, self.strings["no_admins_in_chat"])
+            return await utils.answer(
+                message,
+                f"<blockquote expandable><b>{creator}</b>\n{self.strings['no_admins_in_chat']}</blockquote>",
+            )
         return await utils.answer(
             message,
             f"<blockquote expandable><b>{creator}</b>\n<b>{self.strings['admins_in_chat'].format(title=title, count=num_of_admins)}\n{admins_list}</b></blockquote>",
