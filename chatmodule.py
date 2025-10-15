@@ -85,6 +85,8 @@ class ChatModuleMod(loader.Module):
         "pinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Pinned the message</b>",
         "unpinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Unpinned the message</b>",
         "promoted_moder": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> has been promoted without rights</b>',
+        "banned_in_chat": "<emoji document_id=5019523782004441717>❌</emoji> <b>Banned users in <code>{title}</code> ({count}):</b>\n\n",
+        "no_banned_in_chat": "<emoji document_id=5251741320690551495>👎</emoji> <b>No banned users in this chat.</b>",
     }
 
     strings_ru = {
@@ -160,84 +162,11 @@ class ChatModuleMod(loader.Module):
         "pinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Сообщение закреплено</b>",
         "unpinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Сообщение откреплено</b>",
         "promoted_moder": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> повышен без прав</b>',
+        "banned_in_chat": "<emoji document_id=5019523782004441717>❌</emoji> <b>Забаненные пользователи в <code>{title}</code> ({count}):</b>\n\n",
+        "no_banned_in_chat": "<emoji document_id=5251741320690551495>👎</emoji> <b>В этом чате нет забаненных пользователей.</b>",
     }
 
-    strings_jp = {
-        "chat_id": "<emoji document_id=5886436057091673541>💬</emoji> <b>チャットID:</b> <code>{chat_id}</code>",
-        "user_id": "<emoji document_id=6035084557378654059>👤</emoji> <b>ユーザーID:</b> <code>{user_id}</code>",
-        "user_not_participant": "<emoji document_id=5019523782004441717>❌</emoji> <b>このグループにユーザーはいません。</b>",
-        "_": '<b><a href="tg://user?id={id}">{name}</a>のこのチャットでの権限',
-        "not_an_admin": "<emoji document_id=5019523782004441717>❌</emoji> {user} は管理者ではありません。",
-        "no_rights": "<emoji document_id=5019523782004441717>❌</emoji> <b>私の権限が十分ではありません :(</b>",
-        "no_user": "<emoji document_id=5019523782004441717>❌</emoji> <b>ユーザーが見つかりません。</b>",
-        "change_info": "<emoji document_id=6296367896398399651>✅</emoji> Change Info",
-        "delete_messages": "<emoji document_id=6296367896398399651>✅</emoji> Delete Messages",
-        "ban_users": "<emoji document_id=6296367896398399651>✅</emoji> Ban users",
-        "invite_users": "<emoji document_id=6296367896398399651>✅</emoji> Invite Users",
-        "pin_messages": "<emoji document_id=6296367896398399651>✅</emoji> Pin Messages",
-        "add_admins": "<emoji document_id=6296367896398399651>✅</emoji> Add Admins",
-        "manage_call": "<emoji document_id=6296367896398399651>✅</emoji> Manage Call",
-        "post_stories": "<emoji document_id=6296367896398399651>✅</emoji> Post Stories",
-        "edit_stories": "<emoji document_id=6296367896398399651>✅</emoji> Edit Stories",
-        "delete_stories": "<emoji document_id=6296367896398399651>✅</emoji> Delete Stories",
-        "anonymous": "<emoji document_id=6296367896398399651>✅</emoji> Anonymous",
-        "manage_topics": "<emoji document_id=6296367896398399651>✅</emoji> Manage Topics",
-        "post_messages": "<emoji document_id=6296367896398399651>✅</emoji> Post messages",
-        "edit_messages": "<emoji document_id=6296367896398399651>✅</emoji> Edit messages",
-        "other": "<emoji document_id=6296367896398399651>✅</emoji> Other",
-        "promoted_by": "<emoji document_id=5287734473775918473>🔼</emoji> 昇進させた人: <a href='tg://user?id={id}'>{name}</a> [<code>{id}</code>]",
-        "invalid_args": "<emoji document_id=5019523782004441717>❌</emoji> <b>無効な引数です。</b>",
-        "error": "<b>エラー:</b> <code>{error}</code>",
-        "of_chat": "チャット",
-        "of_channel": "チャンネル",
-        "loading": "<emoji document_id=5021712394259268143>🟡</emoji> <b>データを読み込み中...</b>",
-        "own_list": "<b>私の所有物 ({count}):</b>\n\n{msg}",
-        "no_ownerships": "<emoji document_id=5019523782004441717>❌</emoji> <b>所有物がありません。</b>",
-        "successful_delete": "<emoji document_id=5021905410089550576>✅</emoji> {chat_type} を正常に削除しました",
-        "no_deleted_accounts": "<emoji document_id=5341509066344637610>😎</emoji> <b>削除されたアカウントは見つかりません</b>",
-        "kicked_deleted_accounts": "<emoji document_id=5328302454226298081>🫥</emoji> <b>{count} 件の削除されたアカウントを削除しました</b>",
-        "admins_in_chat": "<emoji document_id=5276229330131772747>👑</emoji> <b><code>{title}</code> の管理者 ({count}):</b>\n\n",
-        "no_admins_in_chat": "<b>このチャットに管理者がいません。</b>",
-        "bots_in_chat": "<emoji document_id=5276127848644503161>🤖</emoji> <b><code>{title}</code> のボット ({count}):</b>\n\n",
-        "no_bots_in_chat": "<b>このチャットにボットはいません。</b>",
-        "users_in_chat": "<emoji document_id=5275979556308674886>👤</emoji> <b><code>{title}</code> のユーザー ({count}):</b>\n\n",
-        "no_user_in_chat": "<b>このチャットにユーザーはいません。</b>",
-        "user_is_banned": "⛔️ <b>{name} [<code>{id}</code>] は {time_info} の間禁止されました。</b>",
-        "user_is_banned_with_reason": "⛔️ <b>{name} [<code>{id}</code>] は {time_info} の間禁止されました。</b>\n<i>理由: {reason}</i>",
-        "user_is_banned_forever": "⛔️ <b>{name} [<code>{id}</code>] は永久に禁止されました。</b>",
-        "user_is_banned_forever_with_reason": "⛔️ <b>{name} [<code>{id}</code>] は永久に禁止されました。</b>\n<i>理由: {reason}</i>",
-        "user_is_unbanned": "👋🏻 <b>{name} [<code>{id}</code>] の禁止を解除しました。</b>",
-        "user_is_kicked": "🍃 <b><code>{name}</code> [<code>{id}</code>] をキックしました。</b>",
-        "user_is_kicked_with_reason": "🍃 <b><code>{name}</code> [<code>{id}</code>] をキックしました。</b>\n<i>理由: {reason}</i>",
-        "user_is_muted_with_reason": "🔇 <b>{name} [<code>{id}</code>] は {time_info} の間ミュートされました。</b>\n<i>理由: {reason}</i>",
-        "user_is_muted": "🔇 <b>{name} [<code>{id}</code>] は {time_info} の間ミュートされました。</b>",
-        "user_is_muted_with_reason_forever": "🔇 <b>{name} [<code>{id}</code>] は永久にミュートされました。</b>\n<i>理由: {reason}</i>",
-        "user_is_muted_forever": "🔇 <b>{name} [<code>{id}</code>] は永久にミュートされました。</b>",
-        "user_is_unmuted": "🔊 <b>{name} [<code>{id}</code>] のミュートを解除しました。</b>",
-        "chat_muted": "🔇 <b>このチャットは参加者にミュートされました。</b>",
-        "chat_unmuted": "✅ <b>このチャットは再び開かれました。</b>",
-        "title_changed": "<b>{type_of} のタイトルを <code>{old_title}</code> から <code>{new_title}</code> に変更しました。</b>",
-        "channel_created": "<emoji document_id=6296367896398399651>✅</emoji> <b>チャンネル <code>{title}</code> が作成されました。\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> 招待リンク: {link}</b>",
-        "group_created": "<emoji document_id=6296367896398399651>✅</emoji> <b>グループ <code>{title}</code> が作成されました。\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> 招待リンク: {link}</b>",
-        "user_blocked": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> はブロックされています。</b>',
-        "user_privacy_restricted": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> のプライバシー設定により、このアクションが制限されています。</b>',
-        "user_not_mutual_contact": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> は相互連絡先ではありません。</b>',
-        "user_kicked": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> をキックしました。</b>',
-        "user_invited": "<emoji document_id=6296367896398399651>✅</emoji> <b>ユーザー <a href='tg://user?id={id}'>{user}</a> がチャットに招待されました。</b>",
-        "creator": "<emoji document_id=5433758796289685818>👑</emoji> <b>クリエイター: <a href='tg://user?id={id}'>{creator}</a>.</b>",
-        "no_creator": "<emoji document_id=5019523782004441717>❌</emoji> <b>クリエイターが見つかりません。</b>",
-        "promoted_fullrights": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> がフル権限で昇進しました</b>',
-        "demoted": "<emoji document_id=5447183459602669338>🔽</emoji> <b><a href='tg://user?id={id}'>{name}</a>が降格されました",
-        "dnd": "<emoji document_id=5384262794306669858>🔕</emoji> <b>チャットをミュートしてアーカイブしました</b>",
-        "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>チャットのミュートとアーカイブに失敗しました</b>",
-        "msg_link": "<emoji document_id=5271604874419647061>🔗</emoji> <b>メッセージリンク: {link}</b>",
-        "msg_link_failed": "<emoji document_id=5019523782004441717>❌</emoji> <b>リンクの取得に失敗しました</b>",
-        "pinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>メッセージを固定しました</b>",
-        "unpinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>メッセージの固定を解除しました</b>",
-        "promoted_moder": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> は権限なしで昇進しました</b>',
-    }
-
-    @loader.command(ru_doc="[reply] - Узнать ID", jp_doc="[reply] - IDを知る")
+    @loader.command(ru_doc="[reply] - Узнать ID")
     async def id(self, message):
         """[reply] - Get the ID"""
         reply = await message.get_reply_message()
@@ -251,7 +180,6 @@ class ChatModuleMod(loader.Module):
 
     @loader.command(
         ru_doc="[reply/username/id] - Посмотреть права администратора пользователя",
-        jp_doc="[reply/username/id] - ユーザーの管理者権限を確認する",
     )
     @loader.tag("no_pm")
     async def rights(self, message):
@@ -294,7 +222,9 @@ class ChatModuleMod(loader.Module):
             message, f"<blockquote expandable><b>{output}</b></blockquote>"
         )
 
-    @loader.command(ru_doc="Покинуть чат", jp_doc="チャットから離脱する")
+    @loader.command(
+        ru_doc="Покинуть чат",
+    )
     @loader.tag("no_pm")
     async def leave(self, message):
         """Leave chat"""
@@ -303,7 +233,6 @@ class ChatModuleMod(loader.Module):
 
     @loader.command(
         ru_doc="[a[1-100] b[1-100]] | [reply] Удалить сообщения",
-        jp_doc="[a[1-100] b[1-100]] | [reply] メッセージを削除する",
     )
     async def d(self, message):
         """[a[1-100] b[1-100]] | [reply] - Delete messages"""
@@ -349,7 +278,6 @@ class ChatModuleMod(loader.Module):
 
     @loader.command(
         ru_doc="Показывает список чатов, каналов и групп где вы админ/владелец",
-        jp_doc="管理者であるかオーナーであるかのチャット、チャンネル、グループの一覧を表示する",
     )
     async def own(self, message):
         """Shows the list of chats, channels and groups where you are an admin/owner"""
@@ -377,10 +305,7 @@ class ChatModuleMod(loader.Module):
         else:
             await utils.answer(message, self.strings["no_ownerships"])
 
-    @loader.command(
-        ru_doc="[reply] - Закрепить сообщение",
-        jp_doc="[reply] - メッセージを固定する",
-    )
+    @loader.command(ru_doc="[reply] - Закрепить сообщение")
     @loader.tag("only_reply")
     async def pin(self, message):
         """[reply] - Pin a message"""
@@ -393,10 +318,7 @@ class ChatModuleMod(loader.Module):
             )
         await utils.answer(message, self.strings["pinned"])
 
-    @loader.command(
-        ru_doc="Открепить сообщение",
-        jp_doc="メッセージの固定を解除する",
-    )
+    @loader.command(ru_doc="Открепить сообщение")
     @loader.tag("only_reply")
     async def unpin(self, message):
         """Unpin a message"""
@@ -409,10 +331,7 @@ class ChatModuleMod(loader.Module):
             )
         await utils.answer(message, self.strings["unpinned"])
 
-    @loader.command(
-        ru_doc="[link/id] Удаляет группу/канал",
-        jp_doc="[link/id] グループ・チャンネルを削除する",
-    )
+    @loader.command(ru_doc="[link/id] Удаляет группу/канал")
     async def dgc(self, message):
         """[link/id] Delete chat/channel"""
         args = utils.get_args(message)
@@ -448,10 +367,7 @@ class ChatModuleMod(loader.Module):
             message, self.strings["successful_delete"].format(chat_type=chat_type)
         )
 
-    @loader.command(
-        ru_doc="Очищает группу/канал от удаленных аккаунтов",
-        jp_doc="グループ・チャンネルから削除されたアカウントを削除する",
-    )
+    @loader.command(ru_doc="Очищает группу/канал от удаленных аккаунтов")
     @loader.tag("no_pm")
     async def flush(self, message):
         """Removes deleted accounts from the chat/channel"""
@@ -480,10 +396,7 @@ class ChatModuleMod(loader.Module):
                 self.strings["kicked_deleted_accounts"].format(count=removed_count),
             )
 
-    @loader.command(
-        ru_doc="Показывает админов в группе/канале",
-        jp_doc="グループ・チャンネルの管理者を表示する",
-    )
+    @loader.command(ru_doc="Показывает админов в группе/канале")
     @loader.tag("no_pm")
     async def admins(self, message):
         """Shows the admins in the chat/channel"""
@@ -499,15 +412,18 @@ class ChatModuleMod(loader.Module):
         admins_header = self.strings["admins_in_chat"].format(
             title=title, count=len(real_members)
         )
-        if len(real_members) == 0:
-            return await utils.answer(message, "no_admins_in_chat")
+        num_of_admins = len(real_members)
+        if num_of_admins == 0:
+            return await utils.answer(message, self.strings["no_admins_in_chat"])
         for user in real_members:
             if hasattr(user, "participant") and isinstance(
                 user.participant, types.ChannelParticipantCreator
             ):
-                creator += self.strings["creator"].format(
-                    id=user.id, creator=user.first_name
-                ) + "\n"
+                creator += (
+                    self.strings["creator"].format(id=user.id, creator=user.first_name)
+                    + "\n"
+                )
+                num_of_admins -= 1
                 continue
             else:
                 admins_header += f'<emoji document_id=5316712579467321913>🔴</emoji> <a href="tg://user?id={user.id}">{user.first_name}</a> | <code>{user.id}</code>\n'
@@ -516,10 +432,27 @@ class ChatModuleMod(loader.Module):
             f"<blockquote expandable><b>{creator}</b>\n<b>{admins_header}</b></blockquote>",
         )
 
-    @loader.command(
-        ru_doc="Показывает ботов в группе/канале",
-        jp_doc="グループ・チャンネルのボットを表示する",
-    )
+    @loader.command(ru_doc="Показывает забаненых участников в группе/канале")
+    @loader.tag("no_pm")
+    async def banlist(self, message):
+        """Shows the banned participants in the chat/channel"""
+        banned = await self._client.get_participants(
+            message.chat_id, filter=types.ChannelParticipantsKicked("")
+        )
+        title = (await message.get_chat()).title
+        banned_header = self.strings["banned_in_chat"].format(
+            title=title, count=len(banned)
+        )
+        if len(banned) == 0:
+            return await utils.answer(message, self.strings["no_banned_in_chat"])
+        for user in banned:
+            if not user.deleted:
+                banned_header += f'<emoji document_id=5316712579467321913>🔴</emoji> <a href="tg://user?id={user.id}">{user.first_name}</a> | <code>{user.id}</code>\n'
+        await utils.answer(
+            message, f"<blockquote expandable><b>{banned_header}</b></blockquote>"
+        )
+
+    @loader.command(ru_doc="Показывает ботов в группе/канале")
     @loader.tag("no_pm")
     async def bots(self, message):
         """Shows the bots in the chat/channel"""
@@ -539,10 +472,7 @@ class ChatModuleMod(loader.Module):
             message, f"<blockquote expandable><b>{bots_header}</b></blockquote>"
         )
 
-    @loader.command(
-        ru_doc="Показывает простых участников чата/канала",
-        jp_doc="グループ・チャンネルのユーザーを表示する",
-    )
+    @loader.command(ru_doc="Показывает простых участников чата/канала")
     @loader.tag("no_pm")
     async def users(self, message):
         """Shows the users in the chat/channel"""
@@ -564,9 +494,7 @@ class ChatModuleMod(loader.Module):
             message, f"<blockquote expandable><b>{users_header}</b></blockquote>"
         )
 
-    @loader.command(
-        ru_doc="Забанить участника", jp_doc="ユーザーを一時的または永久に禁止する"
-    )
+    @loader.command(ru_doc="Забанить участника")
     @loader.tag("no_pm")
     async def ban(self, message):
         """Ban a participant temporarily or permanently"""
@@ -638,7 +566,7 @@ class ChatModuleMod(loader.Module):
             ),
         )
 
-    @loader.command(ru_doc="Разбанить пользователя", jp_doc="ユーザーを解除する")
+    @loader.command(ru_doc="Разбанить пользователя")
     @loader.tag("no_pm")
     async def unban(self, message):
         """Unban a user"""
@@ -667,7 +595,7 @@ class ChatModuleMod(loader.Module):
             self.strings["user_is_unbanned"].format(id=user.id, name=user.first_name),
         )
 
-    @loader.command(ru_doc="Кикнуть участника", jp_doc="ユーザーをキックする")
+    @loader.command(ru_doc="Кикнуть участника")
     @loader.tag("no_pm")
     async def kick(self, message):
         """Kick a participant"""
@@ -708,9 +636,7 @@ class ChatModuleMod(loader.Module):
             )
         )
 
-    @loader.command(
-        ru_doc="Замутить участника", jp_doc="ユーザーを一時的または永久にミュートする"
-    )
+    @loader.command(ru_doc="Замутить участника")
     @loader.tag("no_pm")
     async def mute(self, message):
         """Mute a participant temporarily or permanently"""
@@ -782,7 +708,7 @@ class ChatModuleMod(loader.Module):
             ),
         )
 
-    @loader.command(ru_doc="Размутить участника", jp_doc="ユーザーをミュートを解除する")
+    @loader.command(ru_doc="Размутить участника")
     @loader.tag("no_pm")
     async def unmute(self, message):
         """Unmute a participant"""
@@ -812,10 +738,7 @@ class ChatModuleMod(loader.Module):
             self.strings["user_is_unmuted"].format(id=user.id, name=user.first_name),
         )
 
-    @loader.command(
-        ru_doc="Закрыть чат для всех кроме админов",
-        jp_doc="チャットを管理者以外のユーザーに限定して閉じる",
-    )
+    @loader.command(ru_doc="Закрыть чат для всех кроме админов")
     @loader.tag("no_pm")
     async def mc(self, message):
         """Mute the chat for everyone except admins"""
@@ -838,10 +761,7 @@ class ChatModuleMod(loader.Module):
         else:
             return await utils.answer(message, self.strings["chat_muted"])
 
-    @loader.command(
-        ru_doc="Переименовать группу/канал",
-        jp_doc="グループ・チャンネルの名前を変更する",
-    )
+    @loader.command(ru_doc="Переименовать группу/канал")
     @loader.tag("no_pm")
     async def rename(self, message):
         """Rename the chat/channel"""
@@ -878,10 +798,7 @@ class ChatModuleMod(loader.Module):
             ),
         )
 
-    @loader.command(
-        ru_doc="[g/c] [title] - Создать группу/канал",
-        jp_doc="[g/c] [title] - グループ・チャンネルを作成する",
-    )
+    @loader.command(ru_doc="[g/c] [title] - Создать группу/канал")
     async def create(self, message):
         """[g/c] [title] - Create group/channel"""
         args = utils.get_args(message)
@@ -923,7 +840,6 @@ class ChatModuleMod(loader.Module):
 
     @loader.command(
         ru_doc="Отключает звук и архивирует чат",
-        jp_doc="チャットをミュートしてアーカイブします",
     )
     async def dnd(self, message):
         """Mutes and archives the current chat"""
@@ -933,9 +849,7 @@ class ChatModuleMod(loader.Module):
         else:
             return await utils.answer(message, self.strings["dnd_failed"])
 
-    @loader.command(
-        ru_doc="Получить ссылку на сообщение", jp_doc="メッセージへのリンクを取得する"
-    )
+    @loader.command(ru_doc="Получить ссылку на сообщение")
     async def geturl(self, message):
         """Get the link to the replied messages"""
         reply = await message.get_reply_message()
@@ -947,9 +861,7 @@ class ChatModuleMod(loader.Module):
             )
         return await utils.answer(message, self.strings["msg_link_failed"])
 
-    @loader.command(
-        ru_doc="Пригласить пользователя в чат", jp_doc="ユーザーをチャットに招待する"
-    )
+    @loader.command(ru_doc="Пригласить пользователя в чат")
     async def invite(self, message):
         """Invite a user to the chat"""
         chat = await message.get_chat()
@@ -971,10 +883,7 @@ class ChatModuleMod(loader.Module):
         else:
             return await utils.answer(message, self.strings["no_user"])
 
-    @loader.command(
-        ru_doc="[reply/username/id] - Выдать админку без прав",
-        jp_doc="[reply/username/id] - 権限なしで参加者を昇格させる",
-    )
+    @loader.command(ru_doc="[reply/username/id] - Выдать админку без прав")
     @loader.tag("no_pm")
     async def moder(self, message):
         """Promote a participant without rights"""
@@ -1019,16 +928,12 @@ class ChatModuleMod(loader.Module):
             )
             return await utils.answer(
                 message,
-                self.strings["promoted_moder"].format(
-                    id=user.id, name=user.first_name
-                ),
+                self.strings["promoted_moder"].format(id=user.id, name=user.first_name),
             )
         except Exception as e:
             return await utils.answer(message, self.strings["error"].format(error=e))
 
-    @loader.command(
-        ru_doc="Выдать полные права", jp_doc="完全な権限を持つ参加者を昇格させる"
-    )
+    @loader.command(ru_doc="Выдать полные права")
     @loader.tag("no_pm")
     async def fullrights(self, message):
         """Promote a participant with full rights"""
@@ -1080,7 +985,7 @@ class ChatModuleMod(loader.Module):
         except Exception as e:
             return await utils.answer(message, self.strings["error"].format(error=e))
 
-    @loader.command(ru_doc="Снять с админки", jp_doc="参加者の降格")
+    @loader.command(ru_doc="Снять с админки")
     @loader.tag("no_pm")
     async def demote(self, message):
         """Demote a participant"""
