@@ -408,10 +408,8 @@ class ChatModuleMod(loader.Module):
         real_members = [
             member for member in admins if not member.bot and not member.deleted
         ]
+        admins_list = ""
         creator = ""
-        admins_header = self.strings["admins_in_chat"].format(
-            title=title, count=len(real_members)
-        )
         num_of_admins = len(real_members)
         if num_of_admins == 0:
             return await utils.answer(message, self.strings["no_admins_in_chat"])
@@ -426,10 +424,10 @@ class ChatModuleMod(loader.Module):
                 num_of_admins -= 1
                 continue
             else:
-                admins_header += f'<emoji document_id=5316712579467321913>🔴</emoji> <a href="tg://user?id={user.id}">{user.first_name}</a> | <code>{user.id}</code>\n'
+                admins_list += f'<emoji document_id=5316712579467321913>🔴</emoji> <a href="tg://user?id={user.id}">{user.first_name}</a> | <code>{user.id}</code>\n'
         return await utils.answer(
             message,
-            f"<blockquote expandable><b>{creator}</b>\n<b>{admins_header}</b></blockquote>",
+            f"<blockquote expandable><b>{creator}</b>\n<b>{self.strings['admins_in_chat'].format(title=title, count=num_of_admins)}\n{admins_list}</b></blockquote>",
         )
 
     @loader.command(ru_doc="Показывает забаненых участников в группе/канале")
