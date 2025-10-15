@@ -411,8 +411,6 @@ class ChatModuleMod(loader.Module):
         admins_list = ""
         creator = ""
         num_of_admins = len(real_members)
-        if num_of_admins == 0:
-            return await utils.answer(message, self.strings["no_admins_in_chat"])
         for user in real_members:
             if hasattr(user, "participant") and isinstance(
                 user.participant, types.ChannelParticipantCreator
@@ -425,6 +423,8 @@ class ChatModuleMod(loader.Module):
                 continue
             else:
                 admins_list += f'<emoji document_id=5316712579467321913>🔴</emoji> <a href="tg://user?id={user.id}">{user.first_name}</a> | <code>{user.id}</code>\n'
+        if num_of_admins == 0:
+            return await utils.answer(message, self.strings["no_admins_in_chat"])
         return await utils.answer(
             message,
             f"<blockquote expandable><b>{creator}</b>\n<b>{self.strings['admins_in_chat'].format(title=title, count=num_of_admins)}\n{admins_list}</b></blockquote>",
