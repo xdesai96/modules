@@ -1,4 +1,5 @@
 # meta developer: @xdesai
+# scope: disable_onload_docs
 
 from datetime import timedelta
 import asyncio
