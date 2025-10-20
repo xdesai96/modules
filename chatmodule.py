@@ -46,7 +46,7 @@ class ChatModuleMod(loader.Module):
         "successful_delete": "<emoji document_id=5021905410089550576>✅</emoji> {chat_type} successfully deleted",
         "no_deleted_accounts": "<emoji document_id=5341509066344637610>😎</emoji> <b>No deleted accounts found here</b>",
         "kicked_deleted_accounts": "<emoji document_id=5328302454226298081>🫥</emoji> <b>Removed {count} deleted accounts</b>",
-        "admins_in_chat": "<emoji document_id=5276229330131772747>👑</emoji> <b>Admins in <code>{title}</code> ({count}):</b>\n\n",
+        "admins_in_chat": "<emoji document_id=5276229330131772747>👑</emoji> <b>Admins in <code>{title}</code> ({count}):</b>\n",
         "no_admins_in_chat": "<b>No admins in this chat.</b>",
         "bots_in_chat": "<emoji document_id=5276127848644503161>🤖</emoji> <b>Bots in <code>{title}</code> ({count}):</b>\n\n",
         "no_bots_in_chat": "<b>No bots in this chat.</b>",
@@ -123,7 +123,7 @@ class ChatModuleMod(loader.Module):
         "successful_delete": "<emoji document_id=5021905410089550576>✅</emoji> {chat_type} успешно удалён",
         "no_deleted_accounts": "<emoji document_id=5341509066344637610>😎</emoji> <b>Удалённые аккаунты не найдены</b>",
         "kicked_deleted_accounts": "<emoji document_id=5328302454226298081>🫥</emoji> <b>Удалено {count} удалённых аккаунтов</b>",
-        "admins_in_chat": "<emoji document_id=5276229330131772747>👑</emoji> <b>Админы в <code>{title}</code> ({count}):</b>\n\n",
+        "admins_in_chat": "<emoji document_id=5276229330131772747>👑</emoji> <b>Админы в <code>{title}</code> ({count}):</b>\n",
         "no_admins_in_chat": "<b>В чате нет админов.</b>",
         "bots_in_chat": "<emoji document_id=5276127848644503161>🤖</emoji> <b>Боты в <code>{title}</code> ({count}):</b>\n\n",
         "no_bots_in_chat": "<b>В чате нет ботов.</b>",
@@ -430,7 +430,7 @@ class ChatModuleMod(loader.Module):
             )
         return await utils.answer(
             message,
-            f"<blockquote expandable><b>{creator}</b>\n<b>{self.strings['admins_in_chat'].format(title=title, count=num_of_admins)}\n{admins_list}</b></blockquote>",
+            f"<blockquote expandable><b>{creator}</b>\n<b>{self.strings['admins_in_chat'].format(title=title, count=num_of_admins)}{admins_list}</b></blockquote>",
         )
 
     @loader.command(ru_doc="Показывает забаненых участников в группе/канале")
