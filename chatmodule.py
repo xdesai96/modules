@@ -1,9 +1,8 @@
 # meta developer: @xdesai
 # scope: disable_onload_docs
 
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 import asyncio
-import re
 from .. import loader, utils
 from telethon.tl.functions import channels
 from telethon.tl import types
@@ -75,6 +74,7 @@ class ChatModuleMod(loader.Module):
         "user_not_mutual_contact": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> is not a mutual contact.</b>',
         "user_kicked": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> is kicked from the chat.</b>',
         "user_invited": "<emoji document_id=6296367896398399651>✅</emoji> <b>User <a href='tg://user?id={id}'>{user}</a> is invited to the chat.</b>",
+        "user_not_invited": "<emoji document_id=5019523782004441717>❌</emoji> <b>User could not be invited to the chat.</b>",
         "creator": "<emoji document_id=5433758796289685818>👑</emoji> <b>The creator is <a href='tg://user?id={id}'>{creator}</a>.</b>",
         "no_creator": "<emoji document_id=5019523782004441717>❌</emoji> <b>No creator found.</b>",
         "promoted_fullrights": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> is promoted with fullrights</b>',
@@ -152,6 +152,7 @@ class ChatModuleMod(loader.Module):
         "user_not_mutual_contact": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> не является взаимным контактом.</b>',
         "user_kicked": '<emoji document_id=5019523782004441717>❌</emoji> <b><a href="tg://user?id={user_id}">{user}</a> кикнут из чата.</b>',
         "user_invited": "<emoji document_id=6296367896398399651>✅</emoji> <b>Пользователь <a href='tg://user?id={id}'>{user}</a> приглашён в чат.</b>",
+        "user_not_invited": "<emoji document_id=5019523782004441717>❌</emoji> <b>Пользователя не удалось пригласить в чат.</b>",
         "creator": "<emoji document_id=5433758796289685818>👑</emoji> <b>Создатель: <a href='tg://user?id={id}'>{creator}</a>.</b>",
         "no_creator": "<emoji document_id=5019523782004441717>❌</emoji> <b>Создатель не найден.</b>",
         "promoted_fullrights": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> повышен с полными правами</b>',
@@ -166,6 +167,17 @@ class ChatModuleMod(loader.Module):
         "banned_in_chat": "<emoji document_id=5019523782004441717>❌</emoji> <b>Забаненные пользователи в <code>{title}</code> ({count}):</b>\n\n",
         "no_banned_in_chat": "<emoji document_id=5251741320690551495>👎</emoji> <b>В этом чате нет забаненных пользователей.</b>",
     }
+
+    async def client_ready(self, client, db):
+        self._client = client
+        self._db = db
+        self.xdlib = await self.import_lib(
+            "https://mods.xdesai.top/xdlib.py",
+            suspend_on_error=True,
+        )
+        await self.request_join(
+            "@xdesai_modules", self.xdlib.strings["request_join_reason"]
+        )
 
     @loader.command(ru_doc="[reply] - Узнать ID")
     async def id(self, message):
@@ -237,45 +249,7 @@ class ChatModuleMod(loader.Module):
     )
     async def d(self, message):
         """[a[1-100] b[1-100]] | [reply] - Delete messages"""
-        args = utils.get_args(message)
-        reply = await message.get_reply_message()
-        await message.delete()
-        if args:
-            direction = args[0][0]
-            try:
-                count = int(args[0][1:])
-                if count < 1 or count > 99:
-                    return await utils.answer(message, self.strings["invalid_args"])
-            except:
-                count = 99
-            if reply:
-                ids = [reply.id]
-                if direction == "a":
-                    messages = await self._client.get_messages(
-                        reply.chat_id, min_id=reply.id, limit=count, reverse=True
-                    )
-                    ids.extend([msg.id for msg in messages])
-                elif direction == "b":
-                    messages = await self._client.get_messages(
-                        reply.chat_id, max_id=reply.id, limit=count
-                    )
-                    ids.extend([msg.id for msg in messages])
-                else:
-                    return await utils.answer(message, self.strings["invalid_args"])
-                try:
-                    await self._client.delete_messages(reply.chat_id, ids)
-                except Exception as e:
-                    await utils.answer(
-                        message, self.strings["error"].format(error=str(e))
-                    )
-        else:
-            if reply:
-                try:
-                    await reply.delete()
-                except:
-                    return
-            else:
-                return
+        await self.xdlib.delete_messages(message)
 
     @loader.command(
         ru_doc="Показывает список чатов, каналов и групп где вы админ/владелец",
@@ -509,7 +483,9 @@ class ChatModuleMod(loader.Module):
             user = await self._client.get_entity(reply.sender_id)
         else:
             try:
-                user = await self._client.get_entity(await utils.get_target(message))
+                users = self.xdlib.parse_mentions(message)
+                user = next(iter(users), None)
+                user = await self._client.get_entity(user) if user else None
             except Exception as e:
                 return await utils.answer(
                     message, self.strings["error"].format(error=str(e))
@@ -517,13 +493,11 @@ class ChatModuleMod(loader.Module):
         if not user:
             return await utils.answer(message, self.strings["invalid_args"])
 
-        time_match = re.search(r"(\d+)\s*(mo|y|w|d|h|m)", args)
+        seconds = self.xdlib.parse_time(args)
         chat = await message.get_chat()
-        if time_match:
-            duration_str = time_match.group(0)
-            until_date = self.parse_time(duration_str)
-            time_info = self.parse_time_info(duration_str)
-
+        if seconds:
+            until_date = datetime.now(timezone.utc) + timedelta(seconds=seconds)
+            time_info = self.xdlib.format_time(seconds)
             try:
                 await self._client.edit_permissions(
                     chat, user, until_date=until_date, view_messages=False
@@ -540,13 +514,13 @@ class ChatModuleMod(loader.Module):
                         id=user.id,
                         name=user.first_name,
                         reason=reason,
-                        time_info=time_info[0],
+                        time_info=time_info,
                     ),
                 )
             return await utils.answer(
                 message,
                 self.strings["user_is_banned"].format(
-                    id=user.id, name=user.first_name, time_info=time_info[0]
+                    id=user.id, name=user.first_name, time_info=time_info
                 ),
             )
 
@@ -578,7 +552,9 @@ class ChatModuleMod(loader.Module):
             user = await self._client.get_entity(reply.sender_id)
         else:
             try:
-                user = await self._client.get_entity(await utils.get_target(message))
+                users = self.xdlib.parse_mentions(message)
+                user = next(iter(users), None)
+                user = await self._client.get_entity(user) if user else None
             except Exception as e:
                 return await utils.answer(
                     message, self.strings["error"].format(error=str(e))
@@ -610,7 +586,9 @@ class ChatModuleMod(loader.Module):
             user = await self._client.get_entity(reply.sender_id)
         else:
             try:
-                user = await self._client.get_entity(await utils.get_target(message))
+                users = self.xdlib.parse_mentions(message)
+                user = next(iter(users), None)
+                user = await self._client.get_entity(user) if user else None
             except Exception as e:
                 return await utils.answer(
                     message, self.strings["error"].format(error=str(e))
@@ -651,7 +629,9 @@ class ChatModuleMod(loader.Module):
             user = await self._client.get_entity(reply.sender_id)
         else:
             try:
-                user = await self._client.get_entity(await utils.get_target(message))
+                users = self.xdlib.parse_mentions(message)
+                user = next(iter(users), None)
+                user = await self._client.get_entity(user) if user else None
             except Exception as e:
                 return await utils.answer(
                     message, self.strings["error"].format(error=str(e))
@@ -659,12 +639,11 @@ class ChatModuleMod(loader.Module):
         if not user:
             return await utils.answer(message, self.strings["invalid_args"])
 
-        time_match = re.search(r"(\d+)\s*(mo|y|w|d|h|m)", args)
+        seconds = self.xdlib.parse_time(args)
         chat = await message.get_chat()
-        if time_match:
-            duration_str = time_match.group(0)
-            until_date = self.parse_time(duration_str)
-            time_info = self.parse_time_info(duration_str)
+        if seconds:
+            until_date = datetime.now(timezone.utc) + timedelta(seconds=seconds)
+            time_info = self.xdlib.format_time(seconds)
 
             try:
                 await self._client.edit_permissions(
@@ -682,13 +661,13 @@ class ChatModuleMod(loader.Module):
                         id=user.id,
                         name=user.first_name,
                         reason=reason,
-                        time_info=time_info[0],
+                        time_info=time_info,
                     ),
                 )
             return await utils.answer(
                 message,
                 self.strings["user_is_muted"].format(
-                    id=user.id, name=user.first_name, time_info=time_info[0]
+                    id=user.id, name=user.first_name, time_info=time_info
                 ),
             )
 
@@ -715,11 +694,14 @@ class ChatModuleMod(loader.Module):
     async def unmute(self, message):
         """Unmute a participant"""
         reply = await message.get_reply_message()
+        user = None
         if reply:
             user = await self._client.get_entity(reply.sender_id)
         else:
             try:
-                user = await self._client.get_entity(await utils.get_target(message))
+                users = self.xdlib.parse_mentions(message)
+                user = next(iter(users), None)
+                user = await self._client.get_entity(user) if user else None
             except Exception as e:
                 return await utils.answer(
                     message, self.strings["error"].format(error=str(e))
@@ -870,18 +852,30 @@ class ChatModuleMod(loader.Module):
         reply = await message.get_reply_message()
         args = utils.get_args(message)
         if reply:
-            user = await self._client.get_entity(reply.sender_id)
-            result = await self.invite_user(message, chat, user)
+            entity = await self._client.get_entity(reply.sender_id)
+            result = await self.xdlib.invite_user(message, chat, entity)
             if result:
-                return result
+                return await utils.answer(
+                    message,
+                    self.strings["user_invited"].format(
+                        user=entity.first_name, id=entity.id
+                    ),
+                )
+            else:
+                return await utils.answer(message, self.strings["user_not_invited"])
         elif args:
             for user in args:
                 entity = await self._client.get_entity(
                     int(user) if user.isdigit() else user
                 )
-                result = await self.invite_user(message, chat, entity)
+                result = await self.xdlib.invite_user(message, chat, entity)
                 if result:
-                    return result
+                    return await utils.answer(
+                        message,
+                        self.strings["user_invited"].format(
+                            user=entity.first_name, id=entity.id
+                        ),
+                    )
         else:
             return await utils.answer(message, self.strings["no_user"])
 
@@ -1039,55 +1033,6 @@ class ChatModuleMod(loader.Module):
                 message,
                 self.strings["error"].format(error=str(e)),
             )
-        await utils.answer(
-            message,
-            self.strings["user_invited"].format(user=user.first_name, id=user.id),
-        )
+
         await asyncio.sleep(3)
         return None
-
-    def parse_time(self, time: str) -> timedelta:
-        unit_to_days = {
-            "m": 1 / 1440,
-            "h": 1 / 24,
-            "d": 1,
-            "w": 7,
-            "mo": 30,
-            "y": 365,
-        }
-
-        pattern = r"(\d+)\s*(mo|y|w|d|h|m)"
-        matches = re.findall(pattern, time)
-        total_days = 0
-        for value, unit in matches:
-            val = int(value)
-            total_days += val * unit_to_days[unit]
-
-        return timedelta(days=total_days)
-
-    def parse_time_info(self, time: str):
-        unit_names = {
-            "y": ("year", "years"),
-            "mo": ("month", "months"),
-            "w": ("week", "weeks"),
-            "d": ("day", "days"),
-            "h": ("hour", "hours"),
-            "m": ("minute", "minutes"),
-        }
-        units_order = ["y", "mo", "w", "d", "h", "m"]
-        pattern = r"(\d+)\s*(mo|y|w|d|h|m)"
-        matches = re.findall(pattern, time)
-        time_parts = {}
-        for value, unit in matches:
-            value = int(value)
-            if unit in time_parts:
-                time_parts[unit] += value
-            else:
-                time_parts[unit] = value
-        result = []
-        for unit in units_order:
-            if unit in time_parts:
-                val = time_parts[unit]
-                name = unit_names[unit][1 if val != 1 else 0]
-                result.append(f"{val} {name}")
-        return result
