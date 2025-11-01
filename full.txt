@@ -4,6 +4,7 @@ dbmod
 hardspam
 ipinfo
 imagetogif
+tagwatcher
 stats
 ToDo
 url
