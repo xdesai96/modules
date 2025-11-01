@@ -27,6 +27,7 @@ class XDLib(loader.Library):
     strings = {
         "name": "XDLib",
         "desc": "A library with various utility functions for XD modules.",
+        "request_join_reason": "Stay tuned for updates.",
         "seconds": "seconds",
         "second": "second",
         "minutes": "minutes",
