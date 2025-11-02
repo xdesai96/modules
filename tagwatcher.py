@@ -146,9 +146,17 @@ class TagWatcher(loader.Module):
         title = (
             utils.escape_html(chat.title)
             if hasattr(chat, "title")
-            else utils.escape_html(sender.first_name)
+            else utils.escape_html(
+                sender.first_name if hasattr(sender, "first_name") else sender.title
+            )
         )
-        name = utils.escape_html(sender.first_name) if sender else "Unknown"
+        name = (
+            utils.escape_html(
+                sender.first_name if hasattr(sender, "first_name") else sender.title
+            )
+            if sender
+            else "Unknown"
+        )
         msg_content = (
             utils.escape_html(m.message)
             if m.message
