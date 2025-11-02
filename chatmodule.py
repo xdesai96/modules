@@ -863,9 +863,11 @@ class ChatModuleMod(loader.Module):
         else:
             return await utils.answer(message, self.strings["no_user"])
 
-    @loader.command(ru_doc="Назначить пользователя администратором")
+    @loader.command(
+        ru_doc="<username/mention> [-h|--help] [-f|--fullrights] [-r|--rank rank] <right> - Назначить пользователя администратором"
+    )
     async def promote(self, message):
-        """<username/mention> [-h|--help] [-f|--fullrights] [-r|--ranj rank] <right> - Promote a participant"""
+        """<username/mention> [-h|--help] [-f|--fullrights] [-r|--rank rank] <right> - Promote a participant"""
         opts = self.xdlib.parseopts(utils.get_args_raw(message))
         if opts.get("h") or opts.get("help"):
             return await utils.answer(message, f"{await self.xdlib.get_rights_table()}")
