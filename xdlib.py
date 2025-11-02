@@ -18,6 +18,7 @@ from telethon.tl.types import (
     MessageEntityMention,
     MessageEntityMentionName,
     ChatAdminRights,
+    ChannelParticipantsKicked,
 )
 from telethon.tl.functions.channels import InviteToChannelRequest, EditAdminRequest
 
@@ -410,6 +411,45 @@ class XDLib(loader.Library):
                 f"Failed to invite user {user} to chat {chat.title}", exc_info=True
             )
             return False
+
+    async def get_chat_info(self, chat) -> dict:
+        try:
+            chat_full = await self._client.get_fullchannel(chat)
+            full_chat = chat_full.full_chat
+            chat = chat_full.chats[0]
+            return {
+                "id": full_chat.id or 0,
+                "about": full_chat.about or "",
+                "chat_photo": full_chat.chat_photo,
+                "admins_count": full_chat.admins_count or 0,
+                "online_count": full_chat.online_count or 0,
+                "participants_count": full_chat.participants_count or 0,
+                "kicked_count": full_chat.kicked_count,
+                "slowmode_seconds": full_chat.slowmode_seconds or 0,
+                "call": full_chat.call or None,
+                "title": chat.title or "",
+                "ttl_period": full_chat.ttl_period or 0,
+                "available_reactions": full_chat.available_reactions or None,
+                "requests_pending": full_chat.requests_pending or 0,
+                "recent_requesters": full_chat.recent_requesters or [],
+                "linked_chat_id": full_chat.linked_chat_id or 0,
+                "antispam": full_chat.antispam or False,
+                "participants_hidden": full_chat.participants_hidden or False,
+                "link": (
+                    f"https://t.me/{chat.username}"
+                    if chat.username
+                    else (
+                        full_chat.exported_invite.link
+                        if full_chat.exported_invite
+                        else ""
+                    )
+                ),
+                "is_channel": chat.broadcast or False,
+                "is_group": chat.megagroup or False,
+            }
+        except Exception:
+            logger.error("Failed to get the chat info")
+            return {}
 
 
 class AdminRights:
