@@ -373,9 +373,6 @@ class XDLib(loader.Library):
         pattern = r"([ab])(\d+)"
         matches = re.findall(pattern, utils.get_args_raw(msg))
 
-        if not matches:
-            return
-
         ids_to_delete = [msg.id]
         if reply:
             ids_to_delete.append(reply.id)
