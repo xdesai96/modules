@@ -86,6 +86,12 @@ class ChatModuleMod(loader.Module):
         "unpinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Unpinned the message</b>",
         "banned_in_chat": "<emoji document_id=5019523782004441717>❌</emoji> <b>Banned users in <code>{title}</code> ({count}):</b>\n\n",
         "no_banned_in_chat": "<emoji document_id=5251741320690551495>👎</emoji> <b>No banned users in this chat.</b>",
+        "type_group": "Group",
+        "type_channel": "Channel",
+        "type_unknown": "Unknown",
+        "yes": "<emoji document_id=5408909562919007848>✅</emoji> Yes",
+        "no": "<emoji document_id=5361566877149578396>✖️</emoji> No",
+        "chatinfo": "<emoji document_id=5983036958274752500>🔒</emoji><b> Type: {type_of}\n</b><emoji document_id=5985457743576698865>#️⃣</emoji><b> Chat ID: </b><code>{id}</code><b>\n</b><emoji document_id=5408849420491962048>🔥</emoji><b> Title: {title}\n\n</b><emoji document_id=5870676941614354370>🖋</emoji><b> About: {about}\n\n</b><emoji document_id=5805553606635559688>👑</emoji><b> Admin count: {admins_count}\n</b><emoji document_id=5433648711982921307>✅</emoji><b> Online count: {online_count}\n</b><emoji document_id=6024039683904772353>👤</emoji><b> Participants count: {participants_count}\n</b><emoji document_id=5816617137447376501>🚫</emoji><b> Kicked сount: {kicked_count}\n</b><emoji document_id=5431560533243346887>🔀</emoji><b> Requests pending: {requests_pending}\n\n</b><emoji document_id=5408910404732595664>🕐</emoji><b> Slowmode period: {slowmode_seconds}\n</b><emoji document_id=6019279794988915337>📞</emoji><b> Call: {call}\n</b><emoji document_id=5408832111773757273>🗑</emoji><b> TTL period: {ttl_period}\n</b><emoji document_id=5408846628763217930>👤</emoji><b> Recent requesters: {recent_requesters}\n\n</b><emoji document_id=6021690418398239007>👥</emoji><b> Linked Chat ID: {linked_chat_id}\n</b><emoji document_id=6019328362479097179>🛡</emoji><b> Antispam: {antispam}\n</b><emoji document_id=6024008227564296298>👁</emoji><b> Participants hidden: {participants_hidden}\n\n</b><emoji document_id=6028171274939797252>🔗</emoji><b> Link: {link}</b>",
     }
 
     strings_ru = {
@@ -163,6 +169,12 @@ class ChatModuleMod(loader.Module):
         "unpinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Сообщение откреплено</b>",
         "banned_in_chat": "<emoji document_id=5019523782004441717>❌</emoji> <b>Забаненные пользователи в <code>{title}</code> ({count}):</b>\n\n",
         "no_banned_in_chat": "<emoji document_id=5251741320690551495>👎</emoji> <b>В этом чате нет забаненных пользователей.</b>",
+        "type_group": "Группа",
+        "type_channel": "Канал",
+        "type_unknown": "Неизвестно",
+        "yes": "<emoji document_id=5408909562919007848>✅</emoji> Есть",
+        "no": "<emoji document_id=5361566877149578396>✖️</emoji> Нет",
+        "chatinfo": "<emoji document_id=5983036958274752500>🔒</emoji><b> Тип: {type_of}\n</b><emoji document_id=5985457743576698865>#️⃣</emoji><b> ID чата: </b><code>{id}</code><b>\n</b><emoji document_id=5408849420491962048>🔥</emoji><b> Название: {title}\n\n</b><emoji document_id=5870676941614354370>🖋</emoji><b> Описание: {about}\n\n</b><emoji document_id=5805553606635559688>👑</emoji><b> Кол-во админов: {admins_count}\n</b><emoji document_id=5433648711982921307>✅</emoji><b> Онлайн: {online_count}\n</b><emoji document_id=6024039683904772353>👤</emoji><b> Участников: {participants_count}\n</b><emoji document_id=5816617137447376501>🚫</emoji><b> Заблокировано: {kicked_count}\n</b><emoji document_id=5431560533243346887>🔀</emoji><b> Ожидающие запросы: {requests_pending}\n\n</b><emoji document_id=5408910404732595664>🕐</emoji><b> Период замедления: {slowmode_seconds}\n</b><emoji document_id=6019279794988915337>📞</emoji><b> Звонок: {call}\n</b><emoji document_id=5408832111773757273>🗑</emoji><b> Период TTL: {ttl_period}\n</b><emoji document_id=5408846628763217930>👤</emoji><b> Последние запросы: {recent_requesters}\n\n</b><emoji document_id=6021690418398239007>👥</emoji><b> Связанный ID чата: {linked_chat_id}\n</b><emoji document_id=6019328362479097179>🛡</emoji><b> Антиспам: {antispam}\n</b><emoji document_id=6024008227564296298>👁</emoji><b> Участники скрыты: {participants_hidden}\n\n</b><emoji document_id=6028171274939797252>🔗</emoji><b> Ссылка: {link}</b>",
     }
 
     async def client_ready(self, client, db):
@@ -920,7 +932,78 @@ class ChatModuleMod(loader.Module):
             await self.xdlib.set_rights(chat, user, int(args[-1]), rank=rank)
             return await utils.answer(
                 message,
-                self.strings["promoted"].format(id=user.id, name=user.first_name)
-                if int(args[-1]) > 0
-                else self.strings["demoted"].format(id=user.id, name=user.first_name),
+                (
+                    self.strings["promoted"].format(id=user.id, name=user.first_name)
+                    if int(args[-1]) > 0
+                    else self.strings["demoted"].format(
+                        id=user.id, name=user.first_name
+                    )
+                ),
+            )
+
+    @loader.command(ru_doc="")
+    async def chatinfo(self, message):
+        """Get the current chat info"""
+        try:
+            chat = await message.get_chat()
+            chatinfo = await self.xdlib.get_chat_info(chat)
+            return await utils.answer(
+                message,
+                self.strings["chatinfo"].format(
+                    id=chatinfo.get("id"),
+                    title=chatinfo.get("title"),
+                    about=chatinfo.get("about") or self.strings["no"],
+                    admins_count=chatinfo.get("admins_count"),
+                    online_count=chatinfo.get("online_count"),
+                    participants_count=chatinfo.get("participants_count"),
+                    kicked_count=chatinfo.get("kicked_count"),
+                    slowmode_seconds=(
+                        self.xdlib.format_time(chatinfo.get("slowmode_seconds"))
+                        if chatinfo.get("slowmode_seconds")
+                        else self.strings["no"]
+                    ),
+                    call=(
+                        self.strings["yes"]
+                        if chatinfo.get("call")
+                        else self.strings["no"]
+                    ),
+                    ttl_period=(
+                        self.xdlib.format_time(chatinfo.get("ttl_period"))
+                        if chatinfo.get("ttl_period")
+                        else self.strings["no"]
+                    ),
+                    requests_pending=chatinfo.get("requests_pending"),
+                    recent_requesters=", ".join(
+                        [
+                            f"<code>{user}</code>"
+                            for user in chatinfo.get("recent_requesters")
+                        ]
+                    )
+                    or self.strings["no"],
+                    linked_chat_id=chatinfo.get("linked_chat_id") or self.strings["no"],
+                    antispam=(
+                        self.strings["yes"]
+                        if chatinfo.get("antispam")
+                        else self.strings["no"]
+                    ),
+                    participants_hidden=(
+                        self.strings["yes"]
+                        if chatinfo.get("participants_hidden")
+                        else self.strings["no"]
+                    ),
+                    link=chatinfo.get("link") or self.strings["no"],
+                    type_of=(
+                        self.strings["type_group"]
+                        if chatinfo.get("is_group")
+                        else (
+                            self.strings["type_channel"]
+                            if chatinfo.get("is_channel")
+                            else self.strings["type_unknown"]
+                        )
+                    ),
+                ),
+            )
+        except Exception as e:
+            return await utils.answer(
+                message, self.strings["error"].format(error=str(e))
             )
