@@ -246,7 +246,7 @@ class XDLib(loader.Library):
                 if value == 1:
                     name = name.rstrip("s")
                 result.append(f"{value} {name}")
-        return ", ".join(result) if result else f"0 {self.strings['seconds']}"
+        return ", ".join(result) if result else "0 seconds"
 
     def parse_bool(self, value: str) -> bool:
         """Parses a string into a boolean value.
