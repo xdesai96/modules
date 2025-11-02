@@ -920,5 +920,7 @@ class ChatModuleMod(loader.Module):
             await self.xdlib.set_rights(chat, user, int(args[-1]), rank=rank)
             return await utils.answer(
                 message,
-                self.strings["promoted"].format(id=user.id, name=user.first_name),
+                self.strings["promoted"].format(id=user.id, name=user.first_name)
+                if int(args[-1]) > 0
+                else self.strings["demoted"].format(id=user.id, name=user.first_name),
             )
