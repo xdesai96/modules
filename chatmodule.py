@@ -2,7 +2,6 @@
 # scope: disable_onload_docs
 
 from datetime import timedelta, datetime, timezone
-import asyncio
 from .. import loader, utils
 from telethon.tl.functions import channels
 from telethon.tl import types
@@ -77,7 +76,7 @@ class ChatModuleMod(loader.Module):
         "user_not_invited": "<emoji document_id=5019523782004441717>❌</emoji> <b>User could not be invited to the chat.</b>",
         "creator": "<emoji document_id=5433758796289685818>👑</emoji> <b>The creator is <a href='tg://user?id={id}'>{creator}</a>.</b>",
         "no_creator": "<emoji document_id=5019523782004441717>❌</emoji> <b>No creator found.</b>",
-        "promoted_fullrights": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> is promoted with fullrights</b>',
+        "promoted": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> is promoted</b>',
         "demoted": "<emoji document_id=5447183459602669338>🔽</emoji> <b><a href='tg://user?id={id}'>{name}</a> is demoted</b>",
         "dnd": "<emoji document_id=5384262794306669858>🔕</emoji> <b>Chat muted and archived</b>",
         "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>Failed to mute and archive chat</b>",
@@ -85,7 +84,6 @@ class ChatModuleMod(loader.Module):
         "msg_link_failed": "<emoji document_id=5019523782004441717>❌</emoji> <b>Failed to get the link</b>",
         "pinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Pinned the message</b>",
         "unpinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Unpinned the message</b>",
-        "promoted_moder": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> has been promoted without rights</b>',
         "banned_in_chat": "<emoji document_id=5019523782004441717>❌</emoji> <b>Banned users in <code>{title}</code> ({count}):</b>\n\n",
         "no_banned_in_chat": "<emoji document_id=5251741320690551495>👎</emoji> <b>No banned users in this chat.</b>",
     }
@@ -155,7 +153,7 @@ class ChatModuleMod(loader.Module):
         "user_not_invited": "<emoji document_id=5019523782004441717>❌</emoji> <b>Пользователя не удалось пригласить в чат.</b>",
         "creator": "<emoji document_id=5433758796289685818>👑</emoji> <b>Создатель: <a href='tg://user?id={id}'>{creator}</a>.</b>",
         "no_creator": "<emoji document_id=5019523782004441717>❌</emoji> <b>Создатель не найден.</b>",
-        "promoted_fullrights": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> повышен с полными правами</b>',
+        "promoted": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> назначен администратором</b>',
         "demoted": "<emoji document_id=5447183459602669338>🔽</emoji> <b><a href='tg://user?id={id}'>{name}</a> снят с роли администратора</b>",
         "dnd": "<emoji document_id=5384262794306669858>🔕</emoji> <b>Чат отключён и архивирован</b>",
         "dnd_failed": "<emoji document_id=5312383351217201533>⚠️</emoji> <b>Не удалось отключить и архивировать чат</b>",
@@ -163,7 +161,6 @@ class ChatModuleMod(loader.Module):
         "msg_link_failed": "<emoji document_id=5019523782004441717>❌</emoji> <b>Не удалось получить ссылку</b>",
         "pinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Сообщение закреплено</b>",
         "unpinned": "<emoji document_id=6296367896398399651>✅</emoji> <b>Сообщение откреплено</b>",
-        "promoted_moder": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> повышен без прав</b>',
         "banned_in_chat": "<emoji document_id=5019523782004441717>❌</emoji> <b>Забаненные пользователи в <code>{title}</code> ({count}):</b>\n\n",
         "no_banned_in_chat": "<emoji document_id=5251741320690551495>👎</emoji> <b>В этом чате нет забаненных пользователей.</b>",
     }
@@ -722,29 +719,6 @@ class ChatModuleMod(loader.Module):
             self.strings["user_is_unmuted"].format(id=user.id, name=user.first_name),
         )
 
-    @loader.command(ru_doc="Закрыть чат для всех кроме админов")
-    @loader.tag("no_pm")
-    async def mc(self, message):
-        """Mute the chat for everyone except admins"""
-        chat = await message.get_chat()
-        current = chat.default_banned_rights
-        is_muted = current.send_messages is True
-        try:
-            await self._client(
-                messages.EditChatDefaultBannedRightsRequest(
-                    chat,
-                    types.ChatBannedRights(until_date=0, send_messages=not is_muted),
-                )
-            )
-        except Exception as e:
-            return await utils.answer(
-                message, self.strings["error"].format(error=str(e))
-            )
-        if is_muted:
-            return await utils.answer(message, self.strings["chat_unmuted"])
-        else:
-            return await utils.answer(message, self.strings["chat_muted"])
-
     @loader.command(ru_doc="Переименовать группу/канал")
     @loader.tag("no_pm")
     async def rename(self, message):
@@ -847,8 +821,18 @@ class ChatModuleMod(loader.Module):
 
     @loader.command(ru_doc="Пригласить пользователя в чат")
     async def invite(self, message):
-        """Invite a user to the chat"""
+        """Invite a user to the chat (use -b to invite the inline bot)"""
+        opts = self.xdlib.parseopts(utils.get_args_raw(message))
         chat = await message.get_chat()
+        if opts.get("b"):
+            await self.xdlib.invite_bot(self._client, chat)
+            entity = await self._client.get_entity(self.inline.bot_id)
+            return await utils.answer(
+                message,
+                self.strings["user_invited"].format(
+                    user=entity.first_name, id=entity.id
+                ),
+            )
         reply = await message.get_reply_message()
         args = utils.get_args(message)
         if reply:
@@ -879,160 +863,33 @@ class ChatModuleMod(loader.Module):
         else:
             return await utils.answer(message, self.strings["no_user"])
 
-    @loader.command(ru_doc="[reply/username/id] - Выдать админку без прав")
-    @loader.tag("no_pm")
-    async def moder(self, message):
-        """Promote a participant without rights"""
+    @loader.command(ru_doc="Назначить пользователя администратором")
+    async def promote(self, message):
+        """<username/mention> [-h|--help] [-f|--fullrights] [-r|--ranj rank] <right> - Promote a participant"""
+        opts = self.xdlib.parseopts(utils.get_args_raw(message))
+        if opts.get("h") or opts.get("help"):
+            return await utils.answer(message, f"{await self.xdlib.get_rights_table()}")
         chat = await message.get_chat()
         reply = await message.get_reply_message()
+        user = (
+            next(iter(self.xdlib.parse_mentions(message)))
+            if not reply
+            else reply.sender_id
+        )
+        user = await self._client.get_entity(user)
+        rank = "Admin" if not user.bot else "Bot"
+        if opts.get("r") or opts.get("rank"):
+            rank = opts.get("r") or opts.get("rank")
+        if opts.get("f") or opts.get("fullrights"):
+            await self.xdlib.set_fullrights(chat, user, rank=rank)
+            return await utils.answer(
+                message,
+                self.strings["promoted"].format(id=user.id, name=user.first_name),
+            )
         args = utils.get_args(message)
-        if reply and args:
-            user = await self._client.get_entity(reply.sender_id)
-            rank = " ".join(args)
-        elif reply:
-            user = await self._client.get_entity(reply.sender_id)
-            rank = "admin" if not user.bot else "bot"
-        elif args:
-            user = await self._client.get_entity(await utils.get_target(message))
-            if len(args) >= 2:
-                rank = " ".join(args[1:])
-            else:
-                rank = "admin" if not user.bot else "bot"
-        else:
-            return await utils.answer(message, self.strings["no_user"])
-        try:
-            await self._client(
-                channels.EditAdminRequest(
-                    channel=chat,
-                    user_id=user.id,
-                    admin_rights=types.ChatAdminRights(
-                        other=True,
-                        change_info=False,
-                        post_messages=False if chat.broadcast else None,
-                        edit_messages=False if chat.broadcast else None,
-                        delete_messages=False,
-                        ban_users=False,
-                        invite_users=False,
-                        add_admins=False,
-                        anonymous=None,
-                        pin_messages=False if not chat.broadcast else None,
-                        manage_call=False if not chat.broadcast else None,
-                        manage_topics=False if not chat.broadcast else None,
-                    ),
-                    rank=rank,
-                )
-            )
+        if args[-1].isdigit():
+            await self.xdlib.set_rights(chat, user, int(args[-1]), rank=rank)
             return await utils.answer(
                 message,
-                self.strings["promoted_moder"].format(id=user.id, name=user.first_name),
+                self.strings["promoted"].format(id=user.id, name=user.first_name),
             )
-        except Exception as e:
-            return await utils.answer(message, self.strings["error"].format(error=e))
-
-    @loader.command(ru_doc="Выдать полные права")
-    @loader.tag("no_pm")
-    async def fullrights(self, message):
-        """Promote a participant with full rights"""
-        chat = await message.get_chat()
-        reply = await message.get_reply_message()
-        args = utils.get_args(message)
-        if reply and args:
-            user = await self._client.get_entity(reply.sender_id)
-            rank = " ".join(args)
-        elif reply:
-            user = await self._client.get_entity(reply.sender_id)
-            rank = "admin" if not user.bot else "bot"
-        elif args:
-            user = await self._client.get_entity(await utils.get_target(message))
-            if len(args) >= 2:
-                rank = " ".join(args[1:])
-            else:
-                rank = "admin" if not user.bot else "bot"
-        else:
-            return await utils.answer(message, self.strings["no_user"])
-        try:
-            await self._client(
-                channels.EditAdminRequest(
-                    channel=chat,
-                    user_id=user.id,
-                    admin_rights=types.ChatAdminRights(
-                        other=True,
-                        change_info=True,
-                        post_messages=True if chat.broadcast else None,
-                        edit_messages=True if chat.broadcast else None,
-                        delete_messages=True,
-                        ban_users=True,
-                        invite_users=True,
-                        add_admins=True,
-                        anonymous=None,
-                        pin_messages=True if not chat.broadcast else None,
-                        manage_call=True if not chat.broadcast else None,
-                        manage_topics=True if not chat.broadcast else None,
-                    ),
-                    rank=rank,
-                )
-            )
-            return await utils.answer(
-                message,
-                self.strings["promoted_fullrights"].format(
-                    id=user.id, name=user.first_name
-                ),
-            )
-        except Exception as e:
-            return await utils.answer(message, self.strings["error"].format(error=e))
-
-    @loader.command(ru_doc="Снять с админки")
-    @loader.tag("no_pm")
-    async def demote(self, message):
-        """Demote a participant"""
-        chat = await message.get_chat()
-        reply = await message.get_reply_message()
-        args = utils.get_args(message)
-        if reply:
-            user = await self._client.get_entity(reply.sender_id)
-        elif args:
-            user = await self._client.get_entity(await utils.get_target(message))
-        else:
-            return await utils.answer(message, self.strings["no_user"])
-        try:
-            await self._client(
-                channels.EditAdminRequest(
-                    channel=chat,
-                    user_id=user.id,
-                    admin_rights=types.ChatAdminRights(
-                        other=False,
-                        change_info=None,
-                        post_messages=None,
-                        edit_messages=None,
-                        delete_messages=None,
-                        ban_users=None,
-                        invite_users=None,
-                        pin_messages=None,
-                        add_admins=None,
-                        anonymous=None,
-                        manage_call=None,
-                        manage_topics=None,
-                    ),
-                    rank="",
-                )
-            )
-            return await utils.answer(
-                message,
-                self.strings["demoted"].format(id=user.id, name=user.first_name),
-            )
-        except Exception as e:
-            return await utils.answer(message, self.strings["error"].format(error=e))
-
-    async def invite_user(self, message, chat, user):
-        try:
-            await self._client(
-                channels.InviteToChannelRequest(channel=chat, users=[user])
-            )
-        except Exception as e:
-            return await utils.answer(
-                message,
-                self.strings["error"].format(error=str(e)),
-            )
-
-        await asyncio.sleep(3)
-        return None

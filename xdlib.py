@@ -8,15 +8,21 @@
 
 from .. import loader, utils
 import typing
+import logging
 import re
+from telethon.errors.rpcerrorlist import UserNotParticipantError
 from telethon.tl.types import (
     Message,
     MessageEntityTextUrl,
     MessageEntityUrl,
     MessageEntityMention,
     MessageEntityMentionName,
+    ChatAdminRights,
 )
-from telethon.tl.functions.channels import InviteToChannelRequest
+from telethon.tl.functions.channels import InviteToChannelRequest, EditAdminRequest
+
+
+logger = logging.getLogger("XDLib")
 
 
 class XDLib(loader.Library):
@@ -28,27 +34,139 @@ class XDLib(loader.Library):
         "name": "XDLib",
         "desc": "A library with various utility functions for XD modules.",
         "request_join_reason": "Stay tuned for updates.",
-        "seconds": "seconds",
-        "second": "second",
-        "minutes": "minutes",
-        "minute": "minute",
-        "hours": "hours",
-        "hour": "hour",
-        "days": "days",
-        "day": "day",
-        "weeks": "weeks",
-        "week": "week",
-        "months": "months",
-        "month": "month",
-        "years": "years",
-        "year": "year",
-        "bytes": "bytes",
-        "byte": "byte",
-        "kb": "KB",
-        "mb": "MB",
-        "gb": "GB",
-        "tb": "TB",
     }
+
+    async def is_member(self, chat, user) -> bool:
+        """Checks if a user is a member of a chat.
+
+        Args:
+            chat_id (int): The ID of the chat.
+            user_id (Union[int, str]): The ID or username of the user.
+        Returns:
+            bool: True if the user is a member, False otherwise.
+        """
+        try:
+            perms = await self._client.get_perms_cached(chat, user)
+            return True if perms else False
+        except UserNotParticipantError:
+            return False
+        except Exception:
+            logger.error(
+                f"Failed to check membership for user {user} in chat {chat.title}",
+                exc_info=True,
+            )
+            return False
+
+    async def invite_bot(self, client, chat) -> bool:
+        """Invites an inline bot to a chat.
+
+        Args:
+            client: The Telethon client instance.
+            chat: The chat to invite the bot to.
+        Returns:
+            bool: True if the invitation was successful, False otherwise.
+        """
+        try:
+            await self._client(
+                InviteToChannelRequest(
+                    chat,
+                    [client.loader.inline.bot_username or client.loader.inline.bot_id],
+                )
+            )
+        except Exception:
+            logger.error("Failed to invite inline bot to chat", exc_info=True)
+            return False
+
+        rights = AdminRights(sum(AdminRights.RIGHTS.values()))
+        await self.set_rights(
+            chat,
+            client.loader.inline.bot_username or client.loader.inline.bot_id,
+            rights.to_int(),
+            rank="XD Bot",
+        )
+        return True
+
+    async def get_rights_table(self):
+        perms = AdminRights()
+        return f"<pre><code>{perms.__doc__}</code></pre>"
+
+    async def set_fullrights(self, chat, user, rank: str = "XD Admin") -> bool:
+        """Sets full rights for a user in a chat based on a mask.
+
+        Args:
+            chat (EntityLike): Chat where to protome a user.
+            user (EntityLike): The user you want to promote.
+            rank (str, optional): The rank for the user who you want to promote. Defaults to "XD Admin".
+
+        Returns:
+            bool: True if rights were set successfully, False otherwise.
+        """
+        try:
+            rights = AdminRights.all()
+            new_admin_rights = ChatAdminRights(
+                change_info=rights.has("change_info"),
+                post_messages=rights.has("post_messages"),
+                edit_messages=rights.has("edit_messages"),
+                delete_messages=rights.has("delete_messages"),
+                ban_users=rights.has("ban_users"),
+                invite_users=rights.has("invite_users"),
+                pin_messages=rights.has("pin_messages"),
+                add_admins=rights.has("add_admins"),
+                manage_call=rights.has("manage_call"),
+                other=rights.has("other"),
+            )
+            await self._client(
+                EditAdminRequest(chat, user, new_admin_rights, rank=rank)
+            )
+            return True
+        except Exception:
+            logger.error(
+                f"Failed to set full rights for {user} in chat {chat.title}",
+                exc_info=True,
+            )
+            return False
+
+    async def set_rights(self, chat, user, mask: int, rank: str = "XD Admin") -> bool:
+        """Sets admin rights for a user in a chat based on a mask.
+
+        Args:
+            chat_id (int): The ID of the chat.
+            user_id (Union[int, str]): The ID or username of the user.
+            mask (int): The rights mask to set.
+        Returns:
+            bool: True if the rights were set successfully, False otherwise.
+        """
+        try:
+            rights = AdminRights(mask)
+
+            new_admin_rights = ChatAdminRights(
+                change_info=rights.has("change_info"),
+                post_messages=rights.has("post_messages"),
+                edit_messages=rights.has("edit_messages"),
+                delete_messages=rights.has("delete_messages"),
+                ban_users=rights.has("ban_users"),
+                invite_users=rights.has("invite_users"),
+                pin_messages=rights.has("pin_messages"),
+                add_admins=rights.has("add_admins"),
+                manage_call=rights.has("manage_call"),
+                other=rights.has("other"),
+            )
+
+            await self._client(
+                EditAdminRequest(
+                    chat,
+                    user,
+                    new_admin_rights,
+                    rank=rank,
+                )
+            )
+            return True
+        except Exception:
+            logger.error(
+                f"Failed to set rights with mask {mask} for user {user} in chat {chat.title}",
+                exc_info=True,
+            )
+            return False
 
     def parseopts(self, args: str) -> typing.Dict[str, typing.Any]:
         """Parses command-line style options from a string.
@@ -92,16 +210,16 @@ class XDLib(loader.Library):
         """
         if size < 1024:
             if size == 1:
-                return f"{size} {self.strings['byte']}"
-            return f"{size} {self.strings['bytes']}"
+                return f"{size} byte"
+            return f"{size} bytes"
         elif size < 1024**2:
-            return f"{size / 1024:.2f} {self.strings['kb']}"
+            return f"{size / 1024:.2f} KB"
         elif size < 1024**3:
-            return f"{size / 1024**2:.2f} {self.strings['mb']}"
+            return f"{size / 1024**2:.2f} MB"
         elif size < 1024**4:
-            return f"{size / 1024**3:.2f} {self.strings['gb']}"
+            return f"{size / 1024**3:.2f} GB"
         else:
-            return f"{size / 1024**4:.2f} {self.strings['tb']}"
+            return f"{size / 1024**4:.2f} TB"
 
     def format_time(self, seconds: int) -> str:
         """Formats a time duration in seconds into a human-readable string.
@@ -127,7 +245,7 @@ class XDLib(loader.Library):
                 seconds -= value * count
                 if value == 1:
                     name = name.rstrip("s")
-                result.append(f"{value} {self.strings[name]}")
+                result.append(f"{value} {name}")
         return ", ".join(result) if result else f"0 {self.strings['seconds']}"
 
     def parse_bool(self, value: str) -> bool:
@@ -240,6 +358,7 @@ class XDLib(loader.Library):
         instance = self.lookup(name)
         if isinstance(instance, loader.Library):
             self.allmodules.libraries.remove(instance)
+            logger.info(f"Unloaded library: {name}")
             return True
         return False
 
@@ -290,4 +409,85 @@ class XDLib(loader.Library):
             await self._client(InviteToChannelRequest(channel=chat, users=[user]))
             return True
         except Exception:
+            logger.error(
+                f"Failed to invite user {user} to chat {chat.title}", exc_info=True
+            )
             return False
+
+
+class AdminRights:
+    """
+    ⁧
+    | Right           | Value |
+    | --------------- | ----- |
+    | change_info     | 1     |
+    | post_messages   | 2     |
+    | edit_messages   | 4     |
+    | delete_messages | 8     |
+    | ban_users       | 16    |
+    | invite_users    | 32    |
+    | pin_messages    | 64    |
+    | add_admins      | 128   |
+    | manage_call     | 256   |
+    | other           | 512   |
+
+    Examples:
+    setrights 18 → post_messages + ban_users
+    setrights 1023 → all rights
+    """
+
+    RIGHTS = {
+        "change_info": 1 << 0,
+        "post_messages": 1 << 1,
+        "edit_messages": 1 << 2,
+        "delete_messages": 1 << 3,
+        "ban_users": 1 << 4,
+        "invite_users": 1 << 5,
+        "pin_messages": 1 << 6,
+        "add_admins": 1 << 7,
+        "manage_call": 1 << 8,
+        "other": 1 << 9,
+    }
+
+    MAX_MASK = (1 << len(RIGHTS)) - 1
+
+    def __init__(self, mask: int = 0):
+        self.set_rights(mask)
+
+    def set_rights(self, mask: int) -> None:
+        self.mask = mask & self.MAX_MASK
+
+    def add(self, *right_names: str) -> None:
+        for name in right_names:
+            if name in self.RIGHTS:
+                self.mask |= self.RIGHTS[name]
+
+    def remove(self, *right_names: str) -> None:
+        for name in right_names:
+            if name in self.RIGHTS:
+                self.mask &= ~self.RIGHTS[name]
+
+    def has(self, right_name: str) -> bool:
+        return bool(self.mask & self.RIGHTS.get(right_name, 0))
+
+    def to_dict(self) -> dict[str, bool]:
+        return {name: bool(self.mask & bit) for name, bit in self.RIGHTS.items()}
+
+    def to_int(self) -> int:
+        return self.mask
+
+    @classmethod
+    def from_rights(cls, *right_names: str):
+        mask = 0
+        for name in right_names:
+            if name in cls.RIGHTS:
+                mask |= cls.RIGHTS[name]
+        return cls(mask)
+
+    @classmethod
+    def from_int(cls, mask: int):
+        return cls(mask)
+
+    @classmethod
+    def all(cls):
+        return cls(cls.MAX_MASK)
