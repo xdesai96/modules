@@ -509,7 +509,11 @@ class ChatModuleMod(loader.Module):
                     message,
                     self.strings["user_is_banned_with_reason"].format(
                         id=user.id,
-                        name=user.first_name,
+                        name=(
+                            user.first_name
+                            if hasattr(user, "first_name")
+                            else user.title
+                        ),
                         reason=reason,
                         time_info=time_info,
                     ),
@@ -517,7 +521,9 @@ class ChatModuleMod(loader.Module):
             return await utils.answer(
                 message,
                 self.strings["user_is_banned"].format(
-                    id=user.id, name=user.first_name, time_info=time_info
+                    id=user.id,
+                    name=user.first_name if hasattr(user, "first_name") else user.title,
+                    time_info=time_info,
                 ),
             )
 
@@ -528,14 +534,15 @@ class ChatModuleMod(loader.Module):
                 message,
                 self.strings["user_is_banned_forever_with_reason"].format(
                     id=user.id,
-                    name=user.first_name,
+                    name=user.first_name if hasattr(user, "first_name") else user.title,
                     reason=reason,
                 ),
             )
         return await utils.answer(
             message,
             self.strings["user_is_banned_forever"].format(
-                id=user.id, name=user.first_name
+                id=user.id,
+                name=user.first_name if hasattr(user, "first_name") else user.title,
             ),
         )
 
@@ -567,7 +574,10 @@ class ChatModuleMod(loader.Module):
             )
         return await utils.answer(
             message,
-            self.strings["user_is_unbanned"].format(id=user.id, name=user.first_name),
+            self.strings["user_is_unbanned"].format(
+                id=user.id,
+                name=user.first_name if hasattr(user, "first_name") else user.title,
+            ),
         )
 
     @loader.command(ru_doc="Кикнуть участника")
@@ -602,13 +612,18 @@ class ChatModuleMod(loader.Module):
         return (
             await utils.answer(
                 message,
-                self.strings["user_is_kicked"].format(id=user.id, name=user.first_name),
+                self.strings["user_is_kicked"].format(
+                    id=user.id,
+                    name=user.first_name if hasattr(user, "first_name") else user.title,
+                ),
             )
             if not reason
             else await utils.answer(
                 message,
                 self.strings["user_is_kicked_with_reason"].format(
-                    id=user.id, name=user.first_name, reason=reason
+                    id=user.id,
+                    name=user.first_name if hasattr(user, "first_name") else user.title,
+                    reason=reason,
                 ),
             )
         )
@@ -656,7 +671,11 @@ class ChatModuleMod(loader.Module):
                     message,
                     self.strings["user_is_muted_with_reason"].format(
                         id=user.id,
-                        name=user.first_name,
+                        name=(
+                            user.first_name
+                            if hasattr(user, "first_name")
+                            else user.title
+                        ),
                         reason=reason,
                         time_info=time_info,
                     ),
@@ -664,7 +683,9 @@ class ChatModuleMod(loader.Module):
             return await utils.answer(
                 message,
                 self.strings["user_is_muted"].format(
-                    id=user.id, name=user.first_name, time_info=time_info
+                    id=user.id,
+                    name=user.first_name if hasattr(user, "first_name") else user.title,
+                    time_info=time_info,
                 ),
             )
 
@@ -675,14 +696,15 @@ class ChatModuleMod(loader.Module):
                 message,
                 self.strings["user_is_muted_with_reason_forever"].format(
                     id=user.id,
-                    name=user.first_name,
+                    name=user.first_name if hasattr(user, "first_name") else user.title,
                     reason=reason,
                 ),
             )
         return await utils.answer(
             message,
             self.strings["user_is_muted_forever"].format(
-                id=user.id, name=user.first_name
+                id=user.id,
+                name=user.first_name if hasattr(user, "first_name") else user.title,
             ),
         )
 
@@ -716,7 +738,10 @@ class ChatModuleMod(loader.Module):
             )
         return await utils.answer(
             message,
-            self.strings["user_is_unmuted"].format(id=user.id, name=user.first_name),
+            self.strings["user_is_unmuted"].format(
+                id=user.id,
+                name=user.first_name if hasattr(user, "first_name") else user.title,
+            ),
         )
 
     @loader.command(ru_doc="Переименовать группу/канал")
