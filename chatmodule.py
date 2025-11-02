@@ -878,6 +878,8 @@ class ChatModuleMod(loader.Module):
             if not reply
             else reply.sender_id
         )
+        if not reply and not utils.get_args_raw():
+            return await utils.answer(message, self.strings["invalid_args"])
         user = await self._client.get_entity(user)
         rank = "Admin" if not user.bot else "Bot"
         if opts.get("r") or opts.get("rank"):
