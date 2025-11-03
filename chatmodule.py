@@ -941,7 +941,7 @@ class ChatModuleMod(loader.Module):
                 ),
             )
 
-    @loader.command(ru_doc="")
+    @loader.command(ru_doc="Получить инфу о текущем чате")
     @loader.tag("no_pm")
     async def chatinfo(self, message):
         """Get the current chat info"""
