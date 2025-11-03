@@ -874,7 +874,7 @@ class ChatModuleMod(loader.Module):
         args = utils.get_args(message)
         if reply:
             entity = await self._client.get_entity(reply.sender_id)
-            result = await self.xdlib.invite_user(message, chat, entity)
+            result = await self.xdlib.invite_user(chat, entity)
             if result:
                 return await utils.answer(
                     message,
@@ -889,7 +889,7 @@ class ChatModuleMod(loader.Module):
                 entity = await self._client.get_entity(
                     int(user) if user.isdigit() else user
                 )
-                result = await self.xdlib.invite_user(message, chat, entity)
+                result = await self.xdlib.invite_user(chat, entity)
                 if result:
                     return await utils.answer(
                         message,
