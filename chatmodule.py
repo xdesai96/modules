@@ -214,7 +214,7 @@ class ChatModuleMod(loader.Module):
             participant_id = reply.sender_id
         else:
             if args:
-                participant_id = next(iter(await self.xdlib.parse.mentions(message)))
+                participant_id = next(iter(self.xdlib.parse.mentions(message)))
             else:
                 return await utils.answer(message, self.strings["no_user"])
         try:
