@@ -18,7 +18,6 @@ from telethon.tl.types import (
     MessageEntityMention,
     MessageEntityMentionName,
     ChatAdminRights,
-    ChannelParticipantsKicked,
 )
 from telethon.tl.functions.channels import InviteToChannelRequest, EditAdminRequest
 
@@ -36,6 +35,213 @@ class XDLib(loader.Library):
         "desc": "A library with various utility functions for XD modules.",
         "request_join_reason": "Stay tuned for updates.",
     }
+
+    async def init(self):
+        self.format = FormatUtils()
+        self.parse = ParseUtils()
+        self.messages = MessageUtils(self._client, self._db)
+        self.admin = AdminUtils(self._client, self._db)
+        self.chat = ChatUtils(self._client, self.db)
+
+    def unload_lib(self, name: str):
+        instance = self.lookup(name)
+        if isinstance(instance, loader.Library):
+            self.allmodules.libraries.remove(instance)
+            logger.info(f"Unloaded library: {name}")
+            return True
+        return False
+
+
+class ParseUtils:
+
+    def opts(self, args: str) -> typing.Dict[str, typing.Any]:
+        """Parses command-line style options from a string.
+        Args:
+            args (str): The input string containing options.
+        Returns:
+            Dict[str, Any]: A dictionary of parsed options.
+        """
+        pattern = r'(?:--?)(\w+)(?:[=\s]+("[^"]*"|\'[^\']*\'|\S+))?'
+        matches = re.findall(pattern, args)
+
+        options = {}
+
+        def auto_cast(value: str):
+            low = value.lower()
+            if low in {"true", "yes", "on", "false", "no", "off"}:
+                return self.bool(low)
+            if re.fullmatch(r"-?\d+", value):
+                return int(value)
+            if re.fullmatch(r"-?\d+\.\d+", value):
+                return float(value)
+            return value
+
+        for key, value in matches:
+            if value:
+                value = value.strip("\"'")
+                value = auto_cast(value)
+            else:
+                value = True
+            options[key] = value
+
+        return options
+
+    def bool(self, value: str) -> bool:
+        """Parses a string into a boolean value.
+
+        Args:
+            value (str): The input string.
+        Returns:
+            bool: The parsed boolean value.
+        """
+        true_values = {"true", "yes", "1", "on"}
+        false_values = {"false", "no", "0", "off"}
+        low_value = value.lower()
+        if low_value in true_values:
+            return True
+        elif low_value in false_values:
+            return False
+        else:
+            raise ValueError(f"Cannot parse boolean from '{value}'")
+
+    def time(self, time_str: str) -> int:
+        """Parses a time duration string into seconds.
+
+        Args:
+            time_str (str): The time duration string (e.g., "2h 30m").
+        Returns:
+            int: The total duration in seconds.
+        """
+        time_units = {
+            "s": 1,
+            "m": 60,
+            "h": 3600,
+            "d": 86400,
+            "w": 604800,
+            "y": 31536000,
+        }
+        total_seconds = 0
+        pattern = r"(\d+)([smhdwy])"
+        matches = re.findall(pattern, time_str)
+        for value, unit in matches:
+            total_seconds += int(value) * time_units[unit]
+        return total_seconds
+
+    def size(self, size_str: str) -> int:
+        """Parses a size string into bytes.
+
+        Args:
+            size_str (str): The size string (e.g., "10MB").
+        Returns:
+            int: The size in bytes.
+        """
+        size_units = {
+            "b": 1,
+            "kb": 1024,
+            "mb": 1024**2,
+            "gb": 1024**3,
+            "tb": 1024**4,
+        }
+        pattern = r"(\d+)([bkmgt]b?)"
+        match = re.match(pattern, size_str.lower())
+        if match:
+            value, unit = match.groups()
+            return int(value) * size_units[unit]
+        return 0
+
+    def mentions(self, msg: Message) -> typing.List[str]:
+        """Extracts mentions from a given message.
+
+        Args:
+            msg (Message): The message.
+        Returns:
+            List[str]: A list of extracted mentions.
+        """
+        if msg.entities:
+            mentions = []
+            for entity in msg.entities:
+                if isinstance(entity, MessageEntityMention):
+                    offset = entity.offset
+                    length = entity.length
+                    mentions.append(msg.message[offset : offset + length])
+                elif isinstance(entity, MessageEntityMentionName):
+                    mentions.append(entity.user_id)
+            return mentions
+        return []
+
+    def urls(self, msg: Message) -> typing.List[str]:
+        """Extracts URLs from a given message.
+
+        Args:
+            msg (Message): The message.
+        Returns:
+            List[str]: A list of extracted URLs.
+        """
+        if msg.entities or msg.media:
+            urls = []
+            for entity in msg.entities:
+                if isinstance(entity, MessageEntityTextUrl):
+                    urls.append(entity.url)
+                elif isinstance(entity, MessageEntityUrl):
+                    offset = entity.offset
+                    length = entity.length
+                    urls.append(msg.message[offset : offset + length])
+                elif msg.media and hasattr(msg.media, "webpage"):
+                    if msg.media.webpage.url:
+                        urls.append(msg.media.webpage.url)
+            return urls
+        return []
+
+
+class MessageUtils:
+    def __init__(self, client, db):
+        self._client = client
+        self._db = db
+
+    async def delete_messages(self, msg: Message):
+        """Deletes multiple messages based on a specific pattern.
+        Args:
+            msg (Message): The message containing the command and pattern.
+        Returns:
+            None
+        """
+        reply = await msg.get_reply_message()
+        pattern = r"([ab])(\d+)"
+        matches = re.findall(pattern, utils.get_args_raw(msg))
+
+        ids_to_delete = [msg.id]
+        if reply:
+            ids_to_delete.append(reply.id)
+
+        for direction, count_str in matches:
+            count = int(count_str)
+            if direction == "a":  # after
+                if reply:
+                    async for m in self._client.iter_messages(
+                        msg.chat_id, min_id=reply.id, limit=count, reverse=True
+                    ):
+                        ids_to_delete.append(m.id)
+            elif direction == "b":  # before
+                async for m in self._client.iter_messages(
+                    msg.chat_id, max_id=(reply if reply else msg).id, limit=count
+                ):
+                    ids_to_delete.append(m.id)
+
+        await self._client.delete_messages(msg.chat_id, message_ids=ids_to_delete)
+
+    async def get_sender(self, message):
+        if message.out:
+            return await self._client.get_me()
+        if message.is_private:
+            return message.peer_id
+        if message.is_group and message.is_channel:
+            return message.sender or message.chat
+
+
+class ChatUtils:
+    def __init__(self, client, db) -> None:
+        self._client = client
+        self._db = db
 
     async def is_member(self, chat, user) -> bool:
         """Checks if a user is a member of a chat.
@@ -57,6 +263,63 @@ class XDLib(loader.Library):
                 exc_info=True,
             )
             return False
+
+    async def invite_user(self, chat, user):
+        """Invites a user to a chat.
+
+        Args:
+            chat_id (int): The ID of the chat.
+            user_id (Union[int, str]): The ID or username of the user to invite.
+        Returns:
+            None
+        """
+        try:
+            await self._client(InviteToChannelRequest(channel=chat, users=[user]))
+            return True
+        except Exception:
+            logger.error(
+                f"Failed to invite user {user} to chat {chat.title}", exc_info=True
+            )
+            return False
+
+    async def get_info(self, chat) -> dict:
+        try:
+            chat_full = await self._client.get_fullchannel(chat)
+            full_chat = chat_full.full_chat
+            chat = chat_full.chats[0]
+            return {
+                "id": full_chat.id or 0,
+                "about": full_chat.about or "",
+                "chat_photo": full_chat.chat_photo,
+                "admins_count": full_chat.admins_count or 0,
+                "online_count": full_chat.online_count or 0,
+                "participants_count": full_chat.participants_count or 0,
+                "kicked_count": full_chat.kicked_count,
+                "slowmode_seconds": full_chat.slowmode_seconds or 0,
+                "call": full_chat.call or None,
+                "title": chat.title or "",
+                "ttl_period": full_chat.ttl_period or 0,
+                "available_reactions": full_chat.available_reactions or None,
+                "requests_pending": full_chat.requests_pending or 0,
+                "recent_requesters": full_chat.recent_requesters or [],
+                "linked_chat_id": full_chat.linked_chat_id or 0,
+                "antispam": full_chat.antispam or False,
+                "participants_hidden": full_chat.participants_hidden or False,
+                "link": (
+                    f"https://t.me/{chat.username}"
+                    if chat.username
+                    else (
+                        full_chat.exported_invite.link
+                        if full_chat.exported_invite
+                        else ""
+                    )
+                ),
+                "is_channel": chat.broadcast or False,
+                "is_group": chat.megagroup or False,
+            }
+        except Exception:
+            logger.error("Failed to get the chat info")
+            return {}
 
     async def invite_bot(self, client, chat) -> bool:
         """Invites an inline bot to a chat.
@@ -86,6 +349,12 @@ class XDLib(loader.Library):
             rank="XD Bot",
         )
         return True
+
+
+class AdminUtils:
+    def __init__(self, client, db) -> None:
+        self._client = client
+        self._db = db
 
     async def get_rights_table(self):
         perms = AdminRights()
@@ -169,38 +438,8 @@ class XDLib(loader.Library):
             )
             return False
 
-    def parseopts(self, args: str) -> typing.Dict[str, typing.Any]:
-        """Parses command-line style options from a string.
-        Args:
-            args (str): The input string containing options.
-        Returns:
-            Dict[str, Any]: A dictionary of parsed options.
-        """
-        pattern = r'(?:--?)(\w+)(?:[=\s]+("[^"]*"|\'[^\']*\'|\S+))?'
-        matches = re.findall(pattern, args)
 
-        options = {}
-
-        def auto_cast(value: str):
-            low = value.lower()
-            if low in {"true", "yes", "on", "false", "no", "off"}:
-                return self.parse_bool(low)
-            if re.fullmatch(r"-?\d+", value):
-                return int(value)
-            if re.fullmatch(r"-?\d+\.\d+", value):
-                return float(value)
-            return value
-
-        for key, value in matches:
-            if value:
-                value = value.strip("\"'")
-                value = auto_cast(value)
-            else:
-                value = True
-            options[key] = value
-
-        return options
-
+class FormatUtils:
     def format_bytes(self, size: int) -> str:
         """Formats a size in bytes into a human-readable string.
 
@@ -248,208 +487,6 @@ class XDLib(loader.Library):
                     name = name.rstrip("s")
                 result.append(f"{value} {name}")
         return ", ".join(result) if result else "0 seconds"
-
-    def parse_bool(self, value: str) -> bool:
-        """Parses a string into a boolean value.
-
-        Args:
-            value (str): The input string.
-        Returns:
-            bool: The parsed boolean value.
-        """
-        true_values = {"true", "yes", "1", "on"}
-        false_values = {"false", "no", "0", "off"}
-        low_value = value.lower()
-        if low_value in true_values:
-            return True
-        elif low_value in false_values:
-            return False
-        else:
-            raise ValueError(f"Cannot parse boolean from '{value}'")
-
-    def parse_time(self, time_str: str) -> int:
-        """Parses a time duration string into seconds.
-
-        Args:
-            time_str (str): The time duration string (e.g., "2h 30m").
-        Returns:
-            int: The total duration in seconds.
-        """
-        time_units = {
-            "s": 1,
-            "m": 60,
-            "h": 3600,
-            "d": 86400,
-            "w": 604800,
-            "y": 31536000,
-        }
-        total_seconds = 0
-        pattern = r"(\d+)([smhdwy])"
-        matches = re.findall(pattern, time_str)
-        for value, unit in matches:
-            total_seconds += int(value) * time_units[unit]
-        return total_seconds
-
-    def parse_size(self, size_str: str) -> int:
-        """Parses a size string into bytes.
-
-        Args:
-            size_str (str): The size string (e.g., "10MB").
-        Returns:
-            int: The size in bytes.
-        """
-        size_units = {
-            "b": 1,
-            "kb": 1024,
-            "mb": 1024**2,
-            "gb": 1024**3,
-            "tb": 1024**4,
-        }
-        pattern = r"(\d+)([bkmgt]b?)"
-        match = re.match(pattern, size_str.lower())
-        if match:
-            value, unit = match.groups()
-            return int(value) * size_units[unit]
-        return 0
-
-    def parse_mentions(self, msg: Message) -> typing.List[str]:
-        """Extracts mentions from a given message.
-
-        Args:
-            msg (Message): The message.
-        Returns:
-            List[str]: A list of extracted mentions.
-        """
-        if msg.entities:
-            mentions = []
-            for entity in msg.entities:
-                if isinstance(entity, MessageEntityMention):
-                    offset = entity.offset
-                    length = entity.length
-                    mentions.append(msg.message[offset : offset + length])
-                elif isinstance(entity, MessageEntityMentionName):
-                    mentions.append(entity.user_id)
-            return mentions
-        return []
-
-    def parse_urls(self, msg: Message) -> typing.List[str]:
-        """Extracts URLs from a given message.
-
-        Args:
-            msg (Message): The message.
-        Returns:
-            List[str]: A list of extracted URLs.
-        """
-        if msg.entities or msg.media:
-            urls = []
-            for entity in msg.entities:
-                if isinstance(entity, MessageEntityTextUrl):
-                    urls.append(entity.url)
-                elif isinstance(entity, MessageEntityUrl):
-                    offset = entity.offset
-                    length = entity.length
-                    urls.append(msg.message[offset : offset + length])
-                elif msg.media and hasattr(msg.media, "webpage"):
-                    if msg.media.webpage.url:
-                        urls.append(msg.media.webpage.url)
-            return urls
-        return []
-
-    def unload_lib(self, name: str):
-        instance = self.lookup(name)
-        if isinstance(instance, loader.Library):
-            self.allmodules.libraries.remove(instance)
-            logger.info(f"Unloaded library: {name}")
-            return True
-        return False
-
-    async def delete_messages(self, msg: Message):
-        """Deletes multiple messages based on a specific pattern.
-        Args:
-            msg (Message): The message containing the command and pattern.
-        Returns:
-            None
-        """
-        reply = await msg.get_reply_message()
-        pattern = r"([ab])(\d+)"
-        matches = re.findall(pattern, utils.get_args_raw(msg))
-
-        ids_to_delete = [msg.id]
-        if reply:
-            ids_to_delete.append(reply.id)
-
-        for direction, count_str in matches:
-            count = int(count_str)
-            if direction == "a":  # after
-                if reply:
-                    async for m in self._client.iter_messages(
-                        msg.chat_id, min_id=reply.id, limit=count, reverse=True
-                    ):
-                        ids_to_delete.append(m.id)
-            elif direction == "b":  # before
-                async for m in self._client.iter_messages(
-                    msg.chat_id, max_id=(reply if reply else msg).id, limit=count
-                ):
-                    ids_to_delete.append(m.id)
-
-        await self._client.delete_messages(msg.chat_id, message_ids=ids_to_delete)
-
-    async def invite_user(self, chat, user):
-        """Invites a user to a chat.
-
-        Args:
-            chat_id (int): The ID of the chat.
-            user_id (Union[int, str]): The ID or username of the user to invite.
-        Returns:
-            None
-        """
-        try:
-            await self._client(InviteToChannelRequest(channel=chat, users=[user]))
-            return True
-        except Exception:
-            logger.error(
-                f"Failed to invite user {user} to chat {chat.title}", exc_info=True
-            )
-            return False
-
-    async def get_chat_info(self, chat) -> dict:
-        try:
-            chat_full = await self._client.get_fullchannel(chat)
-            full_chat = chat_full.full_chat
-            chat = chat_full.chats[0]
-            return {
-                "id": full_chat.id or 0,
-                "about": full_chat.about or "",
-                "chat_photo": full_chat.chat_photo,
-                "admins_count": full_chat.admins_count or 0,
-                "online_count": full_chat.online_count or 0,
-                "participants_count": full_chat.participants_count or 0,
-                "kicked_count": full_chat.kicked_count,
-                "slowmode_seconds": full_chat.slowmode_seconds or 0,
-                "call": full_chat.call or None,
-                "title": chat.title or "",
-                "ttl_period": full_chat.ttl_period or 0,
-                "available_reactions": full_chat.available_reactions or None,
-                "requests_pending": full_chat.requests_pending or 0,
-                "recent_requesters": full_chat.recent_requesters or [],
-                "linked_chat_id": full_chat.linked_chat_id or 0,
-                "antispam": full_chat.antispam or False,
-                "participants_hidden": full_chat.participants_hidden or False,
-                "link": (
-                    f"https://t.me/{chat.username}"
-                    if chat.username
-                    else (
-                        full_chat.exported_invite.link
-                        if full_chat.exported_invite
-                        else ""
-                    )
-                ),
-                "is_channel": chat.broadcast or False,
-                "is_group": chat.megagroup or False,
-            }
-        except Exception:
-            logger.error("Failed to get the chat info")
-            return {}
 
 
 class AdminRights:

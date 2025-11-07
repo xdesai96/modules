@@ -214,7 +214,7 @@ class ChatModuleMod(loader.Module):
             participant_id = reply.sender_id
         else:
             if args:
-                participant_id = await utils.get_target(message)
+                participant_id = next(iter(await self.xdlib.parse.mentions(message)))
             else:
                 return await utils.answer(message, self.strings["no_user"])
         try:
@@ -258,7 +258,7 @@ class ChatModuleMod(loader.Module):
     )
     async def d(self, message):
         """[a[1-100] b[1-100]] | [reply] - Delete messages"""
-        await self.xdlib.delete_messages(message)
+        await self.xdlib.messages.delete_messages(message)
 
     @loader.command(
         ru_doc="Показывает список чатов, каналов и групп где вы админ/владелец",
@@ -492,7 +492,7 @@ class ChatModuleMod(loader.Module):
             user = await self._client.get_entity(reply.sender_id)
         else:
             try:
-                users = self.xdlib.parse_mentions(message)
+                users = self.xdlib.parse.mentions(message)
                 user = next(iter(users), None)
                 user = await self._client.get_entity(user) if user else None
             except Exception as e:
@@ -502,11 +502,11 @@ class ChatModuleMod(loader.Module):
         if not user:
             return await utils.answer(message, self.strings["invalid_args"])
 
-        seconds = self.xdlib.parse_time(args)
+        seconds = self.xdlib.parse.time(args)
         chat = await message.get_chat()
         if seconds:
             until_date = datetime.now(timezone.utc) + timedelta(seconds=seconds)
-            time_info = self.xdlib.format_time(seconds)
+            time_info = self.xdlib.format.time(seconds)
             try:
                 await self._client.edit_permissions(
                     chat, user, until_date=until_date, view_messages=False
@@ -565,10 +565,10 @@ class ChatModuleMod(loader.Module):
         reply = await message.get_reply_message()
         user = None
         if reply:
-            user = await self._client.get_entity(reply.sender_id)
+            user = await self.xdlib.messages.get_sender(reply)
         else:
             try:
-                users = self.xdlib.parse_mentions(message)
+                users = self.xdlib.parse.mentions(message)
                 user = next(iter(users), None)
                 user = await self._client.get_entity(user) if user else None
             except Exception as e:
@@ -602,10 +602,10 @@ class ChatModuleMod(loader.Module):
         if "\n" in message.text:
             reason = message.text.split("\n", 1)[1]
         if reply:
-            user = await self._client.get_entity(reply.sender_id)
+            user = await self.xdlib.messages.get_sender(reply)
         else:
             try:
-                users = self.xdlib.parse_mentions(message)
+                users = self.xdlib.parse.mentions(message)
                 user = next(iter(users), None)
                 user = await self._client.get_entity(user) if user else None
             except Exception as e:
@@ -650,10 +650,10 @@ class ChatModuleMod(loader.Module):
         reply = await message.get_reply_message()
         user = None
         if reply:
-            user = await self._client.get_entity(reply.sender_id)
+            user = await self.xdlib.messages.get_sender(reply)
         else:
             try:
-                users = self.xdlib.parse_mentions(message)
+                users = self.xdlib.parse.mentions(message)
                 user = next(iter(users), None)
                 user = await self._client.get_entity(user) if user else None
             except Exception as e:
@@ -663,11 +663,11 @@ class ChatModuleMod(loader.Module):
         if not user:
             return await utils.answer(message, self.strings["invalid_args"])
 
-        seconds = self.xdlib.parse_time(args)
+        seconds = self.xdlib.parse.time(args)
         chat = await message.get_chat()
         if seconds:
             until_date = datetime.now(timezone.utc) + timedelta(seconds=seconds)
-            time_info = self.xdlib.format_time(seconds)
+            time_info = self.xdlib.format.time(seconds)
 
             try:
                 await self._client.edit_permissions(
@@ -727,10 +727,10 @@ class ChatModuleMod(loader.Module):
         reply = await message.get_reply_message()
         user = None
         if reply:
-            user = await self._client.get_entity(reply.sender_id)
+            user = await self.xdlib.messages.get_sender(reply)
         else:
             try:
-                users = self.xdlib.parse_mentions(message)
+                users = self.xdlib.parse.mentions(message)
                 user = next(iter(users), None)
                 user = await self._client.get_entity(user) if user else None
             except Exception as e:
@@ -859,10 +859,10 @@ class ChatModuleMod(loader.Module):
     @loader.command(ru_doc="Пригласить пользователя в чат")
     async def invite(self, message):
         """Invite a user to the chat (use -b to invite the inline bot)"""
-        opts = self.xdlib.parseopts(utils.get_args_raw(message))
+        opts = self.xdlib.parse.opts(utils.get_args_raw(message))
         chat = await message.get_chat()
         if opts.get("b"):
-            await self.xdlib.invite_bot(self._client, chat)
+            await self.xdlib.chat.invite_bot(self._client, chat)
             entity = await self._client.get_entity(self.inline.bot_id)
             return await utils.answer(
                 message,
@@ -873,8 +873,8 @@ class ChatModuleMod(loader.Module):
         reply = await message.get_reply_message()
         args = utils.get_args(message)
         if reply:
-            entity = await self._client.get_entity(reply.sender_id)
-            result = await self.xdlib.invite_user(chat, entity)
+            entity = await self.xdlib.messages.get_sender(reply)
+            result = await self.xdlib.chat.invite_user(chat, entity)
             if result:
                 return await utils.answer(
                     message,
@@ -889,7 +889,7 @@ class ChatModuleMod(loader.Module):
                 entity = await self._client.get_entity(
                     int(user) if user.isdigit() else user
                 )
-                result = await self.xdlib.invite_user(chat, entity)
+                result = await self.xdlib.chat.invite_user(chat, entity)
                 if result:
                     return await utils.answer(
                         message,
@@ -905,13 +905,15 @@ class ChatModuleMod(loader.Module):
     )
     async def promote(self, message):
         """<username/mention> [-h|--help] [-f|--fullrights] [-r|--rank rank] <right> - Promote a participant"""
-        opts = self.xdlib.parseopts(utils.get_args_raw(message))
+        opts = self.xdlib.parse.opts(utils.get_args_raw(message))
         if opts.get("h") or opts.get("help"):
-            return await utils.answer(message, f"{await self.xdlib.get_rights_table()}")
+            return await utils.answer(
+                message, f"{await self.xdlib.admin.get_rights_table()}"
+            )
         chat = await message.get_chat()
         reply = await message.get_reply_message()
         user = (
-            next(iter(self.xdlib.parse_mentions(message)))
+            next(iter(self.xdlib.parse.mentions(message)))
             if not reply
             else reply.sender_id
         )
@@ -922,14 +924,14 @@ class ChatModuleMod(loader.Module):
         if opts.get("r") or opts.get("rank"):
             rank = opts.get("r") or opts.get("rank")
         if opts.get("f") or opts.get("fullrights"):
-            await self.xdlib.set_fullrights(chat, user, rank=rank)
+            await self.xdlib.admin.set_fullrights(chat, user, rank=rank)
             return await utils.answer(
                 message,
                 self.strings["promoted"].format(id=user.id, name=user.first_name),
             )
         args = utils.get_args(message)
         if args[-1].isdigit():
-            await self.xdlib.set_rights(chat, user, int(args[-1]), rank=rank)
+            await self.xdlib.admin.set_rights(chat, user, int(args[-1]), rank=rank)
             return await utils.answer(
                 message,
                 (
@@ -947,7 +949,7 @@ class ChatModuleMod(loader.Module):
         """Get the current chat info"""
         try:
             chat = await message.get_chat()
-            chatinfo = await self.xdlib.get_chat_info(chat)
+            chatinfo = await self.xdlib.chat.get_info(chat)
             return await utils.answer(
                 message,
                 self.strings["chatinfo"].format(
@@ -959,7 +961,7 @@ class ChatModuleMod(loader.Module):
                     participants_count=chatinfo.get("participants_count"),
                     kicked_count=chatinfo.get("kicked_count"),
                     slowmode_seconds=(
-                        self.xdlib.format_time(chatinfo.get("slowmode_seconds"))
+                        self.xdlib.format.time(chatinfo.get("slowmode_seconds"))
                         if chatinfo.get("slowmode_seconds")
                         else self.strings["no"]
                     ),
@@ -969,7 +971,7 @@ class ChatModuleMod(loader.Module):
                         else self.strings["no"]
                     ),
                     ttl_period=(
-                        self.xdlib.format_time(chatinfo.get("ttl_period"))
+                        self.xdlib.format.time(chatinfo.get("ttl_period"))
                         if chatinfo.get("ttl_period")
                         else self.strings["no"]
                     ),
