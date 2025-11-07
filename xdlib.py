@@ -440,7 +440,7 @@ class AdminUtils:
 
 
 class FormatUtils:
-    def format_bytes(self, size: int) -> str:
+    def bytes(self, size: int) -> str:
         """Formats a size in bytes into a human-readable string.
 
         Args:
@@ -461,7 +461,7 @@ class FormatUtils:
         else:
             return f"{size / 1024**4:.2f} TB"
 
-    def format_time(self, seconds: int) -> str:
+    def time(self, seconds: int) -> str:
         """Formats a time duration in seconds into a human-readable string.
 
         Args:
