@@ -93,7 +93,7 @@ class ChatModuleMod(loader.Module):
         "no": "<emoji document_id=5361566877149578396>✖️</emoji> No",
         "chatinfo": "<emoji document_id=5983036958274752500>🔒</emoji><b> Type: {type_of}\n</b><emoji document_id=5985457743576698865>#️⃣</emoji><b> Chat ID: </b><code>{id}</code><b>\n</b><emoji document_id=5408849420491962048>🔥</emoji><b> Title: {title}\n\n</b><emoji document_id=5870676941614354370>🖋</emoji><b> About: {about}\n\n</b><emoji document_id=5805553606635559688>👑</emoji><b> Admin count: {admins_count}\n</b><emoji document_id=5433648711982921307>✅</emoji><b> Online count: {online_count}\n</b><emoji document_id=6024039683904772353>👤</emoji><b> Participants count: {participants_count}\n</b><emoji document_id=5816617137447376501>🚫</emoji><b> Kicked сount: {kicked_count}\n</b><emoji document_id=5431560533243346887>🔀</emoji><b> Requests pending: {requests_pending}\n\n</b><emoji document_id=5408910404732595664>🕐</emoji><b> Slowmode period: {slowmode_seconds}\n</b><emoji document_id=6019279794988915337>📞</emoji><b> Call: {call}\n</b><emoji document_id=5408832111773757273>🗑</emoji><b> TTL period: {ttl_period}\n</b><emoji document_id=5408846628763217930>👤</emoji><b> Recent requesters: {recent_requesters}\n\n</b><emoji document_id=6021690418398239007>👥</emoji><b> Linked Chat ID: {linked_chat_id}\n</b><emoji document_id=6019328362479097179>🛡</emoji><b> Antispam: {antispam}\n</b><emoji document_id=6024008227564296298>👁</emoji><b> Participants hidden: {participants_hidden}\n\n</b><emoji document_id=6028171274939797252>🔗</emoji><b> Link: {link}</b>",
         "all_approved": "<emoji document_id=5409029658794537988>✅</emoji> <b>Users are approved</b>",
-        "all_declined": "<emoji document_id=5458610095539645297>✖️</emoji> <b>Requests are dismissed</b>",
+        "all_dismissed": "<emoji document_id=5458610095539645297>✖️</emoji> <b>Requests are dismissed</b>",
     }
 
     strings_ru = {
@@ -178,7 +178,7 @@ class ChatModuleMod(loader.Module):
         "no": "<emoji document_id=5361566877149578396>✖️</emoji> Нет",
         "chatinfo": "<emoji document_id=5983036958274752500>🔒</emoji><b> Тип: {type_of}\n</b><emoji document_id=5985457743576698865>#️⃣</emoji><b> ID чата: </b><code>{id}</code><b>\n</b><emoji document_id=5408849420491962048>🔥</emoji><b> Название: {title}\n\n</b><emoji document_id=5870676941614354370>🖋</emoji><b> Описание: {about}\n\n</b><emoji document_id=5805553606635559688>👑</emoji><b> Кол-во админов: {admins_count}\n</b><emoji document_id=5433648711982921307>✅</emoji><b> Онлайн: {online_count}\n</b><emoji document_id=6024039683904772353>👤</emoji><b> Участников: {participants_count}\n</b><emoji document_id=5816617137447376501>🚫</emoji><b> Заблокировано: {kicked_count}\n</b><emoji document_id=5431560533243346887>🔀</emoji><b> Ожидающие запросы: {requests_pending}\n\n</b><emoji document_id=5408910404732595664>🕐</emoji><b> Период замедления: {slowmode_seconds}\n</b><emoji document_id=6019279794988915337>📞</emoji><b> Звонок: {call}\n</b><emoji document_id=5408832111773757273>🗑</emoji><b> Период TTL: {ttl_period}\n</b><emoji document_id=5408846628763217930>👤</emoji><b> Последние запросы: {recent_requesters}\n\n</b><emoji document_id=6021690418398239007>👥</emoji><b> Связанный ID чата: {linked_chat_id}\n</b><emoji document_id=6019328362479097179>🛡</emoji><b> Антиспам: {antispam}\n</b><emoji document_id=6024008227564296298>👁</emoji><b> Участники скрыты: {participants_hidden}\n\n</b><emoji document_id=6028171274939797252>🔗</emoji><b> Ссылка: {link}</b>",
         "all_approved": "<emoji document_id=5409029658794537988>✅</emoji> <b>Пользователи одобрены</b>",
-        "all_declined": "<emoji document_id=5458610095539645297>✖️</emoji> <b>Запросы отклонены</b>",
+        "all_dismissed": "<emoji document_id=5458610095539645297>✖️</emoji> <b>Запросы отклонены</b>",
     }
 
     async def client_ready(self, client, db):
@@ -1036,16 +1036,16 @@ class ChatModuleMod(loader.Module):
 
     @loader.command(ru_doc="[-a] - Отклонить заявки на вступление")
     @loader.tag("no_pm")
-    async def decline(self, message):
+    async def dismiss(self, message):
         """[-a] - Decline join requests"""
         opts = self.xdlib.parse.opts(utils.get_args_raw(message))
         if opts.get("a"):
             await self.xdlib.chat.join_requests(message, False)
-            return await utils.answer(message, self.strings["all_declined"])
+            return await utils.answer(message, self.strings["all_dismissed"])
         args = utils.get_args(message)
         for arg in args:
             if arg.isdigit():
                 await self.xdlib.chat.join_request(message, int(arg), False)
             else:
                 await self.xdlib.chat.join_request(message, arg, False)
-        return await utils.answer(message, self.strings["all_declined"])
+        return await utils.answer(message, self.strings["all_dismissed"])
