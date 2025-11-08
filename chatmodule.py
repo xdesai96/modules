@@ -1022,7 +1022,7 @@ class ChatModuleMod(loader.Module):
     @loader.tag("no_pm")
     async def approve(self, message):
         """[-a] - Accept join requests"""
-        opts = self.xdlib.parse.opts(utils.get_args_raw())
+        opts = self.xdlib.parse.opts(utils.get_args_raw(message))
         if opts.get("a"):
             await self.xdlib.chat.join_requests(message, True)
         args = utils.get_args()
@@ -1037,7 +1037,7 @@ class ChatModuleMod(loader.Module):
     @loader.tag("no_pm")
     async def decline(self, message):
         """[-a] - Decline join requests"""
-        opts = self.xdlib.parse.opts(utils.get_args_raw())
+        opts = self.xdlib.parse.opts(utils.get_args_raw(message))
         if opts.get("a"):
             await self.xdlib.chat.join_requests(message, False)
         args = utils.get_args()
