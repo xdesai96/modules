@@ -1025,6 +1025,7 @@ class ChatModuleMod(loader.Module):
         opts = self.xdlib.parse.opts(utils.get_args_raw(message))
         if opts.get("a"):
             await self.xdlib.chat.join_requests(message, True)
+            return await utils.answer(message, self.strings["all_approved"])
         args = utils.get_args(message)
         for arg in args:
             if arg.isdigit():
@@ -1040,6 +1041,7 @@ class ChatModuleMod(loader.Module):
         opts = self.xdlib.parse.opts(utils.get_args_raw(message))
         if opts.get("a"):
             await self.xdlib.chat.join_requests(message, False)
+            return await utils.answer(message, self.strings["all_declined"])
         args = utils.get_args(message)
         for arg in args:
             if arg.isdigit():
