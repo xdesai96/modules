@@ -20,6 +20,10 @@ from telethon.tl.types import (
     ChatAdminRights,
 )
 from telethon.tl.functions.channels import InviteToChannelRequest, EditAdminRequest
+from telethon.tl.functions.messages import (
+    HideAllChatJoinRequestsRequest,
+    HideChatJoinRequestRequest,
+)
 
 
 logger = logging.getLogger("XDLib")
