@@ -907,7 +907,7 @@ class ChatModuleMod(loader.Module):
     async def promote(self, message):
         """<username/mention> [-h|--help] [-f|--fullrights] [-r|--rank rank] <right> - Promote a participant"""
         opts = self.xdlib.parse.opts(utils.get_args_raw(message))
-        if not utils.get_args_raw():
+        if not utils.get_args_raw(message):
             return await utils.answer(message, self.strings["invalid_args"])
         if opts.get("h") or opts.get("help"):
             return await utils.answer(
