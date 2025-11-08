@@ -903,9 +903,12 @@ class ChatModuleMod(loader.Module):
     @loader.command(
         ru_doc="<username/mention> [-h|--help] [-f|--fullrights] [-r|--rank rank] <right> - Назначить пользователя администратором"
     )
+    @loader.tag("no_pm")
     async def promote(self, message):
         """<username/mention> [-h|--help] [-f|--fullrights] [-r|--rank rank] <right> - Promote a participant"""
         opts = self.xdlib.parse.opts(utils.get_args_raw(message))
+        if not args:
+            return await utils.answer(message, self.strings["invalid_args"])
         if opts.get("h") or opts.get("help"):
             return await utils.answer(
                 message, f"{await self.xdlib.admin.get_rights_table()}"
