@@ -243,6 +243,21 @@ class ChatUtils:
         self._client = client
         self._db = db
 
+    async def join_request(self, message, user_id, approved):
+        await self._client(
+            HideChatJoinRequestRequest(
+                peer=message.chat, user_id=user_id, approved=approved
+            )
+        )
+
+    async def join_requests(self, message, approved):
+        await self._client(
+            HideAllChatJoinRequestsRequest(
+                peer=message.chat,
+                approved=approved,
+            )
+        )
+
     async def is_member(self, chat, user) -> bool:
         """Checks if a user is a member of a chat.
 
