@@ -342,7 +342,8 @@ class ChatUtils:
             return False
 
         rights = AdminRights(sum(AdminRights.RIGHTS.values()))
-        await self.set_rights(
+        admin = AdminUtils(self._client, self._db)
+        await admin.set_rights(
             chat,
             client.loader.inline.bot_username or client.loader.inline.bot_id,
             rights.to_int(),
