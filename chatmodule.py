@@ -1025,7 +1025,7 @@ class ChatModuleMod(loader.Module):
         opts = self.xdlib.parse.opts(utils.get_args_raw(message))
         if opts.get("a"):
             await self.xdlib.chat.join_requests(message, True)
-        args = utils.get_args()
+        args = utils.get_args(message)
         for arg in args:
             if arg.isdigit():
                 await self.xdlib.chat.join_request(message, int(arg), True)
@@ -1040,7 +1040,7 @@ class ChatModuleMod(loader.Module):
         opts = self.xdlib.parse.opts(utils.get_args_raw(message))
         if opts.get("a"):
             await self.xdlib.chat.join_requests(message, False)
-        args = utils.get_args()
+        args = utils.get_args(message)
         for arg in args:
             if arg.isdigit():
                 await self.xdlib.chat.join_request(message, int(arg), False)
