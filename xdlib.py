@@ -566,7 +566,7 @@ class AdminRights:
     def __init__(self, mask: int = 0):
         self.set_rights(mask)
 
-    def set_rights(self, mask: int) -> None:
+    def set_rights(self, mask: int = 0) -> None:
         self.mask = mask & self.MAX_MASK
 
     def add(self, *right_names: str) -> None:
