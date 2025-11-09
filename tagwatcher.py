@@ -118,7 +118,7 @@ class TagWatcher(loader.Module):
 
     async def client_ready(self):
         await self.request_join("@xdesai_modules", self.strings["request_join_reason"])
-        self.xdlib = self.import_lib(
+        self.xdlib = await self.import_lib(
             "https://mods.xdesai.top/xdlib.py", suspend_on_error=True
         )
 
@@ -142,7 +142,7 @@ class TagWatcher(loader.Module):
         else:
             text = self.strings["mentioned"]
         chat = await m.get_chat()
-        sender = self.xdlib.messages.get_sender(m)
+        sender = await self.xdlib.messages.get_sender(m)
         title = (
             utils.escape_html(chat.title)
             if hasattr(chat, "title")
