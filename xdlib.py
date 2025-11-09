@@ -392,8 +392,7 @@ class AdminUtils:
         self._db = db
 
     async def get_rights_table(self):
-        perms = AdminRights()
-        return f"<pre><code>{perms.__doc__}</code></pre>"
+        return f"<pre><code>{AdminRights().__doc__}</code></pre>"
 
     async def set_fullrights(self, chat, user, rank: str = "XD Admin") -> bool:
         """Sets full rights for a user in a chat based on a mask.
@@ -408,26 +407,35 @@ class AdminUtils:
         """
         try:
             rights = AdminRights.all()
-            new_admin_rights = ChatAdminRights(
-                change_info=rights.has("change_info"),
-                post_messages=rights.has("post_messages"),
-                edit_messages=rights.has("edit_messages"),
-                delete_messages=rights.has("delete_messages"),
-                ban_users=rights.has("ban_users"),
-                invite_users=rights.has("invite_users"),
-                pin_messages=rights.has("pin_messages"),
-                add_admins=rights.has("add_admins"),
-                manage_call=rights.has("manage_call"),
-                anonymous=rights.has("anonymous"),
-                other=rights.has("other"),
-            )
+            new_admin_rights = rights.get_rights()
             await self._client(
                 EditAdminRequest(chat, user, new_admin_rights, rank=rank)
             )
             return True
         except Exception:
             logger.error(
-                f"Failed to set full rights for {user} in chat {chat.title}",
+                f"Failed to set full rights for {user.id} in chat {chat.title}",
+                exc_info=True,
+            )
+            return False
+
+    async def demote(self, chat, user) -> bool:
+        try:
+            rights = AdminRights.none()
+
+            new_admin_rights = rights.get_rights()
+
+            await self._client(
+                EditAdminRequest(
+                    chat,
+                    user,
+                    new_admin_rights,
+                )
+            )
+            return True
+        except Exception:
+            logger.error(
+                f"Failed to set rights with mask {mask} for user {user.id} in chat {chat.title}",
                 exc_info=True,
             )
             return False
@@ -445,19 +453,7 @@ class AdminUtils:
         try:
             rights = AdminRights(mask)
 
-            new_admin_rights = ChatAdminRights(
-                change_info=rights.has("change_info"),
-                post_messages=rights.has("post_messages"),
-                edit_messages=rights.has("edit_messages"),
-                delete_messages=rights.has("delete_messages"),
-                ban_users=rights.has("ban_users"),
-                invite_users=rights.has("invite_users"),
-                pin_messages=rights.has("pin_messages"),
-                add_admins=rights.has("add_admins"),
-                manage_call=rights.has("manage_call"),
-                anonymous=rights.has("anonymous"),
-                other=rights.has("other"),
-            )
+            new_admin_rights = rights.get_rights()
 
             await self._client(
                 EditAdminRequest(
@@ -470,7 +466,7 @@ class AdminUtils:
             return True
         except Exception:
             logger.error(
-                f"Failed to set rights with mask {mask} for user {user} in chat {chat.title}",
+                f"Failed to set rights with mask {mask} for user {user.id} in chat {chat.title}",
                 exc_info=True,
             )
             return False
@@ -582,6 +578,21 @@ class AdminRights:
     def has(self, right_name: str) -> bool:
         return bool(self.mask & self.RIGHTS.get(right_name, 0))
 
+    def get_rights(self):
+        return ChatAdminRights(
+            change_info=self.has("change_info"),
+            post_messages=self.has("post_messages"),
+            edit_messages=self.has("edit_messages"),
+            delete_messages=self.has("delete_messages"),
+            ban_users=self.has("ban_users"),
+            invite_users=self.has("invite_users"),
+            pin_messages=self.has("pin_messages"),
+            add_admins=self.has("add_admins"),
+            manage_call=self.has("manage_call"),
+            anonymous=self.has("anonymous"),
+            other=self.has("other"),
+        )
+
     def to_dict(self) -> dict[str, bool]:
         return {name: bool(self.mask & bit) for name, bit in self.RIGHTS.items()}
 
@@ -603,3 +614,7 @@ class AdminRights:
     @classmethod
     def all(cls):
         return cls(cls.MAX_MASK)
+
+    @classmethod
+    def none(cls):
+        return cls(0)
