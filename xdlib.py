@@ -58,35 +58,50 @@ class XDLib(loader.Library):
 
 class ParseUtils:
 
-    def opts(self, args: str) -> typing.Dict[str, typing.Any]:
-        """Parses command-line style options from a string.
+    def opts(self, args: list) -> typing.Dict[str, typing.Any]:
+        """Parses command-line style options from a list of arguments.
         Args:
-            args (str): The input string containing options.
+            args (list): List of command-line arguments.
         Returns:
             Dict[str, Any]: A dictionary of parsed options.
         """
-        pattern = r'(?:--?)(\w+)(?:[=\s]+("[^"]*"|\'[^\']*\'|\S+))?'
-        matches = re.findall(pattern, args)
-
         options = {}
+        i = 0
 
         def auto_cast(value: str):
+            if not value:
+                return True
             low = value.lower()
-            if low in {"true", "yes", "on", "false", "no", "off"}:
-                return self.bool(low)
+            if low in {"true", "yes", "on"}:
+                return True
+            if low in {"false", "no", "off"}:
+                return False
             if re.fullmatch(r"-?\d+", value):
                 return int(value)
             if re.fullmatch(r"-?\d+\.\d+", value):
                 return float(value)
             return value
 
-        for key, value in matches:
-            if value:
-                value = value.strip("\"'")
-                value = auto_cast(value)
-            else:
-                value = True
-            options[key] = value
+        while i < len(args):
+            arg = args[i]
+
+            if "=" in arg:
+                key, value = arg.split("=", 1)
+                if key.startswith("--"):
+                    key = key[2:]
+                elif key.startswith("-"):
+                    key = key[1:]
+                options[key] = auto_cast(value.strip("\"'"))
+
+            elif arg.startswith("--") or arg.startswith("-"):
+                key = arg.lstrip("-")
+                if i + 1 < len(args) and not args[i + 1].startswith("-"):
+                    options[key] = auto_cast(args[i + 1].strip("\"'"))
+                    i += 1
+                else:
+                    options[key] = True
+
+            i += 1
 
         return options
 

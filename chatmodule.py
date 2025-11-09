@@ -863,7 +863,7 @@ class ChatModuleMod(loader.Module):
     @loader.command(ru_doc="Пригласить пользователя в чат")
     async def invite(self, message):
         """Invite a user to the chat (use -b to invite the inline bot)"""
-        opts = self.xdlib.parse.opts(utils.get_args_raw(message))
+        opts = self.xdlib.parse.opts(utils.get_args(message))
         chat = await message.get_chat()
         if opts.get("b"):
             await self.xdlib.chat.invite_bot(self._client, chat)
@@ -910,7 +910,7 @@ class ChatModuleMod(loader.Module):
     @loader.tag("no_pm")
     async def promote(self, message):
         """<username/mention> [-h|--help] [-f|--fullrights] [-r|--rank rank] <right> - Promote a participant"""
-        opts = self.xdlib.parse.opts(utils.get_args_raw(message))
+        opts = self.xdlib.parse.opts(utils.get_args(message))
         if not utils.get_args_raw(message):
             return await utils.answer(message, self.strings["invalid_args"])
         if opts.get("h") or opts.get("help"):
@@ -938,12 +938,12 @@ class ChatModuleMod(loader.Module):
             )
         perms = opts.get("p") or opts.get("perms")
         if isinstance(perms, int):
-            await self.xdlib.admin.set_rights(chat, user, int(perms), rank=rank)
+            await self.xdlib.admin.set_rights(chat, user, perms, rank=rank)
             return await utils.answer(
                 message,
                 (
                     self.strings["promoted"].format(id=user.id, name=user.first_name)
-                    if int(perms) > 0
+                    if perms
                     else self.strings["demoted"].format(
                         id=user.id, name=user.first_name
                     )
@@ -1022,7 +1022,7 @@ class ChatModuleMod(loader.Module):
     @loader.tag("no_pm")
     async def approve(self, message):
         """[-a] - Accept join requests"""
-        opts = self.xdlib.parse.opts(utils.get_args_raw(message))
+        opts = self.xdlib.parse.opts(utils.get_args(message))
         if opts.get("a"):
             await self.xdlib.chat.join_requests(message, True)
             return await utils.answer(message, self.strings["all_approved"])
@@ -1038,7 +1038,7 @@ class ChatModuleMod(loader.Module):
     @loader.tag("no_pm")
     async def dismiss(self, message):
         """[-a] - Decline join requests"""
-        opts = self.xdlib.parse.opts(utils.get_args_raw(message))
+        opts = self.xdlib.parse.opts(utils.get_args(message))
         if opts.get("a"):
             await self.xdlib.chat.join_requests(message, False)
             return await utils.answer(message, self.strings["all_dismissed"])
