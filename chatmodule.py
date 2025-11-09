@@ -908,28 +908,23 @@ class ChatModuleMod(loader.Module):
         ru_doc="<username/mention> [-h|--help] [-f|--fullrights] [-r|--rank rank] <right> - Назначить пользователя администратором"
     )
     @loader.tag("no_pm")
-    async def promote(self, message):
+    async def setrights(self, message):
         """<username/mention> [-h|--help] [-f|--fullrights] [-r|--rank rank] <right> - Promote a participant"""
         opts = self.xdlib.parse.opts(utils.get_args(message))
-        if not utils.get_args_raw(message):
+        if not utils.get_args(message):
             return await utils.answer(message, self.strings["invalid_args"])
-        if opts.get("h") or opts.get("help"):
+        reply = await message.get_reply_message()
+        user = opts.get("u") or opts.get("user") or (reply.sender_id if reply else None)
+        if not user:
+            return await utils.answer(message, self.strings["invalid_args"])
+        help = opts.get("h") or opts.get("help")
+        if help:
             return await utils.answer(
                 message, f"{await self.xdlib.admin.get_rights_table()}"
             )
         chat = await message.get_chat()
-        reply = await message.get_reply_message()
-        user = (
-            next(iter(self.xdlib.parse.mentions(message)))
-            if not reply
-            else reply.sender_id
-        )
-        if not reply and not utils.get_args_raw(message):
-            return await utils.answer(message, self.strings["invalid_args"])
         user = await self._client.get_entity(user)
-        rank = "Admin" if not user.bot else "Bot"
-        if opts.get("r") or opts.get("rank"):
-            rank = opts.get("r") or opts.get("rank")
+        rank = opts.get("r") or opts.get("rank") or ("Admin" if not user.bot else "Bot")
         if opts.get("f") or opts.get("fullrights"):
             await self.xdlib.admin.set_fullrights(chat, user, rank=rank)
             return await utils.answer(
@@ -937,8 +932,11 @@ class ChatModuleMod(loader.Module):
                 self.strings["promoted"].format(id=user.id, name=user.first_name),
             )
         perms = opts.get("p") or opts.get("perms")
-        if isinstance(perms, int):
-            await self.xdlib.admin.set_rights(chat, user, perms, rank=rank)
+        try:
+            if not perms:
+                await self.xdlib.admin.demote(chat, user)
+            else:
+                await self.xdlib.admin.set_rights(chat, user, perms, rank)
             return await utils.answer(
                 message,
                 (
@@ -949,6 +947,8 @@ class ChatModuleMod(loader.Module):
                     )
                 ),
             )
+        except Exception as e:
+            return await utils.answer(message, f"<code>{e}</code>")
 
     @loader.command(ru_doc="Получить инфу о текущем чате")
     @loader.tag("no_pm")
