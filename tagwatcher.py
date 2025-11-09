@@ -4,10 +4,7 @@
 
 import logging
 from .. import utils, loader, main
-from telethon.tl.functions.messages import (
-    ReadReactionsRequest,
-    MarkDialogUnreadRequest,
-)
+from telethon.tl.functions.messages import MarkDialogUnreadRequest
 
 logger = logging.getLogger("TagWatcher")
 
@@ -121,6 +118,9 @@ class TagWatcher(loader.Module):
 
     async def client_ready(self):
         await self.request_join("@xdesai_modules", self.strings["request_join_reason"])
+        self.xdlib = self.import_lib(
+            "https://mods.xdesai.top/xdlib.py", suspend_on_error=True
+        )
 
         self.notif_chat, _ = await utils.asset_channel(
             self._client,
@@ -142,7 +142,7 @@ class TagWatcher(loader.Module):
         else:
             text = self.strings["mentioned"]
         chat = await m.get_chat()
-        sender = await utils.get_user(m)
+        sender = self.xdlib.messages.get_sender(m)
         title = (
             utils.escape_html(chat.title)
             if hasattr(chat, "title")
