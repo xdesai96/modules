@@ -425,9 +425,7 @@ class AdminUtils:
 
             new_admin_rights = rights.get_rights()
 
-            await self._client(
-                EditAdminRequest(chat, user, new_admin_rights, rank=None)
-            )
+            await self._client(EditAdminRequest(chat, user, new_admin_rights, rank=""))
             return True
         except Exception:
             logger.error(
