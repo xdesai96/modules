@@ -540,7 +540,8 @@ class AdminRights:
         "pin_messages": 1 << 6,
         "add_admins": 1 << 7,
         "manage_call": 1 << 8,
-        "other": 1 << 9,
+        "anonymous" 1 << 9,
+        "other": 1 << 10,
     }
 
     MAX_MASK = (1 << len(RIGHTS)) - 1
