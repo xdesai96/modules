@@ -435,7 +435,7 @@ class AdminUtils:
             return True
         except Exception:
             logger.error(
-                f"Failed to set rights with mask {mask} for user {user.id} in chat {chat.title}",
+                f"Failed to demote the user {user.id} in chat {chat.title}",
                 exc_info=True,
             )
             return False
