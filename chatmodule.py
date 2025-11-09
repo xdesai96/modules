@@ -913,15 +913,15 @@ class ChatModuleMod(loader.Module):
         opts = self.xdlib.parse.opts(utils.get_args(message))
         if not utils.get_args(message):
             return await utils.answer(message, self.strings["invalid_args"])
-        reply = await message.get_reply_message()
-        user = opts.get("u") or opts.get("user") or (reply.sender_id if reply else None)
-        if not user:
-            return await utils.answer(message, self.strings["invalid_args"])
         help = opts.get("h") or opts.get("help")
         if help:
             return await utils.answer(
                 message, f"{await self.xdlib.admin.get_rights_table()}"
             )
+        reply = await message.get_reply_message()
+        user = opts.get("u") or opts.get("user") or (reply.sender_id if reply else None)
+        if not user:
+            return await utils.answer(message, self.strings["invalid_args"])
         chat = await message.get_chat()
         user = await self._client.get_entity(user)
         rank = opts.get("r") or opts.get("rank") or ("Admin" if not user.bot else "Bot")
