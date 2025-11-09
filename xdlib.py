@@ -403,6 +403,7 @@ class AdminUtils:
                 pin_messages=rights.has("pin_messages"),
                 add_admins=rights.has("add_admins"),
                 manage_call=rights.has("manage_call"),
+                anonymous=rights.has("anonymous"),
                 other=rights.has("other"),
             )
             await self._client(
@@ -439,6 +440,7 @@ class AdminUtils:
                 pin_messages=rights.has("pin_messages"),
                 add_admins=rights.has("add_admins"),
                 manage_call=rights.has("manage_call"),
+                anonymous=rights.has("anonymous"),
                 other=rights.has("other"),
             )
 
