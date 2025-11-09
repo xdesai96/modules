@@ -523,11 +523,11 @@ class AdminRights:
     | pin_messages    | 64    |
     | add_admins      | 128   |
     | manage_call     | 256   |
-    | other           | 512   |
+    | anonymous       | 512   |
+    | other           | 1024  |
 
     Examples:
     setrights 18 → post_messages + ban_users
-    setrights 1023 → all rights
     """
 
     RIGHTS = {
