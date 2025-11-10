@@ -1002,7 +1002,7 @@ class ChatModuleMod(loader.Module):
                         else self.strings["no"]
                     ),
                     link=chatinfo.get("link") or self.strings["no"],
-                    is_forum=self.strings["yes"] if chatinfo.get("is_forum") else self.strings["no"]
+                    is_forum=self.strings["yes"] if chatinfo.get("is_forum") else self.strings["no"],
                     type_of=(
                         self.strings["type_group"]
                         if chatinfo.get("is_group")
