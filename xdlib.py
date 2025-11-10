@@ -336,6 +336,7 @@ class ChatUtils:
                 "available_reactions": full_chat.available_reactions or None,
                 "requests_pending": full_chat.requests_pending or 0,
                 "recent_requesters": full_chat.recent_requesters or [],
+                "is_forum": getattr(chat, "forum"),
                 "linked_chat_id": full_chat.linked_chat_id or 0,
                 "antispam": full_chat.antispam or False,
                 "participants_hidden": full_chat.participants_hidden or False,
