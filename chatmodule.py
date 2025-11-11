@@ -854,14 +854,14 @@ class ChatModuleMod(loader.Module):
         """[-a] - Accept join requests"""
         opts = self.xdlib.parse.opts(utils.get_args(message))
         if opts.get("a"):
-            await self.xdlib.chat.join_requests(message, True)
+            await self.xdlib.chat.join_requests(message.chat, True)
             return await utils.answer(message, self.strings["all_approved"])
         args = utils.get_args(message)
         for arg in args:
             if arg.isdigit():
-                await self.xdlib.chat.join_request(message, int(arg), True)
+                await self.xdlib.chat.join_request(message.chat, int(arg), True)
             else:
-                await self.xdlib.chat.join_request(message, arg, True)
+                await self.xdlib.chat.join_request(message.chat, arg, True)
         return await utils.answer(message, self.strings["all_approved"])
 
     @loader.command(ru_doc="[-a] - Отклонить заявки на вступление")
@@ -870,12 +870,12 @@ class ChatModuleMod(loader.Module):
         """[-a] - Decline join requests"""
         opts = self.xdlib.parse.opts(utils.get_args(message))
         if opts.get("a"):
-            await self.xdlib.chat.join_requests(message, False)
+            await self.xdlib.chat.join_requests(message.chat, False)
             return await utils.answer(message, self.strings["all_dismissed"])
         args = utils.get_args(message)
         for arg in args:
             if arg.isdigit():
-                await self.xdlib.chat.join_request(message, int(arg), False)
+                await self.xdlib.chat.join_request(message.chat, int(arg), False)
             else:
-                await self.xdlib.chat.join_request(message, arg, False)
+                await self.xdlib.chat.join_request(message.chat, arg, False)
         return await utils.answer(message, self.strings["all_dismissed"])
