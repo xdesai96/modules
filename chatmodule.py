@@ -761,10 +761,10 @@ class ChatModuleMod(loader.Module):
             "\n".join([f"<emoji document_id=5409029658794537988>✅</emoji> <code>{self.strings[right]}</code>" for right in rights]) if rights else self.strings["no_role_rights"]
         )))
 
-    @loader.command(ru_doc="-u username/id -n role -r rank - Set the role for the user")
+    @loader.command(ru_doc="-u username/id -n role -r rank - Назначить роль участнику")
     @loader.tag("no_pm")
     async def setrole(self, message):
-        """-u username/id -n role -r rank - Назначить роль участнику"""
+        """-u username/id -n role -r rank - Set the role for the user"""
         args = utils.get_args(message)
         opts = self.xdlib.parse.opts(args)
         reply = await message.get_reply_message()
