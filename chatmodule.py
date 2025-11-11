@@ -639,7 +639,7 @@ class ChatModuleMod(loader.Module):
     async def geturl(self, message):
         """Get the link to the replied messages"""
         if reply := await message.get_reply_message():
-            link = reply.link
+            link = await reply.link if __package__.startswith("legacy") else await reply.link()
             return await utils.answer(
                 message, self.strings["msg_link"].format(link=link)
             )
