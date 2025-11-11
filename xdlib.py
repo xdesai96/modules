@@ -18,8 +18,12 @@ from telethon.tl.types import (
     MessageEntityMention,
     MessageEntityMentionName,
     ChatAdminRights,
+    ChannelParticipantsAdmins,
+    ChannelParticipantCreator,
+    ChannelParticipantsBots,
 )
 from telethon.tl.functions.channels import InviteToChannelRequest, EditAdminRequest
+from telethon.tl.custom.participantpermissions import ParticipantPermissions
 from telethon.tl.functions.messages import (
     HideAllChatJoinRequestsRequest,
     HideChatJoinRequestRequest,
@@ -43,9 +47,10 @@ class XDLib(loader.Library):
     async def init(self):
         self.format = FormatUtils()
         self.parse = ParseUtils()
-        self.messages = MessageUtils(self._client, self._db)
-        self.admin = AdminUtils(self._client, self._db)
-        self.chat = ChatUtils(self._client, self.db)
+        self.messages = MessageUtils(self._client)
+        self.admin = AdminUtils(self._client, self)
+        self.chat = ChatUtils(self._client)
+        self.rights = AdminRights
 
     def unload_lib(self, name: str):
         instance = self.lookup(name)
@@ -213,9 +218,8 @@ class ParseUtils:
 
 
 class MessageUtils:
-    def __init__(self, client, db):
+    def __init__(self, client):
         self._client = client
-        self._db = db
 
     async def delete_messages(self, msg: Message):
         """Deletes multiple messages based on a specific pattern.
@@ -258,24 +262,89 @@ class MessageUtils:
 
 
 class ChatUtils:
-    def __init__(self, client, db) -> None:
+    def __init__(self, client) -> None:
         self._client = client
-        self._db = db
 
-    async def join_request(self, message, user_id, approved):
+    async def join_request(self, chat, user_id, approved):
         await self._client(
             HideChatJoinRequestRequest(
-                peer=message.chat, user_id=user_id, approved=approved
+                peer=chat, user_id=user_id, approved=approved
             )
         )
 
-    async def join_requests(self, message, approved):
+    async def join_requests(self, chat, approved):
         await self._client(
             HideAllChatJoinRequestsRequest(
-                peer=message.chat,
+                peer=chat,
                 approved=approved,
             )
         )
+
+    async def get_members(self, chat):
+        try:
+            members = await self._client.get_participants(
+                chat
+            )
+            users = [member for member in members if not getattr(member, "bot")]
+            if members:
+                return members
+            return None
+        except Exception:
+            logger.error(f"Couldn't get members of the chat {chat}")
+            return None
+
+    async def get_deleted(self, chat):
+        try:
+            members = await self._client.get_participants(
+            chat
+        )
+            deleted = [member for member in members if getattr(member, "deleted")]
+            if deleted:
+                return deleted
+            return None
+        except Exception:
+            logger.error(f"Couldn't get members of the chat {chat}")
+            return None
+
+    async def get_bots(self, chat):
+        try:
+            bots = await self._client.get_participants(
+                chat, filter=ChannelParticipantsBots()
+            )
+            if bots:
+                return bots
+            return None
+        except Exception:
+            logger.error(f"Couldn't get bots from the chat {chat}")
+            return None
+
+    async def get_admins(self, chat, only_users: bool = False):
+        try:
+            admins = await self._client.get_participants(
+                chat, filter=ChannelParticipantsAdmins()
+            )
+            users = [user for user in admins if user and not getattr(user, "bot") and not isinstance(getattr(user, "participant"), ChannelParticipantCreator)]
+            if only_users:
+                return users
+            return admins
+        except Exception:
+            logger.error(f"Couldn't get admins from the chat {chat}")
+            return None
+
+    async def get_creator(self, chat):
+        try:
+            admins = await self._client.get_participants(
+                chat, filter=ChannelParticipantsAdmins()
+            )
+            if not admins:
+                return None
+            for admin in admins:
+                if hasattr(admin, "participant") and isinstance(getattr(admin, "participant"), ChannelParticipantCreator):
+                    return admin
+            return None
+        except Exception:
+            logger.error(f"Couldn't get the creator from the chat {chat}")
+            return None
 
     async def is_member(self, chat, user) -> bool:
         """Checks if a user is a member of a chat.
@@ -297,6 +366,27 @@ class ChatUtils:
                 exc_info=True,
             )
             return False
+
+    async def get_rights(self, chat, user) -> typing.Optional[ParticipantPermissions]:
+        """Checks if a user is a member of a chat.
+
+        Args:
+            chat_id (int): The ID of the chat.
+            user_id (Union[int, str]): The ID or username of the user.
+        Returns:
+            bool: True if the user is a member, False otherwise.
+        """
+        try:
+            perms = await self._client.get_perms_cached(chat, user)
+            return perms
+        except UserNotParticipantError:
+            return None
+        except Exception:
+            logger.error(
+                f"Failed to check membership for user {user} in chat {chat.title}",
+                exc_info=True,
+            )
+            return None
 
     async def invite_user(self, chat, user):
         """Invites a user to a chat.
@@ -388,52 +478,19 @@ class ChatUtils:
 
 
 class AdminUtils:
-    def __init__(self, client, db) -> None:
+    def __init__(self, client, lib) -> None:
         self._client = client
-        self._db = db
+        self._lib = lib
 
     async def get_rights_table(self):
         return f"<pre><code>{AdminRights().__doc__}</code></pre>"
 
-    async def set_fullrights(self, chat, user, rank: str = "XD Admin") -> bool:
-        """Sets full rights for a user in a chat based on a mask.
-
-        Args:
-            chat (EntityLike): Chat where to protome a user.
-            user (EntityLike): The user you want to promote.
-            rank (str, optional): The rank for the user who you want to promote. Defaults to "XD Admin".
-
-        Returns:
-            bool: True if rights were set successfully, False otherwise.
-        """
-        try:
-            rights = AdminRights.all()
-            new_admin_rights = rights.get_rights()
-            await self._client(
-                EditAdminRequest(chat, user, new_admin_rights, rank=rank)
-            )
-            return True
-        except Exception:
-            logger.error(
-                f"Failed to set full rights for {user.id} in chat {chat.title}",
-                exc_info=True,
-            )
+    async def set_role(self, chat, user, role_name, rank="XD Admin") -> bool:
+        rights_obj = self._lib.roles.get_role_perms(role_name)
+        if rights_obj is None:
             return False
 
-    async def demote(self, chat, user) -> bool:
-        try:
-            rights = AdminRights.none()
-
-            new_admin_rights = rights.get_rights()
-
-            await self._client(EditAdminRequest(chat, user, new_admin_rights, rank=""))
-            return True
-        except Exception:
-            logger.error(
-                f"Failed to demote the user {user.id} in chat {chat.title}",
-                exc_info=True,
-            )
-            return False
+        return await self.set_rights(chat, user, rights_obj.to_int(), rank)
 
     async def set_rights(self, chat, user, mask: int, rank: str = "XD Admin") -> bool:
         """Sets admin rights for a user in a chat based on a mask.
@@ -613,3 +670,4 @@ class AdminRights:
     @classmethod
     def none(cls):
         return cls(0)
+
