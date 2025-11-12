@@ -6,29 +6,24 @@
 
 # meta developer: @xdesai
 
-from .. import loader, utils
-import typing
 import logging
 import re
-from telethon.errors.rpcerrorlist import UserNotParticipantError
-from telethon.tl.types import (
-    Message,
-    MessageEntityTextUrl,
-    MessageEntityUrl,
-    MessageEntityMention,
-    MessageEntityMentionName,
-    ChatAdminRights,
-    ChannelParticipantsAdmins,
-    ChannelParticipantCreator,
-    ChannelParticipantsBots,
-)
-from telethon.tl.functions.channels import InviteToChannelRequest, EditAdminRequest
-from telethon.tl.custom.participantpermissions import ParticipantPermissions
-from telethon.tl.functions.messages import (
-    HideAllChatJoinRequestsRequest,
-    HideChatJoinRequestRequest,
-)
+import typing
 
+from telethon.errors.rpcerrorlist import UserNotParticipantError
+from telethon.tl.custom.participantpermissions import ParticipantPermissions
+from telethon.tl.functions.channels import (EditAdminRequest,
+                                            InviteToChannelRequest)
+from telethon.tl.functions.messages import (HideAllChatJoinRequestsRequest,
+                                            HideChatJoinRequestRequest)
+from telethon.tl.types import (ChannelParticipantCreator,
+                               ChannelParticipantsAdmins,
+                               ChannelParticipantsBots, ChatAdminRights,
+                               Message, MessageEntityMention,
+                               MessageEntityMentionName, MessageEntityTextUrl,
+                               MessageEntityUrl)
+
+from .. import loader, utils
 
 logger = logging.getLogger("XDLib")
 
@@ -62,7 +57,6 @@ class XDLib(loader.Library):
 
 
 class ParseUtils:
-
     def opts(self, args: list) -> typing.Dict[str, typing.Any]:
         """Parses command-line style options from a list of arguments.
         Args:
@@ -217,6 +211,11 @@ class ParseUtils:
         return []
 
 
+class DialogUtils:
+    def __init__(self, client) -> None:
+        self._client = client
+
+
 class MessageUtils:
     def __init__(self, client):
         self._client = client
@@ -267,9 +266,7 @@ class ChatUtils:
 
     async def join_request(self, chat, user_id, approved):
         await self._client(
-            HideChatJoinRequestRequest(
-                peer=chat, user_id=user_id, approved=approved
-            )
+            HideChatJoinRequestRequest(peer=chat, user_id=user_id, approved=approved)
         )
 
     async def join_requests(self, chat, approved):
@@ -282,9 +279,7 @@ class ChatUtils:
 
     async def get_members(self, chat):
         try:
-            members = await self._client.get_participants(
-                chat
-            )
+            members = await self._client.get_participants(chat)
             users = [member for member in members if not getattr(member, "bot")]
             if members:
                 return members
@@ -295,9 +290,7 @@ class ChatUtils:
 
     async def get_deleted(self, chat):
         try:
-            members = await self._client.get_participants(
-            chat
-        )
+            members = await self._client.get_participants(chat)
             deleted = [member for member in members if getattr(member, "deleted")]
             if deleted:
                 return deleted
@@ -323,7 +316,15 @@ class ChatUtils:
             admins = await self._client.get_participants(
                 chat, filter=ChannelParticipantsAdmins()
             )
-            users = [user for user in admins if user and not getattr(user, "bot") and not isinstance(getattr(user, "participant"), ChannelParticipantCreator)]
+            users = [
+                user
+                for user in admins
+                if user
+                and not getattr(user, "bot")
+                and not isinstance(
+                    getattr(user, "participant"), ChannelParticipantCreator
+                )
+            ]
             if only_users:
                 return users
             return admins
@@ -339,7 +340,9 @@ class ChatUtils:
             if not admins:
                 return None
             for admin in admins:
-                if hasattr(admin, "participant") and isinstance(getattr(admin, "participant"), ChannelParticipantCreator):
+                if hasattr(admin, "participant") and isinstance(
+                    getattr(admin, "participant"), ChannelParticipantCreator
+                ):
                     return admin
             return None
         except Exception:
@@ -670,4 +673,3 @@ class AdminRights:
     @classmethod
     def none(cls):
         return cls(0)
-

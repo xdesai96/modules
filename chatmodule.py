@@ -2,13 +2,15 @@
 # scope: disable_onload_docs
 
 import logging
-from datetime import timedelta, datetime, timezone
-from .. import loader, utils
-from telethon.tl.functions import channels
+from datetime import datetime, timedelta, timezone
+
 from telethon.tl import types
-from telethon.tl.functions import messages
+from telethon.tl.functions import channels, messages
+
+from .. import loader, utils
 
 logger = logging.getLogger("ChatModule")
+
 
 @loader.tds
 class ChatModuleMod(loader.Module):
@@ -40,7 +42,7 @@ class ChatModuleMod(loader.Module):
         "invalid_args": "<emoji document_id=5019523782004441717>❌</emoji> <b>Invalid args.</b>",
         "error": "<emoji document_id=5458497936763676259>😖</emoji><b> Something went wrong. Check the logs.</b>",
         "successful_delete": "<emoji document_id=5021905410089550576>✅</emoji> {chat_type} successfully deleted",
-        "no_deleted_accounts": "<emoji document_id=5341509066344637610>😎</emoji> <b>No deleted accounts found here</b>",
+        "no_deleted_accounts": "<emoji document_id=5238020759900668600>😶‍🌫️</emoji> <b>No deleted accounts found here</b>",
         "kicked_deleted_accounts": "<emoji document_id=5408832111773757273>🗑</emoji> <b>Removed deleted accounts from the chat</b>",
         "admins_in_chat": "<emoji document_id=5276229330131772747>👑</emoji> <b>Admins in <code>{title}</code> ({count}):</b>\n",
         "no_admins_in_chat": "<emoji document_id=5458610095539645297>✖️</emoji> <b>No admins in this chat.</b>",
@@ -123,7 +125,7 @@ class ChatModuleMod(loader.Module):
         "invalid_args": "<emoji document_id=5019523782004441717>❌</emoji> <b>Неверные аргументы.</b>",
         "error": "<emoji document_id=5458497936763676259>😖</emoji><b> Что-то пошло не так. Проверьте логи.</b>",
         "successful_delete": "<emoji document_id=5021905410089550576>✅</emoji> {chat_type} успешно удалён",
-        "no_deleted_accounts": "<emoji document_id=5341509066344637610>😎</emoji> <b>Удалённые аккаунты не найдены</b>",
+        "no_deleted_accounts": "<emoji document_id=5238020759900668600>😶‍🌫️</emoji> <b>Удалённые аккаунты не найдены</b>",
         "kicked_deleted_accounts": "<emoji document_id=5408832111773757273>🗑</emoji> <b>Удаленные аккаунты исключены из чата</b>",
         "admins_in_chat": "<emoji document_id=5276229330131772747>👑</emoji> <b>Админы в <code>{title}</code> ({count}):</b>\n",
         "no_admins_in_chat": "<emoji document_id=5458610095539645297>✖️</emoji> <b>В чате нет админов.</b>",
@@ -177,7 +179,6 @@ class ChatModuleMod(loader.Module):
         "no_role_rights": "<emoji document_id=5458610095539645297>✖️</emoji><b> Нет прав для этой роли</b>",
         "promoted": '<emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> назначен администратором</b>',
         "demoted": "<emoji document_id=5447183459602669338>🔽</emoji> <b><a href='tg://user?id={id}'>{name}</a> снят с роли администратора</b>",
-
     }
 
     async def client_ready(self, client, db):
@@ -187,7 +188,9 @@ class ChatModuleMod(loader.Module):
             "https://mods.xdesai.top/xdlib.py",
             suspend_on_error=True,
         )
-        self._roles = self.xdlib._db.pointer(self.__class__.__name__, "ChatModule_Roles", {})
+        self._roles = self.xdlib._db.pointer(
+            self.__class__.__name__, "ChatModule_Roles", {}
+        )
         await self.request_join(
             "@xdesai_modules", self.xdlib.strings["request_join_reason"]
         )
@@ -201,12 +204,14 @@ class ChatModuleMod(loader.Module):
             return await utils.answer(message, "\n".join(ids))
         ids.append(self.strings["chat_id"].format(id=message.chat_id))
         reply = await message.get_reply_message()
-        if reply and not getattr(reply, "is_private") and not getattr(reply, "sender_id") == self.tg_id:
+        if (
+            reply
+            and not getattr(reply, "is_private")
+            and not getattr(reply, "sender_id") == self.tg_id
+        ):
             user_id = (await reply.get_sender()).id
             ids.append(self.strings["user_id"].format(id=user_id))
-        return await utils.answer(
-            message, "\n".join(ids)
-        )
+        return await utils.answer(message, "\n".join(ids))
 
     @loader.command(
         ru_doc="[reply/-u username/id] - Посмотреть права администратора пользователя",
@@ -225,7 +230,9 @@ class ChatModuleMod(loader.Module):
         participant = rights.participant
         user = await self._client.get_entity(user)
         if not hasattr(participant, "admin_rights"):
-            return await utils.answer(message, self.strings["not_an_admin"].format(user=user.first_name))
+            return await utils.answer(
+                message, self.strings["not_an_admin"].format(user=user.first_name)
+            )
         if participant.admin_rights:
             can_do = []
             rights = participant.to_dict().get("admin_rights")
@@ -235,8 +242,23 @@ class ChatModuleMod(loader.Module):
                 if is_permitted:
                     can_do.append(right)
             promoter = await self._client.get_entity(participant.promoted_by)
-            return await utils.answer(message, self.strings["admin_rights"].format(rights="\n".join([f"<emoji document_id=5409029658794537988>✅</emoji> {self.strings[right]}" for right in can_do]), promoter_id=promoter.id, promoter_name=promoter.first_name, name=user.first_name))
-        return await utils.answer(message, self.strings["not_an_admin"].format(user=user.first_name))
+            return await utils.answer(
+                message,
+                self.strings["admin_rights"].format(
+                    rights="\n".join(
+                        [
+                            f"<emoji document_id=5409029658794537988>✅</emoji> {self.strings[right]}"
+                            for right in can_do
+                        ]
+                    ),
+                    promoter_id=promoter.id,
+                    promoter_name=promoter.first_name,
+                    name=user.first_name,
+                ),
+            )
+        return await utils.answer(
+            message, self.strings["not_an_admin"].format(user=user.first_name)
+        )
 
     @loader.command(
         ru_doc="Покинуть чат",
@@ -292,9 +314,7 @@ class ChatModuleMod(loader.Module):
                 await self._client(messages.DeleteChatRequest(chat.id))
             else:
                 return await utils.answer(message, self.strings["failed_to_delete"])
-            return await utils.answer(
-                message, self.strings["successful_delete"]
-            )
+            return await utils.answer(message, self.strings["successful_delete"])
         if isinstance(message.chat, types.Channel):
             await self._client(channels.DeleteChannelRequest(message.chat))
         elif isinstance(message.chat, types.Chat):
@@ -312,16 +332,16 @@ class ChatModuleMod(loader.Module):
         if not chat.admin_rights and not chat.creator:
             return await utils.answer(message, self.strings["no_rights"])
 
-        deleted = self.xdlib.chat.get_deleted(chat)
+        deleted = await self.xdlib.chat.get_deleted(chat)
         if not deleted:
             return await utils.answer(message, self.strings["no_deleted_accounts"])
         for to_delete in deleted:
             try:
-                await self.kick_participant(chat, to_delete)
-            except Exception:
-                logger.error(f"Couldn't kick {to_delete.id} from the chat {chat.id}")
+                await self._client.kick_participant(chat, to_delete)
+            except Exception as e:
+                logger.error(str(e))
+                return await utils.answer(message, self.strings["error"])
         return await utils.answer(message, self.strings["kicked_deleted_accounts"])
-
 
     @loader.command(ru_doc="Показывает админов в группе/канале")
     @loader.tag("no_pm")
@@ -329,12 +349,22 @@ class ChatModuleMod(loader.Module):
         """Shows the admins in the chat/channel"""
         admins = await self.xdlib.chat.get_admins(message.chat, True)
         creator = await self.xdlib.chat.get_creator(message.chat)
-        return await utils.answer(message, self.strings["admin_list"].format(
-            id=creator.id if creator else 0,
-            name=creator.first_name if creator else self.strings["no"],
-            admins_count=len(admins) or 0,
-            admins="\n".join(f"<emoji document_id=5774022692642492953>✅</emoji> <a href='tg://user?id={admin.id}'>{admin.first_name}</a> [<code>{admin.id}</code>] / <code>{admin.participant.rank}</code>" for admin in admins) if admins else f"\n{self.strings['no_admins_in_chat']}"
-        ))
+        return await utils.answer(
+            message,
+            self.strings["admin_list"].format(
+                id=creator.id if creator else 0,
+                name=creator.first_name if creator else self.strings["no"],
+                admins_count=len(admins) or 0,
+                admins=(
+                    "\n".join(
+                        f"<emoji document_id=5774022692642492953>✅</emoji> <a href='tg://user?id={admin.id}'>{admin.first_name}</a> [<code>{admin.id}</code>] / <code>{admin.participant.rank}</code>"
+                        for admin in admins
+                    )
+                    if admins
+                    else f"\n{self.strings['no_admins_in_chat']}"
+                ),
+            ),
+        )
 
     @loader.command(ru_doc="Показывает забаненых участников в группе/канале")
     @loader.tag("no_pm")
@@ -363,10 +393,18 @@ class ChatModuleMod(loader.Module):
         bots = await self.xdlib.chat.get_bots(message.chat)
         if not bots:
             return await utils.answer(message, self.strings["no_bots_in_chat"])
-        await utils.answer(message, self.strings["bot_list"].format(
-            count=len(bots),
-            bots="\n".join([f"<emoji document_id=5774022692642492953>✅</emoji> <a href='tg://user?id={bot.id}'>{bot.first_name}</a> [<code>{bot.id}</code>]" for bot in bots])
-        ))
+        await utils.answer(
+            message,
+            self.strings["bot_list"].format(
+                count=len(bots),
+                bots="\n".join(
+                    [
+                        f"<emoji document_id=5774022692642492953>✅</emoji> <a href='tg://user?id={bot.id}'>{bot.first_name}</a> [<code>{bot.id}</code>]"
+                        for bot in bots
+                    ]
+                ),
+            ),
+        )
 
     @loader.command(ru_doc="Показывает простых участников чата/канала")
     @loader.tag("no_pm")
@@ -375,10 +413,18 @@ class ChatModuleMod(loader.Module):
         users = await self.xdlib.chat.get_members(message.chat)
         if not users:
             return await utils.answer(message, self.strings["no_user_in_chat"])
-        await utils.answer(message, self.strings["user_list"].format(
-            count=len(users),
-            users="\n".join([f"<emoji document_id=5774022692642492953>✅</emoji> <a href='tg://user?id={user.id}'>{user.first_name}</a> [<code>{user.id}</code>]" for user in users])
-        ))
+        await utils.answer(
+            message,
+            self.strings["user_list"].format(
+                count=len(users),
+                users="\n".join(
+                    [
+                        f"<emoji document_id=5774022692642492953>✅</emoji> <a href='tg://user?id={user.id}'>{user.first_name}</a> [<code>{user.id}</code>]"
+                        for user in users
+                    ]
+                ),
+            ),
+        )
 
     @loader.command(ru_doc="Забанить участника")
     @loader.tag("no_pm")
@@ -387,15 +433,17 @@ class ChatModuleMod(loader.Module):
         text = message.text.split("\n", 1)
         reason = text[1] if len(text) > 1 else ""
         reply = await message.get_reply_message()
-        user = next(iter(self.xdlib.parse.mentions(message)), None) or reply.sender_id or None
+        user = (
+            next(iter(self.xdlib.parse.mentions(message)), None)
+            or reply.sender_id
+            or None
+        )
         strings = []
         try:
             user = await self._client.get_entity(user) if user else None
         except Exception as e:
             logger.error(str(e))
-            return await utils.answer(
-                message, self.strings["error"]
-            )
+            return await utils.answer(message, self.strings["error"])
         if not user:
             return await utils.answer(message, self.strings["no_user"])
 
@@ -404,44 +452,48 @@ class ChatModuleMod(loader.Module):
         time_info = f" {self.xdlib.format.time(seconds)}" if seconds else None
         try:
             await self._client.edit_permissions(
-                message.chat, user, until_date=until_date if seconds else None, view_messages=False
+                message.chat,
+                user,
+                until_date=until_date if seconds else None,
+                view_messages=False,
             )
         except Exception as e:
             logger.error(str(e))
-            return await utils.answer(
-                message, self.strings["error"]
+            return await utils.answer(message, self.strings["error"])
+        strings.append(
+            self.strings["user_is_banned"].format(
+                id=user.id,
+                name=getattr(user, "first_name") or getattr(user, "title"),
+                time_info=time_info or self.strings["forever"],
             )
-        strings.append(self.strings["user_is_banned"].format(id=user.id, name=getattr(user, "first_name") or getattr(user, "title"), time_info=time_info or self.strings["forever"]))
+        )
 
         if reason:
             strings.append(self.strings["reason"].format(reason=reason))
-        return await utils.answer(
-                message,
-                "\n".join(strings)
-            )
+        return await utils.answer(message, "\n".join(strings))
 
     @loader.command(ru_doc="Разбанить пользователя")
     @loader.tag("no_pm")
     async def unban(self, message):
         """Unban a user"""
         reply = await message.get_reply_message()
-        user = next(iter(self.xdlib.parse.mentions(message)), None) or reply.sender_id or None
+        user = (
+            next(iter(self.xdlib.parse.mentions(message)), None)
+            or reply.sender_id
+            or None
+        )
         try:
             user = await self._client.get_entity(user) if user else None
         except Exception as e:
             logger.error(str(e))
-            return await utils.answer(
-                message, self.strings["error"]
-            )
+            return await utils.answer(message, self.strings["error"])
         if not user:
             return await utils.answer(message, self.strings["no_user"])
         try:
             await self._client.edit_permissions(message.chat, user, view_messages=True)
         except Exception as e:
             logger.error(str(e))
-            return await utils.answer(
-                message, self.strings["error"]
-            )
+            return await utils.answer(message, self.strings["error"])
         return await utils.answer(
             message,
             self.strings["user_is_unbanned"].format(
@@ -457,28 +509,30 @@ class ChatModuleMod(loader.Module):
         text = message.text.split("\n", 1)
         reason = text[1] if len(text) > 1 else ""
         reply = await message.get_reply_message()
-        user = next(iter(self.xdlib.parse.mentions(message)), None) or reply.sender_id or None
+        user = (
+            next(iter(self.xdlib.parse.mentions(message)), None)
+            or reply.sender_id
+            or None
+        )
         strings = []
         try:
             user = await self._client.get_entity(user) if user else None
         except Exception as e:
             logger.error(str(e))
-            return await utils.answer(
-                message, self.strings["error"]
-            )
+            return await utils.answer(message, self.strings["error"])
         if not user:
             return await utils.answer(message, self.strings["no_user"])
         try:
             await self._client.kick_participant(message.chat, user)
         except Exception as e:
             logging.error(str(e))
-            return await utils.answer(
-                message, self.strings["error"]
+            return await utils.answer(message, self.strings["error"])
+        strings.append(
+            self.strings["user_is_kicked"].format(
+                id=user.id,
+                name=getattr(user, "first_name") or getattr(user, "title"),
             )
-        strings.append(self.strings["user_is_kicked"].format(
-                    id=user.id,
-                    name=getattr(user, "first_name") or getattr(user, "title"),
-                ))
+        )
         if reason:
             strings.append(self.strings["reason"].format(reason=reason))
         return await utils.answer(message, "\n".join(strings))
@@ -490,15 +544,17 @@ class ChatModuleMod(loader.Module):
         text = message.text.split("\n", 1)
         reason = text[1] if len(text) > 1 else ""
         reply = await message.get_reply_message()
-        user = next(iter(self.xdlib.parse.mentions(message)), None) or reply.sender_id or None
+        user = (
+            next(iter(self.xdlib.parse.mentions(message)), None)
+            or reply.sender_id
+            or None
+        )
         strings = []
         try:
             user = await self._client.get_entity(user) if user else None
         except Exception as e:
             logger.error(str(e))
-            return await utils.answer(
-                message, self.strings["error"]
-            )
+            return await utils.answer(message, self.strings["error"])
         if not user:
             return await utils.answer(message, self.strings["no_user"])
 
@@ -507,35 +563,41 @@ class ChatModuleMod(loader.Module):
         time_info = f" {self.xdlib.format.time(seconds)}" if seconds else None
         try:
             await self._client.edit_permissions(
-                message.chat, user, until_date=until_date if seconds else None, send_messages=False
+                message.chat,
+                user,
+                until_date=until_date if seconds else None,
+                send_messages=False,
             )
         except Exception as e:
             logger.error(str(e))
-            return await utils.answer(
-                message, self.strings["error"]
+            return await utils.answer(message, self.strings["error"])
+        strings.append(
+            self.strings["user_is_muted"].format(
+                id=user.id,
+                name=getattr(user, "first_name") or getattr(user, "title"),
+                time_info=time_info or self.strings["forever"],
             )
-        strings.append(self.strings["user_is_muted"].format(id=user.id, name=getattr(user, "first_name") or getattr(user, "title"), time_info=time_info or self.strings["forever"]))
+        )
 
         if reason:
             strings.append(self.strings["reason"].format(reason=reason))
-        return await utils.answer(
-                message,
-                "\n".join(strings)
-            )
+        return await utils.answer(message, "\n".join(strings))
 
     @loader.command(ru_doc="Размутить участника")
     @loader.tag("no_pm")
     async def unmute(self, message):
         """Unmute a participant"""
         reply = await message.get_reply_message()
-        user = next(iter(self.xdlib.parse.mentions(message)), None) or reply.sender_id or None
+        user = (
+            next(iter(self.xdlib.parse.mentions(message)), None)
+            or reply.sender_id
+            or None
+        )
         try:
             user = await self._client.get_entity(user) if user else None
         except Exception as e:
             logger.error(str(e))
-            return await utils.answer(
-                message, self.strings["error"]
-            )
+            return await utils.answer(message, self.strings["error"])
         if not user:
             return await utils.answer(message, self.strings["no_user"])
 
@@ -543,9 +605,7 @@ class ChatModuleMod(loader.Module):
             await self._client.edit_permissions(message.chat, user, send_messages=True)
         except Exception as e:
             logger.error(str(e))
-            return await utils.answer(
-                message, self.strings["error"]
-            )
+            return await utils.answer(message, self.strings["error"])
         return await utils.answer(
             message,
             self.strings["user_is_unmuted"].format(
@@ -589,7 +649,9 @@ class ChatModuleMod(loader.Module):
             ),
         )
 
-    @loader.command(ru_doc="[-g|--group name] [-c|--channel name] - Создать группу/канал")
+    @loader.command(
+        ru_doc="[-g|--group name] [-c|--channel name] - Создать группу/канал"
+    )
     async def create(self, message):
         """[-g|--group name] [-c|--channel name] - Create group/channel"""
         args = utils.get_args(message)
@@ -639,13 +701,19 @@ class ChatModuleMod(loader.Module):
     async def geturl(self, message):
         """Get the link to the replied messages"""
         if reply := await message.get_reply_message():
-            link = await reply.link if __package__.startswith("legacy") else await reply.link()
+            link = (
+                await reply.link
+                if __package__.startswith("legacy")
+                else await reply.link()
+            )
             return await utils.answer(
                 message, self.strings["msg_link"].format(link=link)
             )
         return await utils.answer(message, self.strings["msg_link_failed"])
 
-    @loader.command(ru_doc="-u username/id - Пригласить пользователя в чат (-b пригласить инлайн бота)")
+    @loader.command(
+        ru_doc="-u username/id - Пригласить пользователя в чат (-b пригласить инлайн бота)"
+    )
     async def invite(self, message):
         """-u username/id - Invite a user to the chat (use -b to invite the inline bot)"""
         args = utils.get_args(message)
@@ -655,11 +723,11 @@ class ChatModuleMod(loader.Module):
             entity = await self._client.get_entity(self.inline.bot_id)
             if invited:
                 return await utils.answer(
-                message,
-                self.strings["user_invited"].format(
-                    user=entity.first_name, id=entity.id
-                ),
-            )
+                    message,
+                    self.strings["user_invited"].format(
+                        user=entity.first_name, id=entity.id
+                    ),
+                )
             return await utils.answer(message, self.strings["user_not_invited"])
         reply = await message.get_reply_message()
         user = opts.get("u") or opts.get("user") or (reply.sender_id if reply else None)
@@ -668,14 +736,15 @@ class ChatModuleMod(loader.Module):
         entity = await self._client.get_entity(user)
         invited = self.xdlib.chat.invite_user(message.chat, user)
         if invited:
-            return await utils.answer(message, self.strings["user_invited"].format(
-                        user=entity.first_name, id=entity.id
-                    ))
+            return await utils.answer(
+                message,
+                self.strings["user_invited"].format(
+                    user=entity.first_name, id=entity.id
+                ),
+            )
         return await utils.answer(message, self.strings["user_not_invited"])
 
-    @loader.command(
-        ru_doc="-n название_роли -p число - Создать роль"
-    )
+    @loader.command(ru_doc="-n название_роли -p число - Создать роль")
     async def addrole(self, message):
         """-n role_name -p number - Create a role"""
         args = utils.get_args(message)
@@ -718,7 +787,9 @@ class ChatModuleMod(loader.Module):
         if opts.get("f") or opts.get("fullrights"):
             rights = self.xdlib.rights.all()
             rights.remove("anonymous")
-            await self.xdlib.admin.set_rights(message.chat, user, rights.to_int(), rank=rank)
+            await self.xdlib.admin.set_rights(
+                message.chat, user, rights.to_int(), rank=rank
+            )
             return await utils.answer(
                 message,
                 self.strings["promoted"].format(id=user.id, name=user.first_name),
@@ -750,16 +821,41 @@ class ChatModuleMod(loader.Module):
             return await utils.answer(message, self.strings["no_roles"])
         selected_role = opts.get("n") or opts.get("name")
         if not selected_role:
-            return await utils.answer(message, self.strings["all_roles"].format(roles="\n".join([f"<emoji document_id=5807829874877930085>➡️</emoji> <code>{role}</code>" for role in roles.keys()])))
+            return await utils.answer(
+                message,
+                self.strings["all_roles"].format(
+                    roles="\n".join(
+                        [
+                            f"<emoji document_id=5807829874877930085>➡️</emoji> <code>{role}</code>"
+                            for role in roles.keys()
+                        ]
+                    )
+                ),
+            )
         rights = []
-        for right, permitted in self.xdlib.rights.from_int(roles[selected_role]).to_dict().items():
+        for right, permitted in (
+            self.xdlib.rights.from_int(roles[selected_role]).to_dict().items()
+        ):
             if permitted:
                 rights.append(right)
                 continue
 
-        return await utils.answer(message, self.strings["role_info"].format(name=selected_role, rights=(
-            "\n".join([f"<emoji document_id=5409029658794537988>✅</emoji> <code>{self.strings[right]}</code>" for right in rights]) if rights else self.strings["no_role_rights"]
-        )))
+        return await utils.answer(
+            message,
+            self.strings["role_info"].format(
+                name=selected_role,
+                rights=(
+                    "\n".join(
+                        [
+                            f"<emoji document_id=5409029658794537988>✅</emoji> <code>{self.strings[right]}</code>"
+                            for right in rights
+                        ]
+                    )
+                    if rights
+                    else self.strings["no_role_rights"]
+                ),
+            ),
+        )
 
     @loader.command(ru_doc="-u username/id -n role -r rank - Назначить роль участнику")
     @loader.tag("no_pm")
@@ -775,7 +871,9 @@ class ChatModuleMod(loader.Module):
         rank = opts.get("rank") or opts.get("r") or role
         if not user:
             return await utils.answer(message, self.strings["no_user"])
-        role_set = await self.xdlib.admin.set_rights(message.chat, user, self._roles[role], rank=rank)
+        role_set = await self.xdlib.admin.set_rights(
+            message.chat, user, self._roles[role], rank=rank
+        )
         if not role_set:
             return await utils.answer(message, self.strings["role_not_set"])
         return await utils.answer(message, self.strings["role_set"])
@@ -787,6 +885,7 @@ class ChatModuleMod(loader.Module):
         try:
             chat = await message.get_chat()
             chatinfo = await self.xdlib.chat.get_info(chat)
+            photo = chatinfo.get("chat_photo")
             return await utils.answer(
                 message,
                 self.strings["chatinfo"].format(
@@ -832,7 +931,11 @@ class ChatModuleMod(loader.Module):
                         else self.strings["no"]
                     ),
                     link=chatinfo.get("link") or self.strings["no"],
-                    is_forum=self.strings["yes"] if chatinfo.get("is_forum") else self.strings["no"],
+                    is_forum=(
+                        self.strings["yes"]
+                        if chatinfo.get("is_forum")
+                        else self.strings["no"]
+                    ),
                     type_of=(
                         self.strings["type_group"]
                         if chatinfo.get("is_group")
@@ -842,6 +945,15 @@ class ChatModuleMod(loader.Module):
                             else self.strings["type_unknown"]
                         )
                     ),
+                ),
+                media=(
+                    types.InputMediaPhoto(
+                        types.InputPhoto(
+                            photo.id, photo.access_hash, photo.file_reference
+                        )
+                    )
+                    if photo
+                    else None
                 ),
             )
         except Exception as e:
