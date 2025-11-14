@@ -241,7 +241,11 @@ class ChatModuleMod(loader.Module):
                     continue
                 if is_permitted:
                     can_do.append(right)
-            promoter = await self._client.get_entity(participant.promoted_by)
+            promoter = (
+                await self._client.get_entity(participant.promoted_by)
+                if hasattr(participant, "promoted_by")
+                else None
+            )
             return await utils.answer(
                 message,
                 self.strings["admin_rights"].format(
@@ -251,8 +255,10 @@ class ChatModuleMod(loader.Module):
                             for right in can_do
                         ]
                     ),
-                    promoter_id=promoter.id,
-                    promoter_name=promoter.first_name,
+                    promoter_id=promoter.id if promoter else 0,
+                    promoter_name=(
+                        promoter.first_name if promoter else self.strings["no"]
+                    ),
                     name=user.first_name,
                 ),
             )
@@ -314,14 +320,14 @@ class ChatModuleMod(loader.Module):
                 await self._client(messages.DeleteChatRequest(chat.id))
             else:
                 return await utils.answer(message, self.strings["failed_to_delete"])
-            return await utils.answer(message, self.strings["successful_delete"])
+            return
         if isinstance(message.chat, types.Channel):
             await self._client(channels.DeleteChannelRequest(message.chat))
         elif isinstance(message.chat, types.Chat):
             await self._client(messages.DeleteChatRequest(message.chat))
         else:
             return await utils.answer(message, self.strings["failed_to_delete"])
-        return await utils.answer(message, self.strings["successful_delete"])
+        return
 
     @loader.command(ru_doc="Очищает группу/канал от удаленных аккаунтов")
     @loader.tag("no_pm")
@@ -677,7 +683,7 @@ class ChatModuleMod(loader.Module):
                     title=group_name, megagroup=True, about=""
                 )
             )
-            chat = self.xdlib.chat.get_info(result.chats[0])
+            chat = await self.xdlib.chat.get_info(result.chats[0])
             return await utils.answer(
                 message,
                 self.strings["group_created"].format(
@@ -734,7 +740,7 @@ class ChatModuleMod(loader.Module):
         if not user:
             return await utils.answer(message, self.strings["no_user"])
         entity = await self._client.get_entity(user)
-        invited = self.xdlib.chat.invite_user(message.chat, user)
+        invited = await self.xdlib.chat.invite_user(message.chat, user)
         if invited:
             return await utils.answer(
                 message,
@@ -776,7 +782,8 @@ class ChatModuleMod(loader.Module):
         opts = self.xdlib.parse.opts(utils.get_args(message))
         if opts.get("h") or opts.get("help"):
             return await utils.answer(
-                message, f"{await self.xdlib.admin.get_rights_table()}"
+                message,
+                f"<pre><code>{self.xdlib.rights.stringify_masks()}</code></pre>",
             )
         reply = await message.get_reply_message()
         user = opts.get("u") or opts.get("user") or (reply.sender_id if reply else None)

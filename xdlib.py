@@ -44,7 +44,7 @@ class XDLib(loader.Library):
         self.parse = ParseUtils()
         self.messages = MessageUtils(self._client)
         self.admin = AdminUtils(self._client, self)
-        self.chat = ChatUtils(self._client)
+        self.chat = ChatUtils(self._client, self._db)
         self.rights = AdminRights
 
     def unload_lib(self, name: str):
@@ -58,11 +58,9 @@ class XDLib(loader.Library):
 
 class ParseUtils:
     def opts(self, args: list) -> typing.Dict[str, typing.Any]:
-        """Parses command-line style options from a list of arguments.
-        Args:
-            args (list): List of command-line arguments.
-        Returns:
-            Dict[str, Any]: A dictionary of parsed options.
+        """
+        Parses command-line style options from a list of arguments.
+        Supports sequential operations (+, -, *, /) for numeric values.
         """
         options = {}
         i = 0
@@ -81,24 +79,50 @@ class ParseUtils:
                 return float(value)
             return value
 
+        def apply_operations(base, ops: list[str]):
+            val = base
+            for op_str in ops:
+                m = re.fullmatch(r"([+\-*/])(\d+(\.\d+)?)", op_str)
+                if not m:
+                    val = auto_cast(op_str)
+                    continue
+                op, number, _ = m.groups()
+                number = float(number) if "." in number else int(number)
+                if op == "+":
+                    val += number
+                elif op == "-":
+                    val -= number
+                elif op == "*":
+                    val *= number
+                elif op == "/":
+                    val /= number
+            return val
+
         while i < len(args):
             arg = args[i]
 
             if "=" in arg:
                 key, value = arg.split("=", 1)
-                if key.startswith("--"):
-                    key = key[2:]
-                elif key.startswith("-"):
-                    key = key[1:]
+                key = key.lstrip("-")
                 options[key] = auto_cast(value.strip("\"'"))
 
-            elif arg.startswith("--") or arg.startswith("-"):
+            elif arg.startswith("-"):
                 key = arg.lstrip("-")
-                if i + 1 < len(args) and not args[i + 1].startswith("-"):
-                    options[key] = auto_cast(args[i + 1].strip("\"'"))
+                values = []
+                i += 1
+                while i < len(args) and not args[i].startswith("-"):
+                    values.append(args[i].strip("\"'"))
                     i += 1
+                i -= 1
+
+                if key in options and isinstance(options[key], (int, float)):
+                    options[key] = apply_operations(options[key], values)
                 else:
-                    options[key] = True
+                    if values:
+                        base = auto_cast(values[0])
+                        options[key] = apply_operations(base, values[1:])
+                    else:
+                        options[key] = True
 
             i += 1
 
@@ -261,8 +285,9 @@ class MessageUtils:
 
 
 class ChatUtils:
-    def __init__(self, client) -> None:
+    def __init__(self, client, db) -> None:
         self._client = client
+        self._db = db
 
     async def join_request(self, chat, user_id, approved):
         await self._client(
@@ -469,7 +494,8 @@ class ChatUtils:
             logger.error("Failed to invite inline bot to chat", exc_info=True)
             return False
 
-        rights = AdminRights(sum(AdminRights.RIGHTS.values()))
+        rights = AdminRights.all()
+        rights.remove("anonymous")
         admin = AdminUtils(self._client, self._db)
         await admin.set_rights(
             chat,
@@ -486,7 +512,7 @@ class AdminUtils:
         self._lib = lib
 
     async def get_rights_table(self):
-        return f"<pre><code>{AdminRights().__doc__}</code></pre>"
+        return f"<pre><code>{AdminRights.stringify()}</code></pre>"
 
     async def set_role(self, chat, user, role_name, rank="XD Admin") -> bool:
         rights_obj = self._lib.roles.get_role_perms(role_name)
@@ -508,7 +534,7 @@ class AdminUtils:
         try:
             rights = AdminRights(mask)
 
-            new_admin_rights = rights.get_rights()
+            new_admin_rights = rights.to_chat_rights()
 
             await self._client(
                 EditAdminRequest(
@@ -528,6 +554,7 @@ class AdminUtils:
 
 
 class FormatUtils:
+
     def bytes(self, size: int) -> str:
         """Formats a size in bytes into a human-readable string.
 
@@ -578,46 +605,14 @@ class FormatUtils:
 
 
 class AdminRights:
-    """
-    ⁧
-    | Right           | Value |
-    | --------------- | ----- |
-    | change_info     | 1     |
-    | post_messages   | 2     |
-    | edit_messages   | 4     |
-    | delete_messages | 8     |
-    | ban_users       | 16    |
-    | invite_users    | 32    |
-    | pin_messages    | 64    |
-    | add_admins      | 128   |
-    | manage_call     | 256   |
-    | anonymous       | 512   |
-    | other           | 1024  |
 
-    Examples:
-    setrights 18 → post_messages + ban_users
-    """
+    RIGHTS_LIST = [x for x in ChatAdminRights().to_dict().keys() if x != "_"]
 
-    RIGHTS = {
-        "change_info": 1 << 0,
-        "post_messages": 1 << 1,
-        "edit_messages": 1 << 2,
-        "delete_messages": 1 << 3,
-        "ban_users": 1 << 4,
-        "invite_users": 1 << 5,
-        "pin_messages": 1 << 6,
-        "add_admins": 1 << 7,
-        "manage_call": 1 << 8,
-        "anonymous": 1 << 9,
-        "other": 1 << 10,
-    }
+    RIGHTS = {name: 1 << i for i, name in enumerate(RIGHTS_LIST)}
 
     MAX_MASK = (1 << len(RIGHTS)) - 1
 
     def __init__(self, mask: int = 0):
-        self.set_rights(mask)
-
-    def set_rights(self, mask: int = 0) -> None:
         self.mask = mask & self.MAX_MASK
 
     def add(self, *right_names: str) -> None:
@@ -633,34 +628,40 @@ class AdminRights:
     def has(self, right_name: str) -> bool:
         return bool(self.mask & self.RIGHTS.get(right_name, 0))
 
-    def get_rights(self):
-        return ChatAdminRights(
-            change_info=self.has("change_info"),
-            post_messages=self.has("post_messages"),
-            edit_messages=self.has("edit_messages"),
-            delete_messages=self.has("delete_messages"),
-            ban_users=self.has("ban_users"),
-            invite_users=self.has("invite_users"),
-            pin_messages=self.has("pin_messages"),
-            add_admins=self.has("add_admins"),
-            manage_call=self.has("manage_call"),
-            anonymous=self.has("anonymous"),
-            other=self.has("other"),
-        )
+    def add_index(self, idx: int) -> bool:
+        if 0 <= idx < len(self.RIGHTS_LIST):
+            self.mask |= 1 << idx
+
+    def remove_index(self, idx: int):
+        if 0 <= idx < len(self.RIGHTS_LIST):
+            self.mask &= ~(1 << idx)
+
+    def has_index(self, idx: int) -> bool:
+        if 0 <= idx < len(self.RIGHTS_LIST):
+            return bool(self.mask & (1 << idx))
+        return False
 
     def to_dict(self) -> dict[str, bool]:
-        return {name: bool(self.mask & bit) for name, bit in self.RIGHTS.items()}
+        return {name: self.has(name) for name in self.RIGHTS_LIST}
 
     def to_int(self) -> int:
         return self.mask
 
+    def to_chat_rights(self) -> ChatAdminRights:
+        return ChatAdminRights(**self.to_dict())
+
     @classmethod
-    def from_rights(cls, *right_names: str):
-        mask = 0
-        for name in right_names:
-            if name in cls.RIGHTS:
-                mask |= cls.RIGHTS[name]
-        return cls(mask)
+    def stringify_masks(cls):
+        max_len = max(len(name) for name in cls.RIGHTS_LIST)
+        lines = []
+        for name in cls.RIGHTS_LIST:
+            mask = cls.RIGHTS[name]
+            lines.append(f"{name.ljust(max_len)} — {mask}")
+        return "\n".join(lines)
+
+    @classmethod
+    def list_rights(cls):
+        return [(i, name) for i, name in enumerate(cls.RIGHTS_LIST)]
 
     @classmethod
     def from_int(cls, mask: int):
