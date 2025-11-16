@@ -24,6 +24,7 @@ from telethon.tl.types import (ChannelParticipantCreator,
                                MessageEntityUrl)
 
 from .. import loader, utils
+from ..types import SelfUnload
 
 logger = logging.getLogger("XDLib")
 
@@ -37,6 +38,7 @@ class XDLib(loader.Library):
         "name": "XDLib",
         "desc": "A library with various utility functions for XD modules.",
         "request_join_reason": "Stay tuned for updates.",
+        "not_legacy": "The module is supported only on <a href='https://github.com/Crayz310/Legacy'>{label}</a>",
     }
 
     async def init(self):
@@ -46,6 +48,11 @@ class XDLib(loader.Library):
         self.admin = AdminUtils(self._client, self)
         self.chat = ChatUtils(self._client, self._db)
         self.rights = AdminRights
+
+    @classmethod
+    async def only_legacy(self):
+        if not __package__.startswith("legacy"):
+            raise SelfUnload("The module is supported ONLY for Legacy userbot")
 
     def unload_lib(self, name: str):
         instance = self.lookup(name)
@@ -82,7 +89,7 @@ class ParseUtils:
         def apply_operations(base, ops: list[str]):
             val = base
             for op_str in ops:
-                m = re.fullmatch(r"([+\-*/])(\d+(\.\d+)?)", op_str)
+                m = re.fullmatch(r"([+*/])(\d+(\.\d+)?)", op_str)
                 if not m:
                     val = auto_cast(op_str)
                     continue
@@ -90,8 +97,6 @@ class ParseUtils:
                 number = float(number) if "." in number else int(number)
                 if op == "+":
                     val += number
-                elif op == "-":
-                    val -= number
                 elif op == "*":
                     val *= number
                 elif op == "/":

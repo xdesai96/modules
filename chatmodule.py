@@ -8,6 +8,7 @@ from telethon.tl import types
 from telethon.tl.functions import channels, messages
 
 from .. import loader, utils
+from ..types import SelfUnload
 
 logger = logging.getLogger("ChatModule")
 
@@ -188,8 +189,9 @@ class ChatModuleMod(loader.Module):
             "https://mods.xdesai.top/xdlib.py",
             suspend_on_error=True,
         )
+        await self.xdlib.only_legacy()
         self._roles = self.xdlib._db.pointer(
-            self.__class__.__name__, "ChatModule_Roles", {}
+            self.xdlib.__class__.__name__, "ChatModule_Roles", {}
         )
         await self.request_join(
             "@xdesai_modules", self.xdlib.strings["request_join_reason"]
@@ -707,11 +709,7 @@ class ChatModuleMod(loader.Module):
     async def geturl(self, message):
         """Get the link to the replied messages"""
         if reply := await message.get_reply_message():
-            link = (
-                await reply.link
-                if __package__.startswith("legacy")
-                else await reply.link()
-            )
+            link = await reply.link
             return await utils.answer(
                 message, self.strings["msg_link"].format(link=link)
             )
@@ -893,6 +891,7 @@ class ChatModuleMod(loader.Module):
             chat = await message.get_chat()
             chatinfo = await self.xdlib.chat.get_info(chat)
             photo = chatinfo.get("chat_photo")
+            photo = photo if not isinstance(photo, types.PhotoEmpty) else None
             return await utils.answer(
                 message,
                 self.strings["chatinfo"].format(
