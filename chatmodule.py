@@ -24,7 +24,7 @@ class ChatModuleMod(loader.Module):
         self._client = client
         self._db = db
         self.xdlib = await self.import_lib(
-            "https://mods.xdesai.top/xdlib.py",
+            "https://mods.xdesai.top/libs/xdlib.py",
             suspend_on_error=True,
         )
         await self.xdlib.only_legacy()
