@@ -21,7 +21,7 @@ from telethon.tl.types import (ChannelParticipantCreator,
                                ChannelParticipantsBots, ChatAdminRights,
                                Message, MessageEntityMention,
                                MessageEntityMentionName, MessageEntityTextUrl,
-                               MessageEntityUrl)
+                               MessageEntityUrl, PeerUser, User)
 
 from .. import loader, utils
 from ..types import SelfUnload
@@ -47,6 +47,7 @@ class XDLib(loader.Library):
         self.messages = MessageUtils(self._client)
         self.admin = AdminUtils(self._client, self)
         self.chat = ChatUtils(self._client, self._db)
+        self.user = UserUtils(self._client, self._db)
         self.rights = AdminRights
 
     @classmethod
@@ -61,6 +62,37 @@ class XDLib(loader.Library):
             logger.info(f"Unloaded library: {name}")
             return True
         return False
+
+
+class UserUtils:
+    def __init__(self, client, db):
+        self._client = client
+        self._db = db
+
+    async def get_user(user_id: typing.Union[str, int, PeerUser, User]):
+        userfull = await self._client.get_fulluser(user_id)
+        full_user - userfull.full_user
+        user = full_user.users[0]
+
+        return {
+            "common_chats_count": full_user.common_chats_count,
+            "id": user.id,
+            "personal_photo": full_user.personal_photo,
+            "business_work_hours": full_user.business_work_hours,
+            "business_intro": full_user.business_intro,
+            "birthday": full_user.birthday,
+            "personal_channel_id": full_user.personal_channel_id,
+            "stargifts_count": full_user.stargifts_count,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "username": user.username or user.usernames or None,
+            "emoji_status": user.emoji_status,
+            "color": user.color,
+            "blocked": full_user.blocked,
+            "phone_calls_available", full_user.phone_calls_available,
+            "about": full_user.about,
+            "profile_photo": full_user.profile_photo,
+        }
 
 
 class ParseUtils:
