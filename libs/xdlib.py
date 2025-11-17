@@ -69,7 +69,7 @@ class UserUtils:
         self._client = client
         self._db = db
 
-    async def get_user(user_id: typing.Union[str, int, PeerUser, User]):
+    async def get_info(user_id: typing.Union[str, int, PeerUser, User]):
         userfull = await self._client.get_fulluser(user_id)
         full_user - userfull.full_user
         user = full_user.users[0]
@@ -89,7 +89,7 @@ class UserUtils:
             "emoji_status": user.emoji_status,
             "color": user.color,
             "blocked": full_user.blocked,
-            "phone_calls_available", full_user.phone_calls_available,
+            "phone_calls_available": full_user.phone_calls_available,
             "about": full_user.about,
             "profile_photo": full_user.profile_photo,
         }
