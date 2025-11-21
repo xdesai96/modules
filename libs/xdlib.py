@@ -101,7 +101,7 @@ class UserUtils:
             "first_name": user.first_name,
             "last_name": user.last_name,
             "usernames": unames,
-            "emoji_status": user.emoji_status.document_id,
+            "emoji_status": getattr(user.emoji_status, "document_id", None),
             "color": user.color,
             "blocked": full_user.blocked,
             "about": full_user.about,
