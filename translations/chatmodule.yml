@@ -80,6 +80,14 @@ en:
   promoted: <emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> is promoted</b>
   demoted: <emoji document_id=5447183459602669338>🔽</emoji> <b><a href='tg://user?id={id}'>{name}</a> is demoted</b>
   userinfo: "<blockquote><emoji document_id=5985457743576698865>#️⃣</emoji><b> ID: {user_id}\n</b><emoji document_id=5408849420491962048>🔥</emoji><b> First name: {first_name}\n</b><emoji document_id=5408849420491962048>🔥</emoji><b> Last name: {last_name}\n</b><emoji document_id=5364052602357044385>🐶</emoji><b>  Usernames: {usernames}</b></blockquote><b>\n\n</b><blockquote><emoji document_id=5985616786215669454>ℹ️</emoji><b> About: {about}</b></blockquote><b>\n\n</b><blockquote><emoji document_id=5408910404732595664>🕐</emoji><b> Work hours: </b>{business_work_hours}\n<emoji document_id=5408892365869952851>❤️</emoji><b> Emoji status: {emoji_status}</b></blockquote><b>\n\n</b><blockquote><emoji document_id=5409331062419502443>🔉</emoji><b> Personal channel: {personal_channel}\n</b><emoji document_id=6024041612345088787>🎂</emoji><b> Birthday: {birthday}\n</b><emoji document_id=6037175527846975726>🎁</emoji><b> Gifts count: {stargifts_count}</b></blockquote><b>\n\n</b><blockquote><emoji document_id=5208842667647061916>🚨</emoji><b> Common chats count: {common_chats_count}\n</b><emoji document_id=5985401861757210746>👥</emoji><b> Common chats: {common_chats}</b></blockquote>"
+  monday: Monday
+  tuesday: Tuesday
+  wednesday: Wednesday
+  thursday: Thursday
+  friday: Friday
+  saturday: Saturday
+  sunday: Sunday
+
 ru:
   my_id: '<emoji document_id=5361912768045792571>👑</emoji><b> Мой ID: </b><code>{id}</code>'
   chat_id: <emoji document_id=5886436057091673541>💬</emoji> <b>ID чата:</b> <code>{id}</code>
@@ -162,3 +170,10 @@ ru:
   promoted: <emoji document_id=5433758796289685818>👑</emoji> <b><a href="tg://user?id={id}">{name}</a> повышен</b>
   demoted: <emoji document_id=5447183459602669338>🔽</emoji> <b><a href='tg://user?id={id}'>{name}</a> понижен</b>
   userinfo: "<blockquote><emoji document_id=5985457743576698865>#️⃣</emoji><b> ID: {user_id}\n</b><emoji document_id=5408849420491962048>🔥</emoji><b> Имя: {first_name}\n</b><emoji document_id=5408849420491962048>🔥</emoji><b> Фамилия: {last_name}\n</b><emoji document_id=5364052602357044385>🐶</emoji><b> Имена пользователей: {usernames}</b></blockquote><b>\n\n</b><blockquote><emoji document_id=5985616786215669454>ℹ️</emoji><b> О себе: {about}</b></blockquote><b>\n\n</b><blockquote><emoji document_id=5408910404732595664>🕐</emoji><b> Рабочие часы: </b>{business_work_hours}\n<emoji document_id=5408892365869952851>❤️</emoji><b> Статус с эмодзи: {emoji_status}</b></blockquote><b>\n\n</b><blockquote><emoji document_id=5409331062419502443>🔉</emoji><b> Личный канал: {personal_channel}\n</b><emoji document_id=6024041612345088787>🎂</emoji><b> День рождения: {birthday}\n</b><emoji document_id=6037175527846975726>🎁</emoji><b> Количество подарков: {stargifts_count}</b></blockquote><b>\n\n</b><blockquote><emoji document_id=5208842667647061916>🚨</emoji><b> Количество общих чатов: {common_chats_count}\n</b><emoji document_id=5985401861757210746>👥</emoji><b> Общие чаты: {common_chats}</b></blockquote>"
+  monday: Понедельник
+  tuesday: Вторник
+  wednesday: Среда
+  thursday: Четверг
+  friday: Пятница
+  saturday: Суббота
+  sunday: Воскресенье
