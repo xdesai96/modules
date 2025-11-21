@@ -110,6 +110,11 @@ class UserUtils:
 
 
 class ParseUtils:
+    def minutes_to_hhmm(self, m):
+        h = (m // 60) % 24
+        mm = m % 60
+        return f"{h:02d}:{mm:02d}"
+
     def opts(self, args: list) -> typing.Dict[str, typing.Any]:
         """
         Parses command-line style options from a list of arguments.
