@@ -85,7 +85,7 @@ class UserUtils:
             GetCommonChatsRequest(user_id=user_id, max_id=0, limit=100)
         )
         emoji_status = await self._client(
-            GetCustomEmojiDocumentsRequest(document_id=[user.emoji_status.document_id])
+            GetCustomEmojiDocumentsRequest(document_id=user.emoji_status.document_id)
         )
 
         return {
