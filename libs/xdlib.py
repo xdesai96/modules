@@ -73,7 +73,7 @@ class UserUtils:
         userfull = await self._client.get_fulluser(user_id)
         full_user = userfull.full_user
         user = userfull.users[0]
-        usernames = [user] or user.usernames or None
+        usernames = user.usernames or [user] or None
         unames = []
         if usernames:
             for username in usernames:
