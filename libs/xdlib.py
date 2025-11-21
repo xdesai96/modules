@@ -48,7 +48,7 @@ class XDLib(loader.Library):
         self.messages = MessageUtils(self._client)
         self.admin = AdminUtils(self._client, self)
         self.chat = ChatUtils(self._client, self._db)
-        self.dialog = DialogUtils()
+        self.dialog = DialogUtils(self._client)
         self.user = UserUtils(self._client, self._db)
         self.rights = AdminRights
 
