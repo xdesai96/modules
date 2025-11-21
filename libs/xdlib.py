@@ -79,7 +79,11 @@ class UserUtils:
         if usernames:
             for username in usernames:
                 unames.append(username.username)
-        personal_channel = await self._client.get_entity(full_user.personal_channel_id)
+        personal_channel = (
+            await self._client.get_entity(full_user.personal_channel_id)
+            if full_user
+            else None
+        )
         common = await self._client(
             GetCommonChatsRequest(user_id=user_id, max_id=0, limit=100)
         )
@@ -92,7 +96,7 @@ class UserUtils:
             "business_work_hours": full_user.business_work_hours,
             "business_intro": full_user.business_intro,
             "birthday": full_user.birthday,
-            "personal_channel": personal_channel,
+            "personal_channel": personal_channel or None,
             "stargifts_count": full_user.stargifts_count,
             "first_name": user.first_name,
             "last_name": user.last_name,
