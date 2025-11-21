@@ -14,7 +14,8 @@ from telethon.errors.rpcerrorlist import UserNotParticipantError
 from telethon.tl.custom.participantpermissions import ParticipantPermissions
 from telethon.tl.functions.channels import (EditAdminRequest,
                                             InviteToChannelRequest)
-from telethon.tl.functions.messages import (HideAllChatJoinRequestsRequest,
+from telethon.tl.functions.messages import (GetCommonChatsRequest,
+                                            HideAllChatJoinRequestsRequest,
                                             HideChatJoinRequestRequest)
 from telethon.tl.types import (ChannelParticipantCreator,
                                ChannelParticipantsAdmins,
@@ -78,23 +79,27 @@ class UserUtils:
         if usernames:
             for username in usernames:
                 unames.append(username.username)
+        personal_channel = await self._client.get_entity(full_user.personal_channel_id)
+        common = await self._client(
+            GetCommonChatsRequest(user_id=user.id, max_id=0, limit=100)
+        )
 
         return {
             "common_chats_count": full_user.common_chats_count,
+            "common_chats": common.chats,
             "id": user.id,
             "personal_photo": full_user.personal_photo,
             "business_work_hours": full_user.business_work_hours,
             "business_intro": full_user.business_intro,
             "birthday": full_user.birthday,
-            "personal_channel_id": full_user.personal_channel_id,
+            "personal_channel": personal_channel,
             "stargifts_count": full_user.stargifts_count,
             "first_name": user.first_name,
             "last_name": user.last_name,
-            "username": unames,
+            "usernames": unames,
             "emoji_status": user.emoji_status,
             "color": user.color,
             "blocked": full_user.blocked,
-            "phone_calls_available": full_user.phone_calls_available,
             "about": full_user.about,
             "profile_photo": full_user.profile_photo,
         }
