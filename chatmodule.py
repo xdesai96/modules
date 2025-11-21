@@ -889,7 +889,11 @@ class ChatModuleMod(loader.Module):
                     first_name=userinfo.get("first_name") or self.strings["no"],
                     last_name=userinfo.get("last_name") or self.strings["no"],
                     about=userinfo.get("about") or self.strings["no"],
-                    emoji_status=f"<emoji document_id={userinfo.get('emoji_status')}>🌙</emoji>" if userinfo.get('emoji_status') else self.strings["no"],
+                    emoji_status=(
+                        f"<emoji document_id={userinfo.get('emoji_status')}>🌙</emoji>"
+                        if userinfo.get("emoji_status")
+                        else self.strings["no"]
+                    ),
                     business_work_hours=", ".join(working_hours_output)
                     or self.strings["no"],
                     birthday=(
@@ -928,3 +932,20 @@ class ChatModuleMod(loader.Module):
         except Exception as e:
             logger.error(e)
             return await utils.answer(message, self.strings["error"])
+
+    @loader.command(ru_doc="Получить все свои чаты/каналы")
+    async def owns(self, message):
+        """Get all your chats/channels"""
+        owns = await self.xdlib.dialog.get_owns(self._client)
+        return await utils.answer(
+            message,
+            self.strings["owns"].format(
+                num=len(owns),
+                owns="\n".join(
+                    [
+                        f"<emoji document_id=5458833171846029357>✅</emoji> {own.title} [<code>{own.id}</code>]"
+                        for own in owns
+                    ]
+                ),
+            ),
+        )
