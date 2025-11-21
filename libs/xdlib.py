@@ -75,7 +75,7 @@ class UserUtils:
         user = userfull.users[0]
         usernames = [user] or user.usernames or None
         unames = []
-        is usernames:
+        if usernames:
             for username in usernames:
                 unames.append(username.username)
 
