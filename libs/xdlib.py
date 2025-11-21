@@ -72,7 +72,7 @@ class UserUtils:
     async def get_info(self, user_id: typing.Union[str, int, PeerUser, User]):
         userfull = await self._client.get_fulluser(user_id)
         full_user = userfull.full_user
-        user = full_user.users[0]
+        user = userfull.users[0]
 
         return {
             "common_chats_count": full_user.common_chats_count,
