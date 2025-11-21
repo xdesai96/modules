@@ -15,7 +15,6 @@ from telethon.tl.custom.participantpermissions import ParticipantPermissions
 from telethon.tl.functions.channels import (EditAdminRequest,
                                             InviteToChannelRequest)
 from telethon.tl.functions.messages import (GetCommonChatsRequest,
-                                            GetCustomEmojiDocumentsRequest,
                                             HideAllChatJoinRequestsRequest,
                                             HideChatJoinRequestRequest)
 from telethon.tl.types import (ChannelParticipantCreator,
@@ -84,9 +83,6 @@ class UserUtils:
         common = await self._client(
             GetCommonChatsRequest(user_id=user_id, max_id=0, limit=100)
         )
-        emoji_status = await self._client(
-            GetCustomEmojiDocumentsRequest(document_id=user.emoji_status.document_id)
-        )
 
         return {
             "common_chats_count": full_user.common_chats_count,
@@ -101,7 +97,7 @@ class UserUtils:
             "first_name": user.first_name,
             "last_name": user.last_name,
             "usernames": unames,
-            "emoji_status": emoji_status,
+            "emoji_status": user.emoji_status.document_id,
             "color": user.color,
             "blocked": full_user.blocked,
             "about": full_user.about,
