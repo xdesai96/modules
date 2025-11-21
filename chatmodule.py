@@ -889,7 +889,7 @@ class ChatModuleMod(loader.Module):
                     first_name=userinfo.get("first_name") or self.strings["no"],
                     last_name=userinfo.get("last_name") or self.strings["no"],
                     about=userinfo.get("about") or self.strings["no"],
-                    emoji_status=userinfo.get("emoji_status") or self.strings["no"],
+                    emoji_status=f"<emoji document_id={userinfo.get('emoji_status')}>🌙</emoji>" if userinfo.get('emoji_status') else self.strings["no"],
                     business_work_hours=", ".join(working_hours_output)
                     or self.strings["no"],
                     birthday=(
