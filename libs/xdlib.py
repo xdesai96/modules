@@ -81,7 +81,7 @@ class UserUtils:
                 unames.append(username.username)
         personal_channel = await self._client.get_entity(full_user.personal_channel_id)
         common = await self._client(
-            GetCommonChatsRequest(user_id=user, max_id=0, limit=100)
+            GetCommonChatsRequest(user_id=userfull, max_id=0, limit=100)
         )
 
         return {
