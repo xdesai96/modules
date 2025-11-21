@@ -69,7 +69,7 @@ class UserUtils:
         self._client = client
         self._db = db
 
-    async def get_info(user_id: typing.Union[str, int, PeerUser, User]):
+    async def get_info(self, user_id: typing.Union[str, int, PeerUser, User]):
         userfull = await self._client.get_fulluser(user_id)
         full_user - userfull.full_user
         user = full_user.users[0]

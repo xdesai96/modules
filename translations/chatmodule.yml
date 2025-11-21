@@ -119,7 +119,7 @@ ru:
   user_is_kicked: <emoji document_id=5983033346207256798>🚪</emoji> <b><code>{name}</code> [<code>{id}</code>] кикнут.</b>
   user_is_muted: <emoji document_id=5409380965644514142>🔕</emoji> <b>{name} [<code>{id}</code>] замьючен на{time_info}.</b>
   reason: '<i>Причина: {reason}</i>'
-  forever: навсегда
+  forever: всегда
   user_is_unmuted: <emoji document_id=5409331062419502443>🔉</emoji> <b>{name} [<code>{id}</code>] размьючен.</b>
   title_changed: <b>{type_of} название успешно изменено с <code>{old_title}</code> на <code>{new_title}</code>.</b>
   channel_created: "<emoji document_id=6296367896398399651>✅</emoji> <b>Канал <code>{title}</code> создан.\n</b><emoji document_id=5237918475254526196>🔗</emoji><b> Пригласительная ссылка: {link}</b>"
