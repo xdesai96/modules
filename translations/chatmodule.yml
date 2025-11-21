@@ -87,7 +87,7 @@ en:
   friday: Friday
   saturday: Saturday
   sunday: Sunday
-  owns: "<emoji document_id=5458614983212427372>👑</emoji><b> My kingdoms:</b>\n<blockquote>{owns}</blockquote>"
+  owns: "<emoji document_id=5458614983212427372>👑</emoji><b> My kingdoms:</b>\n<blockquote expandable>{owns}</blockquote>"
 
 ru:
   my_id: '<emoji document_id=5361912768045792571>👑</emoji><b> Мой ID: </b><code>{id}</code>'
@@ -178,5 +178,5 @@ ru:
   friday: Пятница
   saturday: Суббота
   sunday: Воскресенье
-  owns: "<emoji document_id=5458614983212427372>👑</emoji><b> Мои королевства:</b>\n<blockquote>{owns}</blockquote>"
+  owns: "<emoji document_id=5458614983212427372>👑</emoji><b> Мои королевства:</b>\n<blockquote expandable>{owns}</blockquote>"
 
