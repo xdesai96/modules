@@ -81,7 +81,7 @@ class UserUtils:
                 unames.append(username.username)
         personal_channel = (
             await self._client.get_entity(full_user.personal_channel_id)
-            if full_user
+            if full_user.personal_channel_id
             else None
         )
         common = await self._client(
