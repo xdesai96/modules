@@ -73,6 +73,11 @@ class UserUtils:
         userfull = await self._client.get_fulluser(user_id)
         full_user = userfull.full_user
         user = userfull.users[0]
+        usernames = [user] or user.usernames or None
+        unames = []
+        is usernames:
+            for username in usernames:
+                unames.append(username.username)
 
         return {
             "common_chats_count": full_user.common_chats_count,
@@ -85,7 +90,7 @@ class UserUtils:
             "stargifts_count": full_user.stargifts_count,
             "first_name": user.first_name,
             "last_name": user.last_name,
-            "username": user.username or user.usernames or None,
+            "username": unames,
             "emoji_status": user.emoji_status,
             "color": user.color,
             "blocked": full_user.blocked,
