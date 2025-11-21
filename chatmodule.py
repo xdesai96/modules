@@ -835,3 +835,96 @@ class ChatModuleMod(loader.Module):
             else:
                 await self.xdlib.chat.join_request(message.chat, arg, False)
         return await utils.answer(message, self.strings["all_dismissed"])
+
+    @loader.command(ru_doc="[-u] Получить информацию об аккаунте")
+    async def userinfo(self, message):
+        """[-u] Get the info about the account"""
+        opts = self.xdlib.parse.opts(utils.get_args(message))
+        reply = await message.get_reply_message()
+        target = opts.get("u") or reply.sender or None
+        if not target:
+            return await utils.answer(message, self.strings["no_user"])
+        try:
+            userinfo = await self.xdlib.user.get_info(target)
+            photo = userinfo.get("profile_photo")
+            working_hours = (
+                userinfo.get("business_work_hours").weekly_open
+                if userinfo.get("business_work_hours")
+                else 0
+            )
+            weekdays = [
+                self.strings["monday"],
+                self.strings["tuesday"],
+                self.strings["wednesday"],
+                self.strings["thursday"],
+                self.strings["friday"],
+                self.strings["saturday"],
+                self.strings["sunday"],
+            ]
+            personal_channel = userinfo.get("personal_channel")
+            working_hours_output = []
+            if working_hours:
+                for item in working_hours:
+                    day_index = item.start_minute // (24 * 60)
+                    day = weekdays[day_index]
+
+                    start = self.xdlib.parse.minutes_to_hhmm(item.start_minute)
+                    end = self.xdlib.parse.minutes_to_hhmm(item.end_minute)
+                    working_hours_output.append(f"<b>{day}: {start} - {end}</b>")
+            return await utils.answer(
+                message,
+                self.strings["userinfo"].format(
+                    common_chats_count=userinfo.get("common_chats_count") or 0,
+                    common_chats=(
+                        ", ".join(
+                            [
+                                f"<a href='{(await self.xdlib.chat.get_info(channel)).get('link')}'>{channel.title}</a>"
+                                for channel in userinfo.get("common_chats")
+                            ]
+                        )
+                        if userinfo.get("common_chats")
+                        else self.strings["no"]
+                    ),
+                    user_id=userinfo.get("id", 0),
+                    first_name=userinfo.get("first_name") or self.strings["no"],
+                    last_name=userinfo.get("last_name") or self.strings["no"],
+                    about=userinfo.get("about") or self.strings["no"],
+                    emoji_status=userinfo.get("emoji_status") or self.strings["no"],
+                    business_work_hours=", ".join(working_hours_output)
+                    or self.strings["no"],
+                    birthday=(
+                        f"{userinfo.get('birthday').day or ''}."
+                        f"{userinfo.get('birthday').month or ''}."
+                        f"{userinfo.get('birthday').year or ''}"
+                        if userinfo.get("birthday")
+                        else self.strings["no"]
+                    ),
+                    stargifts_count=userinfo.get("stargifts_count")
+                    or self.strings["no"],
+                    usernames=(
+                        ", ".join(
+                            [f"@{username}" for username in userinfo.get("usernames")]
+                        )
+                        if userinfo.get("usernames")
+                        else self.strings["no"]
+                    ),
+                    personal_channel=(
+                        f"<a href='{(await self.xdlib.chat.get_info(personal_channel)).get('link')}'>"
+                        f"{personal_channel.title}</a>"
+                        if personal_channel
+                        else self.strings["no"]
+                    ),
+                ),
+                file=(
+                    types.InputMediaPhoto(
+                        types.InputPhoto(
+                            photo.id, photo.access_hash, photo.file_reference
+                        )
+                    )
+                    if photo
+                    else None
+                ),
+            )
+        except Exception as e:
+            logger.error(e)
+            return await utils.answer(message, self.strings["error"])
