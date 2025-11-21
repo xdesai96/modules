@@ -48,6 +48,7 @@ class XDLib(loader.Library):
         self.messages = MessageUtils(self._client)
         self.admin = AdminUtils(self._client, self)
         self.chat = ChatUtils(self._client, self._db)
+        self.dialog = DialogUtils()
         self.user = UserUtils(self._client, self._db)
         self.rights = AdminRights
 
@@ -294,6 +295,36 @@ class ParseUtils:
 class DialogUtils:
     def __init__(self, client) -> None:
         self._client = client
+
+    async def get_all(self, client):
+        dialogs = []
+        async for dialog in client.iter_dialogs():
+            dialogs.append(dialog)
+        return dialogs
+
+    async def get_chats(self, client):
+        return [
+            chat
+            for chat in await self.get_all(client)
+            if chat.is_group and chat.is_channel
+        ]
+
+    async def get_pms(self, client):
+        return [pm for pm in await self.get_all(client) if pm.is_private]
+
+    async def get_channels(self, client):
+        return [
+            channel
+            for channel in await self.get_all(client)
+            if channel.is_channel and not channel.is_group
+        ]
+
+    async def get_owns(self, client):
+        return [
+            ent
+            for ent in await self.get_all(client)
+            if hasattr(ent.entity, "creator") and ent.entity.creator
+        ]
 
 
 class MessageUtils:
