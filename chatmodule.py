@@ -212,26 +212,6 @@ class ChatModuleMod(loader.Module):
             ),
         )
 
-    @loader.command(ru_doc="Показывает забаненых участников в группе/канале")
-    @loader.tag("no_pm")
-    async def banlist(self, message):
-        """Shows the banned participants in the chat/channel"""
-        banned = await self._client.get_participants(
-            message.chat_id, filter=types.ChannelParticipantsKicked("")
-        )
-        title = (await message.get_chat()).title
-        banned_header = self.strings["banned_in_chat"].format(
-            title=title, count=len(banned)
-        )
-        if len(banned) == 0:
-            return await utils.answer(message, self.strings["no_banned_in_chat"])
-        for user in banned:
-            if not user.deleted:
-                banned_header += f'<emoji document_id=5316712579467321913>🔴</emoji> <a href="tg://user?id={user.id}">{user.first_name}</a> | <code>{user.id}</code>\n'
-        await utils.answer(
-            message, f"<blockquote expandable><b>{banned_header}</b></blockquote>"
-        )
-
     @loader.command(ru_doc="Показывает ботов в группе/канале")
     @loader.tag("no_pm")
     async def bots(self, message):
@@ -272,35 +252,30 @@ class ChatModuleMod(loader.Module):
             ),
         )
 
-    @loader.command(ru_doc="Забанить участника")
+    @loader.command(ru_doc="[-u] [-t] [-r] Забанить участника")
     @loader.tag("no_pm")
     async def ban(self, message):
-        """Ban a participant temporarily or permanently"""
-        text = message.text.split("\n", 1)
-        reason = text[1] if len(text) > 1 else ""
+        """[-u] [-t] [-r] Ban a participant temporarily or permanently"""
+        opts = self.xdlib.parse.opts(utils.get_args(message))
+        reason = opts.get("r")
         reply = await message.get_reply_message()
-        user = (
-            next(iter(self.xdlib.parse.mentions(message)), None)
-            or reply.sender_id
-            or None
-        )
+        user = opts.get("u") or (reply.sender_id if reply else None)
         strings = []
-        try:
-            user = await self._client.get_entity(user) if user else None
-        except Exception as e:
-            logger.error(str(e))
-            return await utils.answer(message, self.strings["error"])
         if not user:
             return await utils.answer(message, self.strings["no_user"])
 
-        seconds = self.xdlib.parse.time(utils.get_args_raw(message))
-        until_date = datetime.now(timezone.utc) + timedelta(seconds=seconds)
+        seconds = self.xdlib.parse.time(opts.get("t")) if opts.get("t") else None
+        until_date = (
+            (datetime.now(timezone.utc) + timedelta(seconds=seconds))
+            if seconds
+            else None
+        )
         time_info = f" {self.xdlib.format.time(seconds)}" if seconds else None
         try:
             await self._client.edit_permissions(
                 message.chat,
                 user,
-                until_date=until_date if seconds else None,
+                until_date=until_date,
                 view_messages=False,
             )
         except Exception as e:
@@ -321,18 +296,10 @@ class ChatModuleMod(loader.Module):
     @loader.command(ru_doc="Разбанить пользователя")
     @loader.tag("no_pm")
     async def unban(self, message):
-        """Unban a user"""
+        """[-u] Unban a user"""
+        opts = self.xdlib.parse.opts(utils.get_args(message))
         reply = await message.get_reply_message()
-        user = (
-            next(iter(self.xdlib.parse.mentions(message)), None)
-            or reply.sender_id
-            or None
-        )
-        try:
-            user = await self._client.get_entity(user) if user else None
-        except Exception as e:
-            logger.error(str(e))
-            return await utils.answer(message, self.strings["error"])
+        user = opts.get("u") or (reply.sender_id if reply else None)
         if not user:
             return await utils.answer(message, self.strings["no_user"])
         try:
@@ -348,24 +315,15 @@ class ChatModuleMod(loader.Module):
             ),
         )
 
-    @loader.command(ru_doc="Кикнуть участника")
+    @loader.command(ru_doc="[-u] [-r] Кикнуть участника")
     @loader.tag("no_pm")
     async def kick(self, message):
-        """Kick a participant"""
-        text = message.text.split("\n", 1)
-        reason = text[1] if len(text) > 1 else ""
+        """[-u] [-r] Kick a participant"""
+        opts = self.xdlib.parse.opts(utils.get_args(message))
+        reason = opts.get("r")
         reply = await message.get_reply_message()
-        user = (
-            next(iter(self.xdlib.parse.mentions(message)), None)
-            or reply.sender_id
-            or None
-        )
+        user = opts.get("u") or (reply.sender_id if reply else None)
         strings = []
-        try:
-            user = await self._client.get_entity(user) if user else None
-        except Exception as e:
-            logger.error(str(e))
-            return await utils.answer(message, self.strings["error"])
         if not user:
             return await utils.answer(message, self.strings["no_user"])
         try:
@@ -383,35 +341,30 @@ class ChatModuleMod(loader.Module):
             strings.append(self.strings["reason"].format(reason=reason))
         return await utils.answer(message, "\n".join(strings))
 
-    @loader.command(ru_doc="Замутить участника")
+    @loader.command(ru_doc="[-u] [-t] [-r] Замутить участника")
     @loader.tag("no_pm")
     async def mute(self, message):
-        """Mute a participant temporarily or permanently"""
-        text = message.text.split("\n", 1)
-        reason = text[1] if len(text) > 1 else ""
+        """[-u] [-t] [-r] Mute a participant temporarily or permanently"""
+        opts = self.xdlib.parse.opts(utils.get_args(message))
+        reason = opts.get("r")
         reply = await message.get_reply_message()
-        user = (
-            next(iter(self.xdlib.parse.mentions(message)), None)
-            or reply.sender_id
-            or None
-        )
+        user = opts.get("u") or (reply.sender_id if reply else None)
         strings = []
-        try:
-            user = await self._client.get_entity(user) if user else None
-        except Exception as e:
-            logger.error(str(e))
-            return await utils.answer(message, self.strings["error"])
         if not user:
             return await utils.answer(message, self.strings["no_user"])
 
-        seconds = self.xdlib.parse.time(utils.get_args_raw(message))
-        until_date = datetime.now(timezone.utc) + timedelta(seconds=seconds)
+        seconds = self.xdlib.parse.time(opts.get("t")) if opts.get("t") else None
+        until_date = (
+            (datetime.now(timezone.utc) + timedelta(seconds=seconds))
+            if seconds
+            else None
+        )
         time_info = f" {self.xdlib.format.time(seconds)}" if seconds else None
         try:
             await self._client.edit_permissions(
                 message.chat,
                 user,
-                until_date=until_date if seconds else None,
+                until_date=until_date,
                 send_messages=False,
             )
         except Exception as e:
@@ -433,20 +386,11 @@ class ChatModuleMod(loader.Module):
     @loader.tag("no_pm")
     async def unmute(self, message):
         """Unmute a participant"""
+        opts = self.xdlib.parse.opts(utils.get_args(message))
         reply = await message.get_reply_message()
-        user = (
-            next(iter(self.xdlib.parse.mentions(message)), None)
-            or reply.sender_id
-            or None
-        )
-        try:
-            user = await self._client.get_entity(user) if user else None
-        except Exception as e:
-            logger.error(str(e))
-            return await utils.answer(message, self.strings["error"])
+        user = opts.get("u") or (reply.sender_id if reply else None)
         if not user:
             return await utils.answer(message, self.strings["no_user"])
-
         try:
             await self._client.edit_permissions(message.chat, user, send_messages=True)
         except Exception as e:
@@ -460,48 +404,12 @@ class ChatModuleMod(loader.Module):
             ),
         )
 
-    @loader.command(ru_doc="Переименовать группу/канал")
-    @loader.tag("no_pm")
-    async def rename(self, message):
-        """Rename the chat/channel"""
-        chat = await message.get_chat()
-        old_title = chat.title
-        new_title = utils.get_args_raw(message)
-        if message.is_channel:
-            if message.is_group:
-                type_of = self.strings["type_group"]
-            else:
-                type_of = self.strings["type_channel"]
-            try:
-                await self._client(
-                    channels.EditTitleRequest(channel=chat, title=new_title)
-                )
-            except Exception as e:
-                logger.error(str(e))
-                return await utils.answer(message, self.strings["error"])
-        else:
-            type_of = self.strings["type_group"]
-            try:
-                await self._client(
-                    messages.EditChatTitleRequest(chat_id=chat.id, title=new_title)
-                )
-            except Exception as e:
-                logger.error(str(e))
-                return await utils.answer(message, self.strings["error"])
-        return await utils.answer(
-            message,
-            self.strings["title_changed"].format(
-                old_title=old_title, new_title=new_title, type_of=type_of
-            ),
-        )
-
     @loader.command(
         ru_doc="[-g|--group name] [-c|--channel name] - Создать группу/канал"
     )
     async def create(self, message):
         """[-g|--group name] [-c|--channel name] - Create group/channel"""
-        args = utils.get_args(message)
-        opts = self.xdlib.parse.opts(args)
+        opts = self.xdlib.parse.opts(utils.get_args(message))
         group_name = opts.get("g") or opts.get("group")
         channel_name = opts.get("c") or opts.get("channel")
         if channel_name:
@@ -542,16 +450,6 @@ class ChatModuleMod(loader.Module):
             return await utils.answer(message, self.strings["dnd"])
         else:
             return await utils.answer(message, self.strings["dnd_failed"])
-
-    @loader.command(ru_doc="Получить ссылку на сообщение")
-    async def geturl(self, message):
-        """Get the link to the replied messages"""
-        if reply := await message.get_reply_message():
-            link = await reply.link
-            return await utils.answer(
-                message, self.strings["msg_link"].format(link=link)
-            )
-        return await utils.answer(message, self.strings["msg_link_failed"])
 
     @loader.command(
         ru_doc="-u username/id - Пригласить пользователя в чат (-b пригласить инлайн бота)"
@@ -700,10 +598,10 @@ class ChatModuleMod(loader.Module):
             ),
         )
 
-    @loader.command(ru_doc="-u username/id -n role -r rank - Назначить роль участнику")
+    @loader.command(ru_doc="[-u] [-n] [-r] Назначить роль участнику")
     @loader.tag("no_pm")
     async def setrole(self, message):
-        """-u username/id -n role -r rank - Set the role for the user"""
+        """[-u] [-n] [-r] Set the role for the user"""
         args = utils.get_args(message)
         opts = self.xdlib.parse.opts(args)
         reply = await message.get_reply_message()
@@ -721,217 +619,227 @@ class ChatModuleMod(loader.Module):
             return await utils.answer(message, self.strings["role_not_set"])
         return await utils.answer(message, self.strings["role_set"])
 
-    @loader.command(ru_doc="Получить инфу о текущем чате")
-    @loader.tag("no_pm")
-    async def chatinfo(self, message):
-        """Get the current chat info"""
-        try:
-            chat = await message.get_chat()
-            chatinfo = await self.xdlib.chat.get_info(chat)
-            photo = chatinfo.get("chat_photo")
-            photo = photo if not isinstance(photo, types.PhotoEmpty) else None
-            return await utils.answer(
-                message,
-                self.strings["chatinfo"].format(
-                    id=chatinfo.get("id"),
-                    title=chatinfo.get("title"),
-                    about=chatinfo.get("about") or self.strings["no"],
-                    admins_count=chatinfo.get("admins_count"),
-                    online_count=chatinfo.get("online_count"),
-                    participants_count=chatinfo.get("participants_count"),
-                    kicked_count=chatinfo.get("kicked_count"),
-                    slowmode_seconds=(
-                        self.xdlib.format.time(chatinfo.get("slowmode_seconds"))
-                        if chatinfo.get("slowmode_seconds")
-                        else self.strings["no"]
-                    ),
-                    call=(
-                        self.strings["yes"]
-                        if chatinfo.get("call")
-                        else self.strings["no"]
-                    ),
-                    ttl_period=(
-                        self.xdlib.format.time(chatinfo.get("ttl_period"))
-                        if chatinfo.get("ttl_period")
-                        else self.strings["no"]
-                    ),
-                    requests_pending=chatinfo.get("requests_pending"),
-                    recent_requesters=", ".join(
-                        [
-                            f"<code>{user}</code>"
-                            for user in chatinfo.get("recent_requesters")
-                        ]
-                    )
-                    or self.strings["no"],
-                    linked_chat_id=chatinfo.get("linked_chat_id") or self.strings["no"],
-                    antispam=(
-                        self.strings["yes"]
-                        if chatinfo.get("antispam")
-                        else self.strings["no"]
-                    ),
-                    participants_hidden=(
-                        self.strings["yes"]
-                        if chatinfo.get("participants_hidden")
-                        else self.strings["no"]
-                    ),
-                    link=chatinfo.get("link") or self.strings["no"],
-                    is_forum=(
-                        self.strings["yes"]
-                        if chatinfo.get("is_forum")
-                        else self.strings["no"]
-                    ),
-                    type_of=(
-                        self.strings["type_group"]
-                        if chatinfo.get("is_group")
-                        else (
-                            self.strings["type_channel"]
-                            if chatinfo.get("is_channel")
-                            else self.strings["type_unknown"]
-                        )
-                    ),
-                ),
-                media=(
-                    types.InputMediaPhoto(
-                        types.InputPhoto(
-                            photo.id, photo.access_hash, photo.file_reference
-                        )
-                    )
-                    if photo
-                    else None
-                ),
-            )
-        except Exception as e:
-            logger.error(str(e))
-            return await utils.answer(message, self.strings["error"])
-
-    @loader.command(ru_doc="[-a] - Принять заявки на вступление")
-    @loader.tag("no_pm")
-    async def approve(self, message):
-        """[-a] - Accept join requests"""
-        opts = self.xdlib.parse.opts(utils.get_args(message))
-        if opts.get("a"):
-            await self.xdlib.chat.join_requests(message.chat, True)
-            return await utils.answer(message, self.strings["all_approved"])
-        args = utils.get_args(message)
-        for arg in args:
-            if arg.isdigit():
-                await self.xdlib.chat.join_request(message.chat, int(arg), True)
-            else:
-                await self.xdlib.chat.join_request(message.chat, arg, True)
-        return await utils.answer(message, self.strings["all_approved"])
-
-    @loader.command(ru_doc="[-a] - Отклонить заявки на вступление")
-    @loader.tag("no_pm")
-    async def dismiss(self, message):
-        """[-a] - Decline join requests"""
-        opts = self.xdlib.parse.opts(utils.get_args(message))
-        if opts.get("a"):
-            await self.xdlib.chat.join_requests(message.chat, False)
-            return await utils.answer(message, self.strings["all_dismissed"])
-        args = utils.get_args(message)
-        for arg in args:
-            if arg.isdigit():
-                await self.xdlib.chat.join_request(message.chat, int(arg), False)
-            else:
-                await self.xdlib.chat.join_request(message.chat, arg, False)
-        return await utils.answer(message, self.strings["all_dismissed"])
-
-    @loader.command(ru_doc="[-u] Получить информацию об аккаунте")
-    async def userinfo(self, message):
-        """[-u] Get the info about the account"""
+    @loader.command(ru_doc="[-i] Получить информацию о сущности")
+    async def inspect(self, message):
+        """[-i] Get the info about the entity"""
         opts = self.xdlib.parse.opts(utils.get_args(message))
         reply = await message.get_reply_message()
-        target = opts.get("u") or reply.sender or None
+        target = (
+            opts.get("i")
+            or (reply.sender if reply else await message.get_chat())
+            or None
+        )
         if not target:
             return await utils.answer(message, self.strings["no_user"])
-        try:
-            userinfo = await self.xdlib.user.get_info(target)
-            photo = userinfo.get("profile_photo")
-            working_hours = (
-                userinfo.get("business_work_hours").weekly_open
-                if userinfo.get("business_work_hours")
-                else 0
-            )
-            weekdays = [
-                self.strings["monday"],
-                self.strings["tuesday"],
-                self.strings["wednesday"],
-                self.strings["thursday"],
-                self.strings["friday"],
-                self.strings["saturday"],
-                self.strings["sunday"],
-            ]
-            personal_channel = userinfo.get("personal_channel")
-            working_hours_output = []
-            if working_hours:
-                for item in working_hours:
-                    day_index = item.start_minute // (24 * 60)
-                    day = weekdays[day_index]
-
-                    start = self.xdlib.parse.minutes_to_hhmm(item.start_minute)
-                    end = self.xdlib.parse.minutes_to_hhmm(item.end_minute)
-                    working_hours_output.append(f"<b>{day}: {start} - {end}</b>")
-            return await utils.answer(
-                message,
-                self.strings["userinfo"].format(
-                    common_chats_count=userinfo.get("common_chats_count") or 0,
-                    common_chats=(
-                        ", ".join(
+        ent = await self._client.get_entity(target)
+        if isinstance(ent, types.Channel):
+            try:
+                chatinfo = await self.xdlib.chat.get_info(ent)
+                photo = chatinfo.get("chat_photo")
+                photo = photo if not isinstance(photo, types.PhotoEmpty) else None
+                return await utils.answer(
+                    message,
+                    self.strings["chatinfo"].format(
+                        id=chatinfo.get("id"),
+                        title=chatinfo.get("title"),
+                        about=chatinfo.get("about") or self.strings["no"],
+                        admins_count=chatinfo.get("admins_count"),
+                        online_count=chatinfo.get("online_count"),
+                        participants_count=chatinfo.get("participants_count"),
+                        kicked_count=chatinfo.get("kicked_count"),
+                        slowmode_seconds=(
+                            self.xdlib.format.time(chatinfo.get("slowmode_seconds"))
+                            if chatinfo.get("slowmode_seconds")
+                            else self.strings["no"]
+                        ),
+                        call=(
+                            self.strings["yes"]
+                            if chatinfo.get("call")
+                            else self.strings["no"]
+                        ),
+                        ttl_period=(
+                            self.xdlib.format.time(chatinfo.get("ttl_period"))
+                            if chatinfo.get("ttl_period")
+                            else self.strings["no"]
+                        ),
+                        requests_pending=chatinfo.get("requests_pending"),
+                        recent_requesters=", ".join(
                             [
-                                f"<a href='{(await self.xdlib.chat.get_info(channel)).get('link')}'>{channel.title}</a>"
-                                for channel in userinfo.get("common_chats")
+                                f"<code>{user}</code>"
+                                for user in chatinfo.get("recent_requesters")
                             ]
                         )
-                        if userinfo.get("common_chats")
-                        else self.strings["no"]
+                        or self.strings["no"],
+                        linked_chat_id=chatinfo.get("linked_chat_id")
+                        or self.strings["no"],
+                        antispam=(
+                            self.strings["yes"]
+                            if chatinfo.get("antispam")
+                            else self.strings["no"]
+                        ),
+                        participants_hidden=(
+                            self.strings["yes"]
+                            if chatinfo.get("participants_hidden")
+                            else self.strings["no"]
+                        ),
+                        link=chatinfo.get("link") or self.strings["no"],
+                        is_forum=(
+                            self.strings["yes"]
+                            if chatinfo.get("is_forum")
+                            else self.strings["no"]
+                        ),
+                        type_of=(
+                            self.strings["type_group"]
+                            if chatinfo.get("is_group")
+                            else (
+                                self.strings["type_channel"]
+                                if chatinfo.get("is_channel")
+                                else self.strings["type_unknown"]
+                            )
+                        ),
                     ),
-                    user_id=userinfo.get("id", 0),
-                    first_name=userinfo.get("first_name") or self.strings["no"],
-                    last_name=userinfo.get("last_name") or self.strings["no"],
-                    about=userinfo.get("about") or self.strings["no"],
-                    emoji_status=(
-                        f"<emoji document_id={userinfo.get('emoji_status')}>🌙</emoji>"
-                        if userinfo.get("emoji_status")
-                        else self.strings["no"]
-                    ),
-                    business_work_hours=", ".join(working_hours_output)
-                    or self.strings["no"],
-                    birthday=(
-                        f"{userinfo.get('birthday').day or ''}."
-                        f"{userinfo.get('birthday').month or ''}."
-                        f"{userinfo.get('birthday').year or ''}"
-                        if userinfo.get("birthday")
-                        else self.strings["no"]
-                    ),
-                    stargifts_count=userinfo.get("stargifts_count")
-                    or self.strings["no"],
-                    usernames=(
-                        ", ".join(
-                            [f"@{username}" for username in userinfo.get("usernames")]
+                    media=(
+                        types.InputMediaPhoto(
+                            types.InputPhoto(
+                                photo.id, photo.access_hash, photo.file_reference
+                            )
                         )
-                        if userinfo.get("usernames")
-                        else self.strings["no"]
+                        if photo
+                        else None
                     ),
-                    personal_channel=(
-                        f"<a href='{(await self.xdlib.chat.get_info(personal_channel)).get('link')}'>"
-                        f"{personal_channel.title}</a>"
-                        if personal_channel
-                        else self.strings["no"]
+                )
+            except Exception as e:
+                logger.error(str(e))
+                return await utils.answer(message, self.strings["error"])
+        if isinstance(ent, types.User):
+            try:
+                userinfo = await self.xdlib.user.get_info(ent)
+                photo = userinfo.get("profile_photo")
+                working_hours = (
+                    userinfo.get("business_work_hours").weekly_open
+                    if userinfo.get("business_work_hours")
+                    else 0
+                )
+                weekdays = [
+                    self.strings["monday"],
+                    self.strings["tuesday"],
+                    self.strings["wednesday"],
+                    self.strings["thursday"],
+                    self.strings["friday"],
+                    self.strings["saturday"],
+                    self.strings["sunday"],
+                ]
+                personal_channel = userinfo.get("personal_channel")
+                working_hours_output = []
+                if working_hours:
+                    for item in working_hours:
+                        day_index = item.start_minute // (24 * 60)
+                        day = weekdays[day_index]
+
+                        start = self.xdlib.parse.minutes_to_hhmm(item.start_minute)
+                        end = self.xdlib.parse.minutes_to_hhmm(item.end_minute)
+                        working_hours_output.append(f"<b>{day}: {start} - {end}</b>")
+                return await utils.answer(
+                    message,
+                    self.strings["userinfo"].format(
+                        common_chats_count=userinfo.get("common_chats_count") or 0,
+                        phone=userinfo.get("phone") or self.strings["no"],
+                        common_chats=(
+                            ", ".join(
+                                [
+                                    f"<a href='{(await self.xdlib.chat.get_info(channel)).get('link')}'>{channel.title}</a>"
+                                    for channel in userinfo.get("common_chats")
+                                ]
+                            )
+                            if userinfo.get("common_chats")
+                            else self.strings["no"]
+                        ),
+                        user_id=userinfo.get("id", 0),
+                        first_name=userinfo.get("first_name") or self.strings["no"],
+                        last_name=userinfo.get("last_name") or self.strings["no"],
+                        about=userinfo.get("about") or self.strings["no"],
+                        emoji_status=(
+                            f"<emoji document_id={userinfo.get('emoji_status')}>🌙</emoji>"
+                            if userinfo.get("emoji_status")
+                            else self.strings["no"]
+                        ),
+                        business_work_hours=", ".join(working_hours_output)
+                        or self.strings["no"],
+                        birthday=(
+                            f"{userinfo.get('birthday').day or ''}."
+                            f"{userinfo.get('birthday').month or ''}."
+                            f"{userinfo.get('birthday').year or ''}"
+                            if userinfo.get("birthday")
+                            else self.strings["no"]
+                        ),
+                        stargifts_count=userinfo.get("stargifts_count")
+                        or self.strings["no"],
+                        usernames=(
+                            ", ".join(
+                                [
+                                    f"@{username}"
+                                    for username in userinfo.get("usernames")
+                                ]
+                            )
+                            if userinfo.get("usernames")
+                            else self.strings["no"]
+                        ),
+                        personal_channel=(
+                            f"<a href='{(await self.xdlib.chat.get_info(personal_channel)).get('link')}'>"
+                            f"{personal_channel.title}</a>"
+                            if personal_channel
+                            else self.strings["no"]
+                        ),
                     ),
-                ),
-                file=(
-                    types.InputMediaPhoto(
-                        types.InputPhoto(
-                            photo.id, photo.access_hash, photo.file_reference
+                    file=(
+                        types.InputMediaPhoto(
+                            types.InputPhoto(
+                                photo.id, photo.access_hash, photo.file_reference
+                            )
                         )
-                    )
-                    if photo
-                    else None
-                ),
+                        if photo
+                        else None
+                    ),
+                )
+            except Exception as e:
+                logger.error(e)
+                return await utils.answer(message, self.strings["error"])
+
+    @loader.command(ru_doc="[-a] [-d] Управлять заявками на вступление")
+    @loader.tag("no_pm")
+    async def requests(self, message):
+        """[-a] [-d] Manage join requests"""
+        opts = self.xdlib.parse.opts(utils.get_args(message))
+        approve_list = [x for x in opts.get("a", "").split(",") if x]
+        dismiss_list = [x for x in opts.get("d", "").split(",") if x]
+        all_list = approve_list + dismiss_list
+        all_targets = [
+            await self._client.get_entity(
+                int(ent.strip()) if ent.strip().isdigit() else ent.strip()
             )
-        except Exception as e:
-            logger.error(e)
-            return await utils.answer(message, self.strings["error"])
+            for ent in all_list
+        ]
+        for approve in approve_list:
+            if approve.isdigit():
+                await self.xdlib.chat.join_request(message.chat, int(approve), True)
+            else:
+                await self.xdlib.chat.join_request(message.chat, approve, True)
+        for dismiss in dismiss_list:
+            if dismiss.isdigit():
+                await self.xdlib.chat.join_request(message.chat, int(dismiss), False)
+            else:
+                await self.xdlib.chat.join_request(message.chat, dismiss, False)
+        return await utils.answer(
+            message,
+            self.strings["requests_checked"].format(
+                entities=", ".join(
+                    ent.first_name
+                    or getattr(ent, "username", None)
+                    or str(getattr(ent, "id", "unknown"))
+                    for ent in all_targets
+                )
+            ),
+        )
 
     @loader.command(ru_doc="Получить все свои чаты/каналы")
     async def owns(self, message):

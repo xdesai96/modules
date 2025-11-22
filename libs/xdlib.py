@@ -107,6 +107,7 @@ class UserUtils:
             "blocked": full_user.blocked,
             "about": full_user.about,
             "profile_photo": full_user.profile_photo,
+            "phone": user.phone,
         }
 
 
