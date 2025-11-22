@@ -160,7 +160,7 @@ class ChatModuleMod(loader.Module):
                 await self._client(messages.DeleteChatRequest(chat.id))
             else:
                 return await utils.answer(message, self.strings["failed_to_delete"])
-            return
+            return await utils.answer(message, self.strings["successful_delete"])
         if isinstance(message.chat, types.Channel):
             await self._client(channels.DeleteChannelRequest(message.chat))
         elif isinstance(message.chat, types.Chat):
@@ -943,7 +943,7 @@ class ChatModuleMod(loader.Module):
                 num=len(owns),
                 owns="\n".join(
                     [
-                        f"<emoji document_id=5458833171846029357>✅</emoji> {own.title} [<code>{own.id}</code>]"
+                        f"<emoji document_id=5458833171846029357>✅</emoji> {own.title} [<code>{str(own.id).replace('-100', '')}</code>]"
                         for own in owns
                     ]
                 ),
