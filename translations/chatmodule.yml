@@ -115,7 +115,7 @@ ru:
   edit_messages: Редактирование сообщений
   invalid_args: <emoji document_id=5019523782004441717>❌</emoji> <b>Неверные аргументы.</b>
   error: <emoji document_id=5458497936763676259>😖</emoji><b> Что-то пошло не так. Проверьте логи.</b>
-  successful_delete: <emoji document_id=5409029658794537988>✅</emoji> <b>Entity успешно удалён</b>
+  successful_delete: <emoji document_id=5409029658794537988>✅</emoji> <b>Сущность успешно удалена</b>
   no_deleted_accounts: <emoji document_id=5238020759900668600>😶‍🌫️</emoji> <b>Удалённых аккаунтов здесь нет</b>
   kicked_deleted_accounts: <emoji document_id=5408832111773757273>🗑</emoji> <b>Удалённые аккаунты очищены из чата</b>
   admins_in_chat: "<emoji document_id=5276229330131772747>👑</emoji> <b>Админы в <code>{title}</code> ({count}):</b>\n"
