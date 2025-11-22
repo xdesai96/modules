@@ -24,7 +24,7 @@ en:
   edit_messages: Edit messages
   invalid_args: <emoji document_id=5019523782004441717>❌</emoji> <b>Invalid args.</b>
   error: <emoji document_id=5458497936763676259>😖</emoji><b> Something went wrong. Check the logs.</b>
-  successful_delete: <emoji document_id=5021905410089550576>✅</emoji> <b>{chat_type} successfully deleted</b>
+  successful_delete: <emoji document_id=5409029658794537988>✅</emoji> <b>Entity successfully deleted</b>
   no_deleted_accounts: <emoji document_id=5238020759900668600>😶‍🌫️</emoji> <b>No deleted accounts found here</b>
   kicked_deleted_accounts: <emoji document_id=5408832111773757273>🗑</emoji> <b>Removed deleted accounts from the chat</b>
   admins_in_chat: "<emoji document_id=5276229330131772747>👑</emoji> <b>Admins in <code>{title}</code> ({count}):</b>\n"
@@ -115,7 +115,7 @@ ru:
   edit_messages: Редактирование сообщений
   invalid_args: <emoji document_id=5019523782004441717>❌</emoji> <b>Неверные аргументы.</b>
   error: <emoji document_id=5458497936763676259>😖</emoji><b> Что-то пошло не так. Проверьте логи.</b>
-  successful_delete: <emoji document_id=5021905410089550576>✅</emoji> <b>{chat_type} успешно удалён</b>
+  successful_delete: <emoji document_id=5409029658794537988>✅</emoji> <b>Entity успешно удалён</b>
   no_deleted_accounts: <emoji document_id=5238020759900668600>😶‍🌫️</emoji> <b>Удалённых аккаунтов здесь нет</b>
   kicked_deleted_accounts: <emoji document_id=5408832111773757273>🗑</emoji> <b>Удалённые аккаунты очищены из чата</b>
   admins_in_chat: "<emoji document_id=5276229330131772747>👑</emoji> <b>Админы в <code>{title}</code> ({count}):</b>\n"
