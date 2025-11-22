@@ -186,13 +186,7 @@ class ParseUtils:
         return options
 
     def bool(self, value: str) -> bool:
-        """Parses a string into a boolean value.
-
-        Args:
-            value (str): The input string.
-        Returns:
-            bool: The parsed boolean value.
-        """
+        """Parses a string into a boolean value."""
         true_values = {"true", "yes", "1", "on"}
         false_values = {"false", "no", "0", "off"}
         low_value = value.lower()
@@ -204,13 +198,7 @@ class ParseUtils:
             raise ValueError(f"Cannot parse boolean from '{value}'")
 
     def time(self, time_str: str) -> int:
-        """Parses a time duration string into seconds.
-
-        Args:
-            time_str (str): The time duration string (e.g., "2h 30m").
-        Returns:
-            int: The total duration in seconds.
-        """
+        """Parses a time duration string into seconds."""
         time_units = {
             "s": 1,
             "m": 60,
@@ -227,13 +215,7 @@ class ParseUtils:
         return total_seconds
 
     def size(self, size_str: str) -> int:
-        """Parses a size string into bytes.
-
-        Args:
-            size_str (str): The size string (e.g., "10MB").
-        Returns:
-            int: The size in bytes.
-        """
+        """Parses a size string into bytes."""
         size_units = {
             "b": 1,
             "kb": 1024,
@@ -249,13 +231,7 @@ class ParseUtils:
         return 0
 
     def mentions(self, msg: Message) -> typing.List[str]:
-        """Extracts mentions from a given message.
-
-        Args:
-            msg (Message): The message.
-        Returns:
-            List[str]: A list of extracted mentions.
-        """
+        """Extracts mentions from a given message."""
         if msg.entities:
             mentions = []
             for entity in msg.entities:
@@ -269,13 +245,7 @@ class ParseUtils:
         return []
 
     def urls(self, msg: Message) -> typing.List[str]:
-        """Extracts URLs from a given message.
-
-        Args:
-            msg (Message): The message.
-        Returns:
-            List[str]: A list of extracted URLs.
-        """
+        """Extracts URLs from a given message."""
         if msg.entities or msg.media:
             urls = []
             for entity in msg.entities:
@@ -332,12 +302,7 @@ class MessageUtils:
         self._client = client
 
     async def delete_messages(self, msg: Message):
-        """Deletes multiple messages based on a specific pattern.
-        Args:
-            msg (Message): The message containing the command and pattern.
-        Returns:
-            None
-        """
+        """Deletes multiple messages based on a specific pattern."""
         reply = await msg.get_reply_message()
         pattern = r"([ab])(\d+)"
         matches = re.findall(pattern, utils.get_args_raw(msg))
@@ -376,6 +341,12 @@ class ChatUtils:
         self._client = client
         self._db = db
 
+    async def get_user_messages(self, chat, user_id):
+        msgs = []
+        async for msg in self._client.iter_messages(chat, from_user=user_id):
+            msgs.append(msg)
+        return msgs
+
     async def join_request(self, chat, user_id, approved):
         await self._client(
             HideChatJoinRequestRequest(peer=chat, user_id=user_id, approved=approved)
@@ -392,7 +363,6 @@ class ChatUtils:
     async def get_members(self, chat):
         try:
             members = await self._client.get_participants(chat)
-            users = [member for member in members if not getattr(member, "bot")]
             if members:
                 return members
             return None
@@ -462,14 +432,7 @@ class ChatUtils:
             return None
 
     async def is_member(self, chat, user) -> bool:
-        """Checks if a user is a member of a chat.
-
-        Args:
-            chat_id (int): The ID of the chat.
-            user_id (Union[int, str]): The ID or username of the user.
-        Returns:
-            bool: True if the user is a member, False otherwise.
-        """
+        """Checks if a user is a member of a chat."""
         try:
             perms = await self._client.get_perms_cached(chat, user)
             return True if perms else False
@@ -483,14 +446,7 @@ class ChatUtils:
             return False
 
     async def get_rights(self, chat, user) -> typing.Optional[ParticipantPermissions]:
-        """Checks if a user is a member of a chat.
-
-        Args:
-            chat_id (int): The ID of the chat.
-            user_id (Union[int, str]): The ID or username of the user.
-        Returns:
-            bool: True if the user is a member, False otherwise.
-        """
+        """Checks if a user is a member of a chat."""
         try:
             perms = await self._client.get_perms_cached(chat, user)
             return perms
@@ -504,14 +460,7 @@ class ChatUtils:
             return None
 
     async def invite_user(self, chat, user):
-        """Invites a user to a chat.
-
-        Args:
-            chat_id (int): The ID of the chat.
-            user_id (Union[int, str]): The ID or username of the user to invite.
-        Returns:
-            None
-        """
+        """Invites a user to a chat."""
         try:
             await self._client(InviteToChannelRequest(channel=chat, users=[user]))
             return True
@@ -562,14 +511,7 @@ class ChatUtils:
             return {}
 
     async def invite_bot(self, client, chat) -> bool:
-        """Invites an inline bot to a chat.
-
-        Args:
-            client: The Telethon client instance.
-            chat: The chat to invite the bot to.
-        Returns:
-            bool: True if the invitation was successful, False otherwise.
-        """
+        """Invites an inline bot to a chat."""
         try:
             await self._client(
                 InviteToChannelRequest(
@@ -609,15 +551,7 @@ class AdminUtils:
         return await self.set_rights(chat, user, rights_obj.to_int(), rank)
 
     async def set_rights(self, chat, user, mask: int, rank: str = "XD Admin") -> bool:
-        """Sets admin rights for a user in a chat based on a mask.
-
-        Args:
-            chat_id (int): The ID of the chat.
-            user_id (Union[int, str]): The ID or username of the user.
-            mask (int): The rights mask to set.
-        Returns:
-            bool: True if the rights were set successfully, False otherwise.
-        """
+        """Sets admin rights for a user in a chat based on a mask."""
         try:
             rights = AdminRights(mask)
 
@@ -641,15 +575,8 @@ class AdminUtils:
 
 
 class FormatUtils:
-
     def bytes(self, size: int) -> str:
-        """Formats a size in bytes into a human-readable string.
-
-        Args:
-            size (int): The size in bytes.
-        Returns:
-            str: The formatted size string.
-        """
+        """Formats a size in bytes into a human-readable string."""
         if size < 1024:
             if size == 1:
                 return f"{size} byte"
@@ -664,13 +591,7 @@ class FormatUtils:
             return f"{size / 1024**4:.2f} TB"
 
     def time(self, seconds: int) -> str:
-        """Formats a time duration in seconds into a human-readable string.
-
-        Args:
-            seconds (int): The time duration in seconds.
-        Returns:
-            str: The formatted time string.
-        """
+        """Formats a time duration in seconds into a human-readable string."""
         intervals = (
             ("years", 31536000),
             ("months", 2592000),
@@ -692,7 +613,6 @@ class FormatUtils:
 
 
 class AdminRights:
-
     RIGHTS_LIST = [x for x in ChatAdminRights().to_dict().keys() if x != "_"]
 
     RIGHTS = {name: 1 << i for i, name in enumerate(RIGHTS_LIST)}
