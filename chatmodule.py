@@ -260,6 +260,7 @@ class ChatModuleMod(loader.Module):
         reason = opts.get("r")
         reply = await message.get_reply_message()
         user = opts.get("u") or (reply.sender_id if reply else None)
+        user = await self._client.get_entity(user) if user else None
         strings = []
         if not user:
             return await utils.answer(message, self.strings["no_user"])
@@ -284,7 +285,11 @@ class ChatModuleMod(loader.Module):
         strings.append(
             self.strings["user_is_banned"].format(
                 id=user.id,
-                name=getattr(user, "first_name") or getattr(user, "title"),
+                name=(
+                    getattr(user, "first_name")
+                    if hasattr(user, "first_name")
+                    else getattr(user, "title")
+                ),
                 time_info=time_info or self.strings["forever"],
             )
         )
@@ -300,6 +305,7 @@ class ChatModuleMod(loader.Module):
         opts = self.xdlib.parse.opts(utils.get_args(message))
         reply = await message.get_reply_message()
         user = opts.get("u") or (reply.sender_id if reply else None)
+        user = await self._client.get_entity(user) if user else None
         if not user:
             return await utils.answer(message, self.strings["no_user"])
         try:
@@ -311,7 +317,11 @@ class ChatModuleMod(loader.Module):
             message,
             self.strings["user_is_unbanned"].format(
                 id=user.id,
-                name=getattr(user, "first_name") or getattr(user, "title"),
+                name=(
+                    getattr(user, "first_name")
+                    if hasattr(user, "first_name")
+                    else getattr(user, "title")
+                ),
             ),
         )
 
@@ -323,6 +333,7 @@ class ChatModuleMod(loader.Module):
         reason = opts.get("r")
         reply = await message.get_reply_message()
         user = opts.get("u") or (reply.sender_id if reply else None)
+        user = await self._client.get_entity(user) if user else None
         strings = []
         if not user:
             return await utils.answer(message, self.strings["no_user"])
@@ -334,7 +345,11 @@ class ChatModuleMod(loader.Module):
         strings.append(
             self.strings["user_is_kicked"].format(
                 id=user.id,
-                name=getattr(user, "first_name") or getattr(user, "title"),
+                name=(
+                    getattr(user, "first_name")
+                    if hasattr(user, "first_name")
+                    else getattr(user, "title")
+                ),
             )
         )
         if reason:
@@ -349,6 +364,7 @@ class ChatModuleMod(loader.Module):
         reason = opts.get("r")
         reply = await message.get_reply_message()
         user = opts.get("u") or (reply.sender_id if reply else None)
+        user = await self._client.get_entity(user) if user else None
         strings = []
         if not user:
             return await utils.answer(message, self.strings["no_user"])
@@ -373,7 +389,11 @@ class ChatModuleMod(loader.Module):
         strings.append(
             self.strings["user_is_muted"].format(
                 id=user.id,
-                name=getattr(user, "first_name") or getattr(user, "title"),
+                name=(
+                    getattr(user, "first_name")
+                    if hasattr(user, "first_name")
+                    else getattr(user, "title")
+                ),
                 time_info=time_info or self.strings["forever"],
             )
         )
@@ -389,6 +409,7 @@ class ChatModuleMod(loader.Module):
         opts = self.xdlib.parse.opts(utils.get_args(message))
         reply = await message.get_reply_message()
         user = opts.get("u") or (reply.sender_id if reply else None)
+        user = await self._client.get_entity(user) if user else None
         if not user:
             return await utils.answer(message, self.strings["no_user"])
         try:
@@ -400,7 +421,11 @@ class ChatModuleMod(loader.Module):
             message,
             self.strings["user_is_unmuted"].format(
                 id=user.id,
-                name=getattr(user, "first_name") or getattr(user, "title"),
+                name=(
+                    getattr(user, "first_name")
+                    if hasattr(user, "first_name")
+                    else getattr(user, "title")
+                ),
             ),
         )
 
