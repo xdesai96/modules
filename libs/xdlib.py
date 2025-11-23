@@ -342,6 +342,12 @@ class ChatUtils:
         self._client = client
         self._db = db
 
+    async def get_admin_logs(self, chat, limit: int = 5, **kwargs):
+        logs = []
+        for log_event in self._client.get_admin_log(chat, limit=limit, **kwargs):
+            logs.append(log_event)
+        return logs
+
     async def get_user_messages(self, chat, user_id):
         msgs = []
         async for msg in self._client.iter_messages(chat, from_user=user_id):
