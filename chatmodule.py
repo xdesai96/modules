@@ -443,7 +443,7 @@ class ChatModuleMod(loader.Module):
                     title=channel_name, broadcast=True, about=""
                 )
             )
-            chat = self.xdlib.chat.get_info(result.chats[0])
+            chat = await self.xdlib.chat.get_info(result.chats[0])
             return await utils.answer(
                 message,
                 self.strings["channel_created"].format(
