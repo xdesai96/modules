@@ -344,7 +344,7 @@ class ChatUtils:
 
     async def get_admin_logs(self, chat, limit: int = 5, **kwargs):
         logs = []
-        for log_event in self._client.get_admin_log(chat, limit=limit, **kwargs):
+        for log_event in await self._client.get_admin_log(chat, limit=limit, **kwargs):
             logs.append(log_event)
         return logs
 
