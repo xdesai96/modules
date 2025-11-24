@@ -87,6 +87,12 @@ en:
   saturday: Saturday
   sunday: Sunday
   owns: "<emoji document_id=5458614983212427372>👑</emoji><b> My kingdoms [{num}]:</b>\n<blockquote expandable>{owns}</blockquote>"
+  delete_action: "<blockquote><emoji document_id=5408832111773757273>🗑</emoji><b> DELETED:\n</b><emoji document_id=5904630315946611415>👤</emoji><b> From: {user}\n</b><emoji document_id=5904248647972820334>💭</emoji><b> Message: </b>{message}<b>\n</b><emoji document_id=5408910404732595664>🕐</emoji><b> Date: {date}</b></blockquote>"
+  join_action: ""
+  leave_action: ""
+  edit_action: ""
+  chat_photo_action: ""
+  chat_title_action: ""
 
 ru:
   my_id: "<emoji document_id=5361912768045792571>👑</emoji><b> Мой ID: </b><code>{id}</code>"
@@ -177,3 +183,4 @@ ru:
   saturday: Суббота
   sunday: Воскресенье
   owns: "<emoji document_id=5458614983212427372>👑</emoji><b> Мои королевства [{num}]:</b>\n<blockquote expandable>{owns}</blockquote>"
+  delete_action: "<blockquote><emoji document_id=5408832111773757273>🗑</emoji><b> УДАЛЕНО:\n</b><emoji document_id=5904630315946611415>👤</emoji><b> От: {user}\n</b><emoji document_id=5904248647972820334>💭</emoji><b> Сообщение: </b>{message}<b>\n</b><emoji document_id=5408910404732595664>🕐</emoji><b> Дата: {date}</b></blockquote>"
