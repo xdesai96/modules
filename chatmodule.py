@@ -835,9 +835,11 @@ class ChatModuleMod(loader.Module):
     async def requests(self, message):
         """[-a] [-d] Manage join requests"""
         opts = self.xdlib.parse.opts(utils.get_args(message))
-        approve_list = [x for x in opts.get("a", "").split(",") if x]
-        dismiss_list = [x for x in opts.get("d", "").split(",") if x]
-        all_list = approve_list + dismiss_list
+        approve_list = [x for x in str(opts.get("a", "")).split(",") if x]
+        dismiss_list = [x for x in str(opts.get("d", "")).split(",") if x]
+        sanitized_approve_list = [int(x) if x.isdigit() else x for x in approve_list]
+        sanitized_dismiss_list = [int(x) if x.isdigit() else x for x in approve_list]
+        all_list = sanitized_approve_list + sanitized_dismiss_list
         all_targets = [
             await self._client.get_entity(
                 int(ent.strip()) if ent.strip().isdigit() else ent.strip()
