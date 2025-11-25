@@ -723,7 +723,7 @@ class ChatModuleMod(loader.Module):
                             )
                         ),
                     ),
-                    media=(
+                    file=(
                         types.InputMediaPhoto(
                             types.InputPhoto(
                                 photo.id, photo.access_hash, photo.file_reference
