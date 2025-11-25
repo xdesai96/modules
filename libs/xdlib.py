@@ -641,7 +641,9 @@ class FormatUtils:
 
 
 class BannedRights:
-    RIGHTS_LIST = [x for x in ChatBannedRights().to_dict().keys() if x != "_"]
+    RIGHTS_LIST = [
+        x for x in ChatBannedRights(until_date=None).to_dict().keys() if x != "_"
+    ]
 
     RIGHTS = {name: 1 << i for i, name in enumerate(RIGHTS_LIST)}
 
