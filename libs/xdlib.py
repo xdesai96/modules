@@ -28,6 +28,7 @@ from telethon.tl.types import (
     ChatAdminRights,
     Message,
     MessageEntityMention,
+    ChatBannedRights,
     MessageEntityMentionName,
     MessageEntityTextUrl,
     MessageEntityUrl,
@@ -61,7 +62,8 @@ class XDLib(loader.Library):
         self.chat = ChatUtils(self._client, self._db)
         self.dialog = DialogUtils(self._client)
         self.user = UserUtils(self._client, self._db)
-        self.rights = AdminRights
+        self.admin_rights = AdminRights
+        self.banned_rights = BannedRights
 
     @classmethod
     async def only_legacy(self):
@@ -636,6 +638,77 @@ class FormatUtils:
                     name = name.rstrip("s")
                 result.append(f"{value} {name}")
         return ", ".join(result) if result else "0 seconds"
+
+
+class BannedRights:
+    RIGHTS_LIST = [x for x in ChatBannedRights().to_dict().keys() if x != "_"]
+
+    RIGHTS = {name: 1 << i for i, name in enumerate(RIGHTS_LIST)}
+
+    MAX_MASK = (1 << len(RIGHTS)) - 1
+
+    def __init__(self, mask: int = 0):
+        self.mask = mask & self.MAX_MASK
+
+    def add(self, *right_names: str) -> None:
+        for name in right_names:
+            if name in self.RIGHTS:
+                self.mask |= self.RIGHTS[name]
+
+    def remove(self, *right_names: str) -> None:
+        for name in right_names:
+            if name in self.RIGHTS:
+                self.mask &= ~self.RIGHTS[name]
+
+    def has(self, right_name: str) -> bool:
+        return bool(self.mask & self.RIGHTS.get(right_name, 0))
+
+    def add_index(self, idx: int) -> None:
+        if 0 <= idx < len(self.RIGHTS_LIST):
+            self.mask |= 1 << idx
+
+    def remove_index(self, idx: int) -> None:
+        if 0 <= idx < len(self.RIGHTS_LIST):
+            self.mask &= ~(1 << idx)
+
+    def has_index(self, idx: int) -> bool:
+        if 0 <= idx < len(self.RIGHTS_LIST):
+            return bool(self.mask & (1 << idx))
+        return False
+
+    def to_dict(self) -> dict[str, bool]:
+        return {name: self.has(name) for name in self.RIGHTS_LIST}
+
+    def to_int(self) -> int:
+        return self.mask
+
+    def to_chat_rights(self) -> ChatBannedRights:
+        return ChatBannedRights(**self.to_dict())
+
+    @classmethod
+    def stringify_masks(cls) -> str:
+        max_len = max(len(name) for name in cls.RIGHTS_LIST)
+        lines = []
+        for name in cls.RIGHTS_LIST:
+            mask = cls.RIGHTS[name]
+            lines.append(f"{name.ljust(max_len)} — {mask}")
+        return "\n".join(lines)
+
+    @classmethod
+    def list_rights(cls) -> list[tuple[int, str]]:
+        return [(i, name) for i, name in enumerate(cls.RIGHTS_LIST)]
+
+    @classmethod
+    def from_int(cls, mask: int):
+        return cls(mask)
+
+    @classmethod
+    def all(cls):
+        return cls(cls.MAX_MASK)
+
+    @classmethod
+    def none(cls):
+        return cls(0)
 
 
 class AdminRights:
