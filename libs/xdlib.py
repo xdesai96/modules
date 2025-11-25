@@ -10,19 +10,30 @@ import logging
 import re
 import typing
 
-from telethon.errors.rpcerrorlist import UserNotParticipantError
+from telethon.errors.rpcerrorlist import (
+    UserNotParticipantError,
+    HideRequesterMissingError,
+)
 from telethon.tl.custom.participantpermissions import ParticipantPermissions
-from telethon.tl.functions.channels import (EditAdminRequest,
-                                            InviteToChannelRequest)
-from telethon.tl.functions.messages import (GetCommonChatsRequest,
-                                            HideAllChatJoinRequestsRequest,
-                                            HideChatJoinRequestRequest)
-from telethon.tl.types import (ChannelParticipantCreator,
-                               ChannelParticipantsAdmins,
-                               ChannelParticipantsBots, ChatAdminRights,
-                               Message, MessageEntityMention,
-                               MessageEntityMentionName, MessageEntityTextUrl,
-                               MessageEntityUrl, PeerUser, User)
+from telethon.tl.functions.channels import EditAdminRequest, InviteToChannelRequest
+from telethon.tl.functions.messages import (
+    GetCommonChatsRequest,
+    HideAllChatJoinRequestsRequest,
+    HideChatJoinRequestRequest,
+)
+from telethon.tl.types import (
+    ChannelParticipantCreator,
+    ChannelParticipantsAdmins,
+    ChannelParticipantsBots,
+    ChatAdminRights,
+    Message,
+    MessageEntityMention,
+    MessageEntityMentionName,
+    MessageEntityTextUrl,
+    MessageEntityUrl,
+    PeerUser,
+    User,
+)
 
 from .. import loader, utils
 from ..types import SelfUnload
@@ -355,17 +366,25 @@ class ChatUtils:
         return msgs
 
     async def join_request(self, chat, user_id, approved):
-        await self._client(
-            HideChatJoinRequestRequest(peer=chat, user_id=user_id, approved=approved)
-        )
+        try:
+            await self._client(
+                HideChatJoinRequestRequest(
+                    peer=chat, user_id=user_id, approved=approved
+                )
+            )
+        except HideRequesterMissingError:
+            logger.error("Request not found")
 
     async def join_requests(self, chat, approved):
-        await self._client(
-            HideAllChatJoinRequestsRequest(
-                peer=chat,
-                approved=approved,
+        try:
+            await self._client(
+                HideAllChatJoinRequestsRequest(
+                    peer=chat,
+                    approved=approved,
+                )
             )
-        )
+        except HideRequesterMissingError:
+            logger.error("Request not found")
 
     async def get_members(self, chat):
         try:
