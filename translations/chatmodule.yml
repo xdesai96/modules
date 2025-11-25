@@ -87,12 +87,10 @@ en:
   saturday: Saturday
   sunday: Sunday
   owns: "<emoji document_id=5458614983212427372>👑</emoji><b> My kingdoms [{num}]:</b>\n<blockquote expandable>{owns}</blockquote>"
-  delete_action: "<blockquote><emoji document_id=5408832111773757273>🗑</emoji><b> DELETED:\n</b><emoji document_id=5904630315946611415>👤</emoji><b> From: {user}\n</b><emoji document_id=5904248647972820334>💭</emoji><b> Message: </b>{message}<b>\n</b><emoji document_id=5408910404732595664>🕐</emoji><b> Date: {date}</b></blockquote>"
-  join_action: ""
-  leave_action: ""
-  edit_action: "<blockquote><emoji document_id=5408832111773757273>🗑</emoji><b> EDITED:\n</b><emoji document_id=5904630315946611415>👤</emoji><b> From: {user}\n</b><emoji document_id=5904248647972820334>💭</emoji><b> Old Message: </b>{old_msg}\n<emoji document_id=5904248647972820334>💭</emoji><b> New Message: </b>{new_msg}<b>\n</b><emoji document_id=5408910404732595664>🕐</emoji><b> Date: {date}</b></blockquote>"
-  chat_photo_action: ""
-  chat_title_action: ""
+  delete_message_action: "<blockquote expandable><emoji document_id=5408832111773757273>🗑</emoji><b> DELETED:\n</b><emoji document_id=5904630315946611415>👤</emoji><b> From: {action.message.sender.first_name} [<code>{user_id}</code>]\n</b><emoji document_id=5904248647972820334>💭</emoji><b> Message: </b>{action.message.message}<b>\n</b><emoji document_id=5408910404732595664>🕐</emoji><b> Date: {date}</b></blockquote>"
+  edit_message_action: "<blockquote expandable><emoji document_id=5985774024968379294>🖊</emoji><b> EDITED:\n</b><emoji document_id=5904630315946611415>👤</emoji><b> From: {action.message.sender.first_name} [<code>{user_id}</code>]\n</b><emoji document_id=5904248647972820334>💭</emoji><b> Old Message: </b>{action.prev_message.message}\n<emoji document_id=5904248647972820334>💭</emoji><b> New Message: </b>{action.new_message.message}<b>\n</b><emoji document_id=5408910404732595664>🕐</emoji><b> Date: {date}</b></blockquote>"
+  change_photo_action: "<emoji document_id=5870782662234346251>🖼</emoji><b> <code>{user_id}</code> changed the photo at {date}</b>"
+  approve_action: "<blockquote expandable><emoji document_id=5985454685559983915>🔓</emoji><b> APPROVED:\n</b><emoji document_id=5409029658794537988>✅</emoji><b> Approved by: {user_id}\n</b><emoji document_id=5904630315946611415>👤</emoji><b> Approved: {action.approved_by}\n<emoji document_id=5408910404732595664>🕐</emoji><b> Date: {date}</b></blockquote>"
 
 ru:
   my_id: "<emoji document_id=5361912768045792571>👑</emoji><b> Мой ID: </b><code>{id}</code>"
@@ -183,4 +181,4 @@ ru:
   saturday: Суббота
   sunday: Воскресенье
   owns: "<emoji document_id=5458614983212427372>👑</emoji><b> Мои королевства [{num}]:</b>\n<blockquote expandable>{owns}</blockquote>"
-  delete_action: "<blockquote><emoji document_id=5408832111773757273>🗑</emoji><b> УДАЛЕНО:\n</b><emoji document_id=5904630315946611415>👤</emoji><b> От: {user}\n</b><emoji document_id=5904248647972820334>💭</emoji><b> Сообщение: </b>{message}<b>\n</b><emoji document_id=5408910404732595664>🕐</emoji><b> Дата: {date}</b></blockquote>"
+  delete_action: "<blockquote expandable><emoji document_id=5408832111773757273>🗑</emoji><b> УДАЛЕНО:\n</b><emoji document_id=5904630315946611415>👤</emoji><b> От: {user}\n</b><emoji document_id=5904248647972820334>💭</emoji><b> Сообщение: </b>{message}<b>\n</b><emoji document_id=5408910404732595664>🕐</emoji><b> Дата: {date}</b></blockquote>"
