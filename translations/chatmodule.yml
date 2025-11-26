@@ -22,6 +22,7 @@ en:
   manage_topics: Manage Topics
   post_messages: Post messages
   edit_messages: Edit messages
+  until_date: "Until: {until_date}"
   invalid_args: <emoji document_id=5019523782004441717>❌</emoji> <b>Invalid args.</b>
   error: <emoji document_id=5458497936763676259>😖</emoji><b> Something went wrong. Check the logs.</b>
   successful_delete: <emoji document_id=5409029658794537988>✅</emoji> <b>Entity successfully deleted</b>
@@ -91,7 +92,7 @@ en:
   edit_message_action: "<blockquote expandable><emoji document_id=5985774024968379294>🖊</emoji><b> EDITED:\n</b><emoji document_id=5904630315946611415>👤</emoji><b> From: {action.prev_message.sender.first_name} [<code>{user_id}</code>]\n</b><emoji document_id=5904248647972820334>💭</emoji><b> Old Message: </b>{action.prev_message.message}\n<emoji document_id=5904248647972820334>💭</emoji><b> New Message: </b>{action.new_message.message}<b>\n</b><emoji document_id=5408910404732595664>🕐</emoji><b> Date: {date}</b></blockquote>"
   change_photo_action: "<emoji document_id=5870782662234346251>🖼</emoji><b> <code>{user_id}</code> changed the photo at {date}</b>"
   approve_action: "<blockquote expandable><emoji document_id=5985454685559983915>🔓</emoji><b> APPROVED:\n</b><emoji document_id=5409029658794537988>✅</emoji><b> Approved by: {user_id}\n</b><emoji document_id=5904630315946611415>👤</emoji><b> Approved: {action.approved_by}\n<emoji document_id=5408910404732595664>🕐</emoji><b> Date: {date}</b></blockquote>"
-  participant_toggle_ban_action: "<blockquote expandable><emoji document_id=5208491751639106607>🚫</emoji><b> TOGGLE BAN:\n User:</b> {action.new_participant.peer.user_id}\n<b>By:</b> {action.new_participant.kicked_by}\n<b>Banned rights:</b> {banned_rights}\n<b>Date:</b> {date}</blockquote>"
+  participant_toggle_ban_action: "<blockquote expandable><emoji document_id=5208491751639106607>🚫</emoji><b> TOGGLE BAN:\n User:</b> {action.new_participant.peer.user_id}\n<b>By:</b> {action.new_participant.kicked_by}\n<b>Banned rights:</b>\n{banned_rights}\n<b>Date:</b> {date}</blockquote>"
   participant_leave_action: "<blockquote><emoji document_id=5904630315946611415>👤</emoji><b> User {user_id} left the chat</b>\n<b>Date:</b> {date}</blockquote>"
 
 ru:
