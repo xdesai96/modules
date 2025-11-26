@@ -568,9 +568,6 @@ class AdminUtils:
         self._client = client
         self._lib = lib
 
-    async def get_rights_table(self):
-        return f"<pre><code>{AdminRights.stringify()}</code></pre>"
-
     async def set_role(self, chat, user, role_name, rank="XD Admin") -> bool:
         rights_obj = self._lib.roles.get_role_perms(role_name)
         if rights_obj is None:
@@ -687,7 +684,7 @@ class Rights:
         return ChatBannedRights(**self.to_dict())
 
     @classmethod
-    def stringify_masks(cls) -> str:
+    def stringify(cls) -> str:
         max_len = max(len(name) for name in cls.RIGHTS_LIST)
         lines = []
         for name in cls.RIGHTS_LIST:
