@@ -680,8 +680,12 @@ class Rights:
     def to_int(self) -> int:
         return self.mask
 
-    def to_chat_rights(self) -> ChatBannedRights:
-        return ChatBannedRights(**self.to_dict())
+    def to_chat_rights(self):
+        return (
+            ChatBannedRights(**self.to_dict())
+            if self.__class__.__name__ == "BannedRights"
+            else ChatAdminRights(**self.to_dict())
+        )
 
     @classmethod
     def stringify(cls) -> str:
