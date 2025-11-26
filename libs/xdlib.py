@@ -646,6 +646,11 @@ class Rights:
     def __init__(self, mask: int = 0):
         self.mask = mask & self.MAX_MASK
 
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.RIGHTS = {name: 1 << i for i, name in enumerate(cls.RIGHTS_LIST)}
+        cls.MAX_MASK = (1 << len(cls.RIGHTS_LIST)) - 1
+
     def add(self, *right_names: str) -> None:
         for name in right_names:
             if name in self.RIGHTS:
@@ -705,14 +710,6 @@ class Rights:
     @classmethod
     def none(cls):
         return cls(0)
-
-    @property
-    def RIGHTS(self):
-        return {name: 1 << i for i, name in enumerate(self.RIGHTS_LIST)}
-
-    @property
-    def MAX_MASK(self):
-        return (1 << len(self.RIGHTS_LIST)) - 1
 
 
 class BannedRights(Rights):
