@@ -643,10 +643,6 @@ class FormatUtils:
 class Rights:
     RIGHTS_LIST: typing.List = []
 
-    RIGHTS = {name: 1 << i for i, name in enumerate(RIGHTS_LIST)}
-
-    MAX_MASK = (1 << len(RIGHTS)) - 1
-
     def __init__(self, mask: int = 0):
         self.mask = mask & self.MAX_MASK
 
@@ -709,6 +705,14 @@ class Rights:
     @classmethod
     def none(cls):
         return cls(0)
+
+    @property
+    def RIGHTS(self):
+        return {name: 1 << i for i, name in enumerate(self.RIGHTS_LIST)}
+
+    @property
+    def MAX_MASK(self):
+        return (1 << len(self.RIGHTS_LIST)) - 1
 
 
 class BannedRights(Rights):
