@@ -745,18 +745,46 @@ class ChatModuleMod(loader.Module):
             ),
         )
 
-    @loader.command(ru_doc="[-r] [-u] - Выдать админку участнику")
+    @loader.command(ru_doc="[-r] [-u] [-f] - Выдать админку участнику")
     @loader.tag("no_pm")
     async def promote(self, message):
-        """[-r] [-u] - Promote a participant"""
+        """[-r] [-u] [-f] - Promote a participant"""
         reply = await message.get_reply_message()
         opts = self.xdlib.parse.opts(utils.get_args(message))
         user = opts.get("u") or getattr(reply, "sender_id") or None
         if not user:
             return await utils.answer(message, self.strings["no_user"])
-        rank = str(opts.get("r")) or "XD Admin"
         user = await self._client.get_entity(user)
+        rank = (opts.get("r")) or "XD Admin"
         chat = await message.get_chat()
+        rights = await self.xdlib.chat.get_rights(message.chat, user)
+        if (
+            not chat.admin_rights
+            or not getattr(chat.admin_rights, "add_admins")
+            or (rights.participant.promoted_by != self.tg_id)
+        ):
+            return await utils.answer(message, self.strings["no_rights"])
+        full = opts.get("f")
+        if full:
+            my_rights = [
+                r for r, y in chat.admin_rights.to_dict().items() if y and r != "_"
+            ]
+            perms = self.xdlib.admin_rights(0)
+            perms = perms.add(*my_rights)
+            await self.xdlib.admin.set_rights(chat, user, perms.to_int(), rank)
+            return await utils.answer(
+                message,
+                self.strings["promoted"].format(
+                    id=user.id,
+                    name=user.first_name
+                    if hasattr(user, "first_name")
+                    else user.title
+                    if hasattr(user, "title")
+                    else "None",
+                    rights=self.strings["full_rights"],
+                ),
+            )
+
         await utils.answer(
             message,
             self.strings["promote"].format(
@@ -768,12 +796,15 @@ class ChatModuleMod(loader.Module):
                 else "None",
                 rank=rank,
             ),
-            reply_markup=self.build_promote_markup(user.id, chat.id, 0, rank),
+            reply_markup=await self.build_promote_markup(user.id, chat.id, 0, rank),
         )
 
-    def build_promote_markup(self, user_id: int, chat_id: int, mask: int, rank: str):
+    async def build_promote_markup(
+        self, user_id: int, chat_id: int, mask: int, rank: str
+    ):
         rights_cls = self.xdlib.admin_rights
         rights = rights_cls(mask)
+        chat = await self._client.get_entity(chat_id)
         markup = utils.chunks(
             [
                 {
@@ -782,6 +813,8 @@ class ChatModuleMod(loader.Module):
                     "args": (user_id, chat_id, mask, idx, rank),
                 }
                 for idx, name in enumerate(rights_cls.RIGHTS_LIST)
+                if (hasattr(chat, "admin_rights") and getattr(chat.admin_rights, name))
+                or (hasattr(chat, "admin_rights") and getattr(chat, "creator"))
             ],
             2,
         )
@@ -801,7 +834,7 @@ class ChatModuleMod(loader.Module):
         self, call, user_id: int, chat_id: int, mask: int, idx: int, rank: str
     ):
         new_mask = mask ^ (1 << idx)
-        new_markup = self.build_promote_markup(user_id, chat_id, new_mask, rank)
+        new_markup = await self.build_promote_markup(user_id, chat_id, new_mask, rank)
         user = await self._client.get_entity(user_id)
         await utils.answer(
             call,
@@ -836,10 +869,10 @@ class ChatModuleMod(loader.Module):
                     else user.title
                     if hasattr(user, "title")
                     else "None",
-                    rights=", ".join([self.strings[r] for r in rights_list]),
-                )
-                if rights_list
-                else self.strings["no"],
+                    rights=", ".join([self.strings[r] for r in rights_list])
+                    if rights_list
+                    else self.strings["no"],
+                ),
                 reply_markup=[[{"text": self.strings["close"], "action": "close"}]],
             )
         else:
