@@ -3,13 +3,13 @@
 # packurl: https://raw.githubusercontent.com/xdesai96/modules/refs/heads/main/translations/chatmodule.yml
 
 import logging
+import re
 from datetime import datetime, timedelta, timezone
 
 from telethon.tl import types
 from telethon.tl.functions import channels, messages
 
 from .. import loader, utils
-from ..types import SelfUnload
 
 logger = logging.getLogger("ChatModule")
 
@@ -24,12 +24,8 @@ class ChatModuleMod(loader.Module):
         self._client = client
         self._db = db
         self.xdlib = await self.import_lib(
-            "https://mods.xdesai.top/libs/xdlib.py",
+            "https://raw.githubusercontent.com/xdesai96/modules/refs/heads/main/libs/xdlib.py",
             suspend_on_error=True,
-        )
-        await self.xdlib.only_legacy()
-        self._roles = self.xdlib._db.pointer(
-            self.xdlib.__class__.__name__, "ChatModule_Roles", {}
         )
         await self.request_join(
             "@xdesai_modules", self.xdlib.strings["request_join_reason"]
@@ -59,8 +55,7 @@ class ChatModuleMod(loader.Module):
     @loader.tag("no_pm")
     async def rights(self, message):
         """[reply/-u username/id] - Check user's admin rights"""
-        args = utils.get_args(message)
-        opts = self.xdlib.parse.opts(args)
+        opts = self.xdlib.parse.opts(utils.get_args(message))
         reply = await message.get_reply_message()
         user = opts.get("u") or opts.get("user") or (reply.sender_id if reply else None)
         if not user:
@@ -509,141 +504,6 @@ class ChatModuleMod(loader.Module):
             )
         return await utils.answer(message, self.strings["user_not_invited"])
 
-    @loader.command(ru_doc="-n название_роли -p число - Создать роль")
-    async def addrole(self, message):
-        """-n role_name -p number - Create a role"""
-        args = utils.get_args(message)
-        opts = self.xdlib.parse.opts(args)
-        name = opts.get("name") or opts.get("n")
-        perms = opts.get("perms") or opts.get("p")
-        if not name:
-            return await utils.answer(message, self.strings["invalid_args"])
-        self._roles[name] = perms
-        return await utils.answer(message, self.strings["role_created"])
-
-    @loader.command(ru_doc="-n название_роли - Удалить роль")
-    async def delrole(self, message):
-        """-n role_name - Delete the role"""
-        args = utils.get_args(message)
-        opts = self.xdlib.parse.opts(args)
-        name = opts.get("name") or opts.get("n")
-        if not name:
-            return await utils.answer(message, self.strings["invalid_args"])
-        del self._roles[name]
-        return await utils.answer(message, self.strings["role_removed"])
-
-    @loader.command(
-        ru_doc="<username/mention> [-h|--help] [-f|--fullrights] [-r|--rank rank] <right> - Назначить пользователя администратором"
-    )
-    @loader.tag("no_pm")
-    async def setrights(self, message):
-        """<username/mention> [-h|--help] [-f|--fullrights] [-r|--rank rank] <right> - Promote a participant"""
-        opts = self.xdlib.parse.opts(utils.get_args(message))
-        if opts.get("h") or opts.get("help"):
-            return await utils.answer(
-                message,
-                f"<pre><code>{self.xdlib.rights.stringify_masks()}</code></pre>",
-            )
-        reply = await message.get_reply_message()
-        user = opts.get("u") or opts.get("user") or (reply.sender_id if reply else None)
-        if not user:
-            return await utils.answer(message, self.strings["no_user"])
-        user = await self._client.get_entity(user)
-        rank = opts.get("r") or opts.get("rank") or ("Admin" if not user.bot else "Bot")
-        if opts.get("f") or opts.get("fullrights"):
-            rights = self.xdlib.rights.all()
-            rights.remove("anonymous")
-            await self.xdlib.admin.set_rights(
-                message.chat, user, rights.to_int(), rank=rank
-            )
-            return await utils.answer(
-                message,
-                self.strings["promoted"].format(id=user.id, name=user.first_name),
-            )
-        perms = opts.get("p") or opts.get("perms") or 0
-        rights = self.xdlib.rights.from_int(perms)
-        try:
-            await self.xdlib.admin.set_rights(message.chat, user, rights.to_int(), rank)
-            return await utils.answer(
-                message,
-                (
-                    self.strings["promoted"].format(id=user.id, name=user.first_name)
-                    if perms
-                    else self.strings["demoted"].format(
-                        id=user.id, name=user.first_name
-                    )
-                ),
-            )
-        except Exception as e:
-            return await utils.answer(message, f"<code>{e}</code>")
-
-    @loader.command(ru_doc="Показать все созданные роли")
-    async def roles(self, message):
-        """Get the created roles"""
-        roles = self._roles
-        args = utils.get_args(message)
-        opts = self.xdlib.parse.opts(args)
-        if not roles:
-            return await utils.answer(message, self.strings["no_roles"])
-        selected_role = opts.get("n") or opts.get("name")
-        if not selected_role:
-            return await utils.answer(
-                message,
-                self.strings["all_roles"].format(
-                    roles="\n".join(
-                        [
-                            f"<emoji document_id=5807829874877930085>➡️</emoji> <code>{role}</code>"
-                            for role in roles.keys()
-                        ]
-                    )
-                ),
-            )
-        rights = []
-        for right, permitted in (
-            self.xdlib.rights.from_int(roles[selected_role]).to_dict().items()
-        ):
-            if permitted:
-                rights.append(right)
-                continue
-
-        return await utils.answer(
-            message,
-            self.strings["role_info"].format(
-                name=selected_role,
-                rights=(
-                    "\n".join(
-                        [
-                            f"<emoji document_id=5409029658794537988>✅</emoji> <code>{self.strings[right]}</code>"
-                            for right in rights
-                        ]
-                    )
-                    if rights
-                    else self.strings["no_role_rights"]
-                ),
-            ),
-        )
-
-    @loader.command(ru_doc="[-u] [-n] [-r] Назначить роль участнику")
-    @loader.tag("no_pm")
-    async def setrole(self, message):
-        """[-u] [-n] [-r] Set the role for the user"""
-        args = utils.get_args(message)
-        opts = self.xdlib.parse.opts(args)
-        reply = await message.get_reply_message()
-        user = opts.get("user") or opts.get("u") or getattr(reply, "sender_id")
-        role = opts.get("name") or opts.get("n")
-        if role not in self._roles:
-            return await utils.answer(message, self.strings["invalid_args"])
-        rank = opts.get("rank") or opts.get("r") or role
-        if not user:
-            return await utils.answer(message, self.strings["no_user"])
-        role_set = await self.xdlib.admin.set_rights(
-            message.chat, user, self._roles[role], rank=rank
-        )
-        if not role_set:
-            return await utils.answer(message, self.strings["role_not_set"])
-        return await utils.answer(message, self.strings["role_set"])
-
     @loader.command(ru_doc="[-i] Получить информацию о сущности")
     async def inspect(self, message):
         """[-i] Get the info about the entity"""
@@ -884,3 +744,107 @@ class ChatModuleMod(loader.Module):
                 ),
             ),
         )
+
+    @loader.command(ru_doc="[-r] [-u] - Выдать админку участнику")
+    @loader.tag("no_pm")
+    async def promote(self, message):
+        """[-r] [-u] - Promote a participant"""
+        reply = await message.get_reply_message()
+        opts = self.xdlib.parse.opts(utils.get_args(message))
+        user = opts.get("u") or getattr(reply, "sender_id") or None
+        if not user:
+            return await utils.answer(message, self.strings["no_user"])
+        rank = str(opts.get("r")) or "XD Admin"
+        user = await self._client.get_entity(user)
+        chat = await message.get_chat()
+        await utils.answer(
+            message,
+            self.strings["promote"].format(
+                id=user.id,
+                name=user.first_name
+                if hasattr(user, "first_name")
+                else user.title
+                if hasattr(user, "title")
+                else "None",
+                rank=rank,
+            ),
+            reply_markup=self.build_promote_markup(user.id, chat.id, 0, rank),
+        )
+
+    def build_promote_markup(self, user_id: int, chat_id: int, mask: int, rank: str):
+        rights_cls = self.xdlib.admin_rights
+        rights = rights_cls(mask)
+        markup = utils.chunks(
+            [
+                {
+                    "text": f"{'🟢' if rights.has_index(idx) else '🔴'} {self.strings[name]}",
+                    "callback": self._toggle_right,
+                    "args": (user_id, chat_id, mask, idx, rank),
+                }
+                for idx, name in enumerate(rights_cls.RIGHTS_LIST)
+            ],
+            2,
+        )
+        markup.append(
+            [
+                {
+                    "text": self.strings["apply"],
+                    "callback": self._apply_rights,
+                    "args": (user_id, chat_id, mask, rank),
+                }
+            ]
+        )
+        markup.append([{"text": self.strings["close"], "action": "close"}])
+        return markup
+
+    async def _toggle_right(
+        self, call, user_id: int, chat_id: int, mask: int, idx: int, rank: str
+    ):
+        new_mask = mask ^ (1 << idx)
+        new_markup = self.build_promote_markup(user_id, chat_id, new_mask, rank)
+        user = await self._client.get_entity(user_id)
+        await utils.answer(
+            call,
+            self.strings["promote"].format(
+                id=user_id,
+                name=user.first_name
+                if hasattr(user, "first_name")
+                else user.title
+                if hasattr(user, "title")
+                else "None",
+                rank=rank,
+            ),
+            reply_markup=new_markup,
+        )
+
+    async def _apply_rights(
+        self, call, user_id: int, chat_id: int, mask: int, rank: str
+    ):
+        user = await self._client.get_entity(user_id)
+        chat = await self._client.get_entity(chat_id)
+        ok = await self.xdlib.admin.set_rights(chat, user, mask, rank)
+        rights_list = [
+            r for r, a in self.xdlib.admin_rights(mask).to_dict().items() if a
+        ]
+        if ok:
+            await utils.answer(
+                call,
+                self.strings["promoted"].format(
+                    id=user_id,
+                    name=user.first_name
+                    if hasattr(user, "first_name")
+                    else user.title
+                    if hasattr(user, "title")
+                    else "None",
+                    rights=", ".join([self.strings[r] for r in rights_list]),
+                )
+                if rights_list
+                else self.strings["no"],
+                reply_markup=[[{"text": self.strings["close"], "action": "close"}]],
+            )
+        else:
+            await utils.answer(
+                call,
+                self.strings["error"],
+                reply_markup=[[{"text": self.strings["close"], "action": "close"}]],
+            )
