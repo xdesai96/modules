@@ -701,7 +701,13 @@ class Rights:
     def to_mask(self, chat_rights):
         mask = 0
         for right, rmask in self.RIGHTS.items():
-            if getattr(chat_rights, right):
+            if (
+                getattr(chat_rights, right)
+                and isinstance(chat_rights, types.ChatAdminRights)
+            ) or (
+                not getattr(chat_rights, right)
+                and isinstance(chat_rights, types.ChatBannedRights)
+            ):
                 mask |= rmask
         return mask
 
