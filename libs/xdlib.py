@@ -14,27 +14,8 @@ from telethon.errors.rpcerrorlist import (
     UserNotParticipantError,
     HideRequesterMissingError,
 )
-from telethon.tl.custom.participantpermissions import ParticipantPermissions
-from telethon.tl.functions.channels import EditAdminRequest, InviteToChannelRequest
-from telethon.tl.functions.messages import (
-    GetCommonChatsRequest,
-    HideAllChatJoinRequestsRequest,
-    HideChatJoinRequestRequest,
-)
-from telethon.tl.types import (
-    ChannelParticipantCreator,
-    ChannelParticipantsAdmins,
-    ChannelParticipantsBots,
-    ChatAdminRights,
-    Message,
-    MessageEntityMention,
-    ChatBannedRights,
-    MessageEntityMentionName,
-    MessageEntityTextUrl,
-    MessageEntityUrl,
-    PeerUser,
-    User,
-)
+from telethon.functions import messages, channels
+from telethon import types
 
 from .. import loader, utils
 from ..types import SelfUnload
@@ -84,7 +65,9 @@ class UserUtils:
         self._client = client
         self._db = db
 
-    async def get_info(self, user_id: typing.Union[str, int, PeerUser, User]):
+    async def get_info(
+        self, user_id: typing.Union[str, int, types.PeerUser, types.User]
+    ):
         userfull = await self._client.get_fulluser(user_id)
         full_user = userfull.full_user
         user = userfull.users[0]
@@ -99,7 +82,7 @@ class UserUtils:
             else None
         )
         common = await self._client(
-            GetCommonChatsRequest(user_id=user_id, max_id=0, limit=100)
+            messages.GetCommonChatsRequest(user_id=user_id, max_id=0, limit=100)
         )
 
         return {
@@ -244,28 +227,28 @@ class ParseUtils:
             return int(value) * size_units[unit]
         return 0
 
-    def mentions(self, msg: Message) -> typing.List[str]:
+    def mentions(self, msg) -> typing.List[str]:
         """Extracts mentions from a given message."""
         if msg.entities:
             mentions = []
             for entity in msg.entities:
-                if isinstance(entity, MessageEntityMention):
+                if isinstance(entity, types.MessageEntityMention):
                     offset = entity.offset
                     length = entity.length
                     mentions.append(msg.message[offset : offset + length])
-                elif isinstance(entity, MessageEntityMentionName):
+                elif isinstance(entity, types.MessageEntityMentionName):
                     mentions.append(entity.user_id)
             return mentions
         return []
 
-    def urls(self, msg: Message) -> typing.List[str]:
+    def urls(self, msg) -> typing.List[str]:
         """Extracts URLs from a given message."""
         if msg.entities or msg.media:
             urls = []
             for entity in msg.entities:
-                if isinstance(entity, MessageEntityTextUrl):
+                if isinstance(entity, types.MessageEntityTextUrl):
                     urls.append(entity.url)
-                elif isinstance(entity, MessageEntityUrl):
+                elif isinstance(entity, types.MessageEntityUrl):
                     offset = entity.offset
                     length = entity.length
                     urls.append(msg.message[offset : offset + length])
@@ -315,7 +298,7 @@ class MessageUtils:
     def __init__(self, client):
         self._client = client
 
-    async def delete_messages(self, msg: Message):
+    async def delete_messages(self, msg):
         """Deletes multiple messages based on a specific pattern."""
         reply = await msg.get_reply_message()
         pattern = r"([ab])(\d+)"
@@ -355,6 +338,46 @@ class ChatUtils:
         self._client = client
         self._db = db
 
+    async def set_restrictions(
+        self, chat, user, mask: int, duration: int = None
+    ) -> bool:
+        """
+        Sets chat restrictions (mute/ban permissions) for a user based on a mask.
+
+        :param chat: Chat entity
+        :param user: User entity
+        :param mask: Bitmask of BannedRights
+        :param duration: Ban duration in seconds (None = forever)
+        """
+
+        try:
+            rights = BannedRights(mask)
+
+            rights_dict = rights.to_dict()
+
+            rights_dict["until_date"] = (
+                None if duration is None else utils.timestamp() + duration
+            )
+
+            new_banned_rights = types.ChatBannedRights(**rights_dict)
+
+            await self._client(
+                channels.EditBannedRequest(
+                    channel=chat,
+                    participant=user,
+                    banned_rights=new_banned_rights,
+                )
+            )
+
+            return True
+
+        except Exception:
+            logger.error(
+                f"Failed to set restrictions with mask {mask} for user {user.id} in chat {chat}",
+                exc_info=True,
+            )
+            return False
+
     async def get_admin_logs(self, chat, limit: int = 5, **kwargs):
         logs = []
         for log_event in await self._client.get_admin_log(chat, limit=limit, **kwargs):
@@ -370,7 +393,7 @@ class ChatUtils:
     async def join_request(self, chat, user_id, approved):
         try:
             await self._client(
-                HideChatJoinRequestRequest(
+                messages.HideChatJoinRequestRequest(
                     peer=chat, user_id=user_id, approved=approved
                 )
             )
@@ -380,7 +403,7 @@ class ChatUtils:
     async def join_requests(self, chat, approved):
         try:
             await self._client(
-                HideAllChatJoinRequestsRequest(
+                messages.HideAllChatJoinRequestsRequest(
                     peer=chat,
                     approved=approved,
                 )
@@ -412,7 +435,7 @@ class ChatUtils:
     async def get_bots(self, chat):
         try:
             bots = await self._client.get_participants(
-                chat, filter=ChannelParticipantsBots()
+                chat, filter=types.ChannelParticipantsBots()
             )
             if bots:
                 return bots
@@ -424,7 +447,7 @@ class ChatUtils:
     async def get_admins(self, chat, only_users: bool = False):
         try:
             admins = await self._client.get_participants(
-                chat, filter=ChannelParticipantsAdmins()
+                chat, filter=types.ChannelParticipantsAdmins()
             )
             users = [
                 user
@@ -432,7 +455,7 @@ class ChatUtils:
                 if user
                 and not getattr(user, "bot")
                 and not isinstance(
-                    getattr(user, "participant"), ChannelParticipantCreator
+                    getattr(user, "participant"), types.ChannelParticipantCreator
                 )
             ]
             if only_users:
@@ -445,13 +468,13 @@ class ChatUtils:
     async def get_creator(self, chat):
         try:
             admins = await self._client.get_participants(
-                chat, filter=ChannelParticipantsAdmins()
+                chat, filter=types.ChannelParticipantsAdmins()
             )
             if not admins:
                 return None
             for admin in admins:
                 if hasattr(admin, "participant") and isinstance(
-                    getattr(admin, "participant"), ChannelParticipantCreator
+                    getattr(admin, "participant"), types.ChannelParticipantCreator
                 ):
                     return admin
             return None
@@ -473,7 +496,7 @@ class ChatUtils:
             )
             return False
 
-    async def get_rights(self, chat, user) -> typing.Optional[ParticipantPermissions]:
+    async def get_rights(self, chat, user):
         """Checks if a user is a member of a chat."""
         try:
             perms = await self._client.get_perms_cached(chat, user)
@@ -490,7 +513,9 @@ class ChatUtils:
     async def invite_user(self, chat, user):
         """Invites a user to a chat."""
         try:
-            await self._client(InviteToChannelRequest(channel=chat, users=[user]))
+            await self._client(
+                channels.InviteToChannelRequest(channel=chat, users=[user])
+            )
             return True
         except Exception:
             logger.error(
@@ -542,7 +567,7 @@ class ChatUtils:
         """Invites an inline bot to a chat."""
         try:
             await self._client(
-                InviteToChannelRequest(
+                channels.InviteToChannelRequest(
                     chat,
                     [client.loader.inline.bot_username or client.loader.inline.bot_id],
                 )
@@ -583,7 +608,7 @@ class AdminUtils:
             new_admin_rights = rights.to_chat_rights()
 
             await self._client(
-                EditAdminRequest(
+                channels.EditAdminRequest(
                     chat,
                     user,
                     new_admin_rights,
@@ -690,9 +715,9 @@ class Rights:
 
     def to_chat_rights(self):
         return (
-            ChatBannedRights(**self.to_dict())
+            types.ChatBannedRights(**self.to_dict())
             if self.__class__.__name__ == "BannedRights"
-            else ChatAdminRights(**self.to_dict())
+            else types.ChatAdminRights(**self.to_dict())
         )
 
     @classmethod
@@ -723,9 +748,9 @@ class Rights:
 
 class BannedRights(Rights):
     RIGHTS_LIST = [
-        x for x in ChatBannedRights(until_date=None).to_dict().keys() if x != "_"
+        x for x in types.ChatBannedRights(until_date=None).to_dict().keys() if x != "_"
     ]
 
 
 class AdminRights(Rights):
-    RIGHTS_LIST = [x for x in ChatAdminRights().to_dict().keys() if x != "_"]
+    RIGHTS_LIST = [x for x in types.ChatAdminRights().to_dict().keys() if x != "_"]
