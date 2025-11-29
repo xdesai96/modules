@@ -761,7 +761,7 @@ class ChatModuleMod(loader.Module):
         if (
             not chat.admin_rights
             or not getattr(chat.admin_rights, "add_admins")
-            or (rights.participant.promoted_by != self.tg_id)
+            or (getattr(rights.participant, "promoted_by", self.tg_id) != self.tg_id)
         ):
             return await utils.answer(message, self.strings["no_rights"])
         full = opts.get("f")
