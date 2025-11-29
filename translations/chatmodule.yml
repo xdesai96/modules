@@ -1,28 +1,44 @@
 en:
   my_id: "<emoji document_id=5361912768045792571>👑</emoji><b> My ID: </b><code>{id}</code>"
-  chat_id: <emoji document_id=5886436057091673541>💬</emoji> <b>Chat ID:</b> <code>{id}</code>
-  user_id: <emoji document_id=6035084557378654059>👤</emoji> <b>User's ID:</b> <code>{id}</code>
-  user_not_participant: <emoji document_id=5019523782004441717>❌</emoji> <b>User is not in this group.</b>
+  chat_id: "<emoji document_id=5886436057091673541>💬</emoji> <b>Chat ID:</b> <code>{id}</code>"
+  user_id: "<emoji document_id=6035084557378654059>👤</emoji> <b>User's ID:</b> <code>{id}</code>"
+  user_not_participant: "<emoji document_id=5019523782004441717>❌</emoji> <b>User is not in this group.</b>"
   admin_rights: "<blockquote expandable><emoji document_id=6023985764885338464>📜</emoji> {name} <b>Rights in this chat:\n\n{rights}</b>\n\n<emoji document_id=5287734473775918473>🔼</emoji><b> Promoted by: {promoter_name}</b> [{promoter_id}]</blockquote>"
-  not_an_admin: <emoji document_id=5019523782004441717>❌</emoji><b> {user} is not an admin.</b>
-  no_rights: <emoji document_id=5019523782004441717>❌</emoji> <b>I don't have enough rights :(</b>
-  no_user: <emoji document_id=5019523782004441717>❌</emoji> <b>User not found.</b>
-  change_info: Change Info
-  delete_messages: Delete messages
-  other: Other
-  ban_users: Ban users
-  invite_users: Invite Users
-  pin_messages: Pin Messages
-  add_admins: Add Admins
-  manage_call: Manage Call
-  post_stories: Post Stories
-  edit_stories: Edit Stories
-  delete_stories: Delete Stories
-  anonymous: Anonymous
-  manage_topics: Manage Topics
-  post_messages: Post messages
-  edit_messages: Edit messages
+  not_an_admin: "<emoji document_id=5019523782004441717>❌</emoji><b> {user} is not an admin.</b>"
+  no_rights: "<emoji document_id=5019523782004441717>❌</emoji> <b>I don't have enough rights :(</b>"
+  no_user: "<emoji document_id=5019523782004441717>❌</emoji> <b>User not found.</b>"
+  change_info: "Change Info"
+  delete_messages: "Delete messages"
+  other: "Other"
+  ban_users: "Ban users"
+  invite_users: "Invite Users"
+  pin_messages: "Pin Messages"
+  add_admins: "Add Admins"
+  manage_call: "Manage Call"
+  post_stories: "Post Stories"
+  edit_stories: "Edit Stories"
+  delete_stories: "Delete Stories"
+  anonymous: "Anonymous"
+  manage_topics: "Manage Topics"
+  post_messages: "Post messages"
+  edit_messages: "Edit messages"
   until_date: "Until: {until_date}"
+  view_messages: "View messages"
+  send_messages: "Send messages"
+  send_media: "Send media"
+  send_stickers: "Send stickers"
+  send_gifts: "Send gifts"
+  send_games: "Send games"
+  send_inline: "Use inline bots"
+  embed_links: "Embed links"
+  send_polls: "Send polls"
+  send_photos: "Send photos"
+  send_videos: "Send videos"
+  send_roundvideos: "Send round videos"
+  send_audios: "Send audio"
+  send_voices: "Send voice messages"
+  send_docs: "Send documents"
+  send_plain: "Send plain text"
   invalid_args: <emoji document_id=5019523782004441717>❌</emoji> <b>Invalid args.</b>
   error: <emoji document_id=5458497936763676259>😖</emoji><b> Something went wrong. Check the logs.</b>
   successful_delete: <emoji document_id=5409029658794537988>✅</emoji> <b>Entity successfully deleted</b>
@@ -71,6 +87,8 @@ en:
   promoted: "<emoji document_id=5458614983212427372>👑</emoji> <b><a href='tg://user?id={id}'>{name}</a> is promoted!\n<emoji document_id=5409029658794537988>✅</emoji> Rights: {rights}</b>"
   full_rights: "Full rights"
   promote: "<b>Select rights for <a href='tg://user?id={id}'>{name}</a>!\nRank: {rank}</b>"
+  restrict: "Restricting <a href='tg://user?id={id}'>{name}</a> for{time}"
+  restricted: "<a href='tg://user?id={id}'>{name}</a> has been restricted for{time}"
   demoted: "<emoji document_id=5447183459602669338>🔽</emoji> <b><a href='tg://user?id={id}'>{name}</a> is demoted</b>"
   userinfo: "<blockquote><emoji document_id=5985457743576698865>#️⃣</emoji><b> ID: {user_id}\n</b><emoji document_id=5408849420491962048>🔥</emoji><b> First name: {first_name}\n</b><emoji document_id=5408849420491962048>🔥</emoji><b> Last name: {last_name}\n</b><emoji document_id=5208889774848361126>📞</emoji><b> Phone number: {phone}\n</b><emoji document_id=5364052602357044385>🐶</emoji><b>  Usernames: {usernames}</b></blockquote><b>\n</b><blockquote><emoji document_id=5985616786215669454>ℹ️</emoji><b> About: {about}</b></blockquote><b>\n</b><blockquote><emoji document_id=5408910404732595664>🕐</emoji><b> Work hours: </b>{business_work_hours}\n<emoji document_id=5408892365869952851>❤️</emoji><b> Emoji status: {emoji_status}</b></blockquote><b>\n</b><blockquote><emoji document_id=5409331062419502443>🔉</emoji><b> Personal channel: {personal_channel}\n</b><emoji document_id=6024041612345088787>🎂</emoji><b> Birthday: {birthday}\n</b><emoji document_id=6037175527846975726>🎁</emoji><b> Gifts count: {stargifts_count}</b></blockquote><b>\n</b><blockquote><emoji document_id=5208842667647061916>🚨</emoji><b> Common chats count: {common_chats_count}\n</b><emoji document_id=5985401861757210746>👥</emoji><b> Common chats: {common_chats}</b></blockquote>"
   monday: Monday
@@ -90,24 +108,40 @@ ru:
   user_id: <emoji document_id=6035084557378654059>👤</emoji> <b>ID пользователя:</b> <code>{id}</code>
   user_not_participant: <emoji document_id=5019523782004441717>❌</emoji> <b>Пользователь не состоит в этом чате.</b>
   admin_rights: "<blockquote expandable><emoji document_id=6023985764885338464>📜</emoji> {name} <b>Права в этом чате:\n\n{rights}</b>\n\n<emoji document_id=5287734473775918473>🔼</emoji><b> Повысил: {promoter_name}</b> [{promoter_id}]</blockquote>"
-  not_an_admin: <emoji document_id=5019523782004441717>❌</emoji><b> {user} не является админом.</b>
-  no_rights: <emoji document_id=5019523782004441717>❌</emoji> <b>У меня недостаточно прав :(</b>
+  not_an_admin: "<emoji document_id=5019523782004441717>❌</emoji><b> {user} не является админом.</b>"
+  no_rights: "<emoji document_id=5019523782004441717>❌</emoji> <b>У меня недостаточно прав :(</b>"
   no_user: <emoji document_id=5019523782004441717>❌</emoji> <b>Пользователь не найден.</b>
-  change_info: Изменение информации
-  delete_messages: Удаление сообщений
-  other: Другое
-  ban_users: Бан пользователей
-  invite_users: Приглашение пользователей
-  pin_messages: Закрепление сообщений
-  add_admins: Добавление админов
-  manage_call: Управление звонками
-  post_stories: Публикация историй
-  edit_stories: Редактирование историй
-  delete_stories: Удаление историй
-  anonymous: Анонимность
-  manage_topics: Управление темами
-  post_messages: Публикация сообщений
-  edit_messages: Редактирование сообщений
+  change_info: "Изменение информации"
+  delete_messages: "Удаление сообщений"
+  other: "Другое"
+  ban_users: "Бан пользователей"
+  invite_users: "Приглашение пользователей"
+  pin_messages: "Закрепление сообщений"
+  add_admins: "Добавление админов"
+  manage_call: "Управление звонками"
+  post_stories: "Публикация историй"
+  edit_stories: "Редактирование историй"
+  delete_stories: "Удаление историй"
+  anonymous: "Анонимность"
+  manage_topics: "Управление темами"
+  post_messages: "Публикация сообщений"
+  edit_messages: "Редактирование сообщений"
+  view_messages: "Просмотр сообщений"
+  send_messages: "Отправка сообщений"
+  send_media: "Отправка медиа"
+  send_stickers: "Отправка стикеров"
+  send_gifts: "Отправка подарков"
+  send_games: "Отправка игр"
+  send_inline: "Использование инлайн-ботов"
+  embed_links: "Встраивание ссылок"
+  send_polls: "Отправка опросов"
+  send_photos: "Отправка фото"
+  send_videos: "Отправка видео"
+  send_roundvideos: "Отправка круговых видео"
+  send_audios: "Отправка аудио"
+  send_voices: "Отправка голосовых"
+  send_docs: "Отправка документов"
+  send_plain: "Отправка текстовых сообщений"
   invalid_args: <emoji document_id=5019523782004441717>❌</emoji> <b>Неверные аргументы.</b>
   error: <emoji document_id=5458497936763676259>😖</emoji><b> Что-то пошло не так. Проверьте логи.</b>
   successful_delete: <emoji document_id=5409029658794537988>✅</emoji> <b>Сущность успешно удалена</b>
@@ -156,6 +190,8 @@ ru:
   promoted: "<emoji document_id=5458614983212427372>👑</emoji> <b><a href='tg://user?id={id}'>{name}</a> назначен администратором!\n<emoji document_id=5409029658794537988>✅</emoji> Права: {rights}</b>"
   full_rights: "Полные права"
   promote: "<b>Выберите права для <a href='tg://user?id={id}'>{name}</a>!\nРанг: {rank}</b>"
+  restrict: "Ограничение <a href='tg://user?id={id}'>{name}</a> на{time}"
+  restricted: "<a href='tg://user?id={id}'>{name}</a> был(а) ограничен(а) на{time}"
   demoted: "<emoji document_id=5447183459602669338>🔽</emoji> <b><a href='tg://user?id={id}'>{name}</a> понижен</b>"
   userinfo: "<blockquote><emoji document_id=5985457743576698865>#️⃣</emoji><b> ID: {user_id}\n</b><emoji document_id=5408849420491962048>🔥</emoji><b> Имя: {first_name}\n</b><emoji document_id=5408849420491962048>🔥</emoji><b> Фамилия: {last_name}\n</b><emoji document_id=5208889774848361126>📞</emoji><b> Номер телефона: {phone}\n</b><emoji document_id=5364052602357044385>🐶</emoji><b> Имена пользователей: {usernames}</b></blockquote><b>\n</b><blockquote><emoji document_id=5985616786215669454>ℹ️</emoji><b> О себе: {about}</b></blockquote><b>\n</b><blockquote><emoji document_id=5408910404732595664>🕐</emoji><b> Рабочие часы: </b>{business_work_hours}\n<emoji document_id=5408892365869952851>❤️</emoji><b> Статус с эмодзи: {emoji_status}</b></blockquote><b>\n</b><blockquote><emoji document_id=5409331062419502443>🔉</emoji><b> Личный канал: {personal_channel}\n</b><emoji document_id=6024041612345088787>🎂</emoji><b> День рождения: {birthday}\n</b><emoji document_id=6037175527846975726>🎁</emoji><b> Количество подарков: {stargifts_count}</b></blockquote><b>\n</b><blockquote><emoji document_id=5208842667647061916>🚨</emoji><b> Количество общих чатов: {common_chats_count}\n</b><emoji document_id=5985401861757210746>👥</emoji><b> Общие чаты: {common_chats}</b></blockquote>"
   monday: Понедельник
