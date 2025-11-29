@@ -652,11 +652,17 @@ class Rights:
         for name in right_names:
             if name in self.RIGHTS:
                 self.mask |= self.RIGHTS[name]
+            else:
+                return None
+        return self
 
     def remove(self, *right_names: str) -> None:
         for name in right_names:
             if name in self.RIGHTS:
                 self.mask &= ~self.RIGHTS[name]
+            else:
+                return None
+        return self
 
     def has(self, right_name: str) -> bool:
         return bool(self.mask & self.RIGHTS.get(right_name, 0))
@@ -664,10 +670,12 @@ class Rights:
     def add_index(self, idx: int) -> None:
         if 0 <= idx < len(self.RIGHTS_LIST):
             self.mask |= 1 << idx
+        return self
 
     def remove_index(self, idx: int) -> None:
         if 0 <= idx < len(self.RIGHTS_LIST):
             self.mask &= ~(1 << idx)
+        return self
 
     def has_index(self, idx: int) -> bool:
         if 0 <= idx < len(self.RIGHTS_LIST):
