@@ -3,7 +3,7 @@
 # packurl: https://raw.githubusercontent.com/xdesai96/modules/refs/heads/main/translations/chatmodule.yml
 
 import logging
-import re
+import typing
 from datetime import datetime, timedelta, timezone
 
 from telethon.tl import types
@@ -170,7 +170,9 @@ class ChatModuleMod(loader.Module):
         """Removes deleted accounts from the chat/channel"""
         chat = await message.get_chat()
 
-        if not chat.admin_rights and not chat.creator:
+        if not getattr(chat, "admin_rights", False) and not getattr(
+            getattr(chat, "admin_rights", None), "ban_users", False
+        ):
             return await utils.answer(message, self.strings["no_rights"])
 
         deleted = await self.xdlib.chat.get_deleted(chat)
@@ -784,6 +786,11 @@ class ChatModuleMod(loader.Module):
                     rights=self.strings["full_rights"],
                 ),
             )
+        mask = (
+            self.xdlib.admin_rights.to_mask(rights.participant.admin_rights)
+            if hasattr(rights.participant, "admin_rights")
+            else 0
+        )
 
         await utils.answer(
             message,
@@ -796,49 +803,131 @@ class ChatModuleMod(loader.Module):
                 else "None",
                 rank=rank,
             ),
-            reply_markup=await self.build_promote_markup(user.id, chat.id, 0, rank),
+            reply_markup=await self.build_markup(user.id, chat.id, mask, rank),
         )
 
-    async def build_promote_markup(
-        self, user_id: int, chat_id: int, mask: int, rank: str
+    @loader.command(ru_doc="[-t] [-u] - Ограничить участника")
+    @loader.tag("no_pm")
+    async def restrict(self, message):
+        """[-t] [-u] - Restrict a participant"""
+        reply = await message.get_reply_message()
+        opts = self.xdlib.parse.opts(utils.get_args(message))
+
+        user = opts.get("u") or getattr(reply, "sender_id") or None
+        if not user:
+            return await utils.answer(message, self.strings["no_user"])
+
+        user = await self._client.get_entity(user)
+        chat = await message.get_chat()
+
+        if not chat.admin_rights or not getattr(chat.admin_rights, "ban_users"):
+            return await utils.answer(message, self.strings["no_rights"])
+        duration = opts.get("t", None)
+        if duration:
+            duration = self.xdlib.format.time(self.xdlib.parse.time(duration))
+
+        rights = await self.xdlib.chat.get_rights(chat, user)
+        mask = (
+            self.xdlib.banned_rights.to_mask(rights.participant.banned_rights)
+            if hasattr(rights.participant, "banned_rights")
+            else 0
+        )
+        rank = "-"
+
+        await utils.answer(
+            message,
+            self.strings["restrict"].format(
+                id=user.id,
+                name=user.first_name
+                if hasattr(user, "first_name")
+                else user.title
+                if hasattr(user, "title")
+                else "None",
+                time=f" {duration}" if duration else self.strings["forever"],
+            ),
+            reply_markup=await self.build_markup(
+                user.id,
+                chat.id,
+                mask,
+                rank,
+                mode="restrict",
+                duration=f" {duration}" if duration else None,
+            ),
+        )
+
+    async def build_markup(
+        self,
+        user_id: int,
+        chat_id: int,
+        mask: int,
+        rank: str,
+        duration: typing.Optional[int] = None,
+        mode="admin",
     ):
-        rights_cls = self.xdlib.admin_rights
+        rights_cls = (
+            self.xdlib.admin_rights if mode == "admin" else self.xdlib.banned_rights
+        )
+        rights_names = rights_cls.RIGHTS_LIST
         rights = rights_cls(mask)
         chat = await self._client.get_entity(chat_id)
+
         markup = utils.chunks(
             [
                 {
                     "text": f"{'🟢' if rights.has_index(idx) else '🔴'} {self.strings[name]}",
                     "callback": self._toggle_right,
-                    "args": (user_id, chat_id, mask, idx, rank),
+                    "args": (user_id, chat_id, mask, idx, rank, mode, duration),
                 }
-                for idx, name in enumerate(rights_cls.RIGHTS_LIST)
-                if (hasattr(chat, "admin_rights") and getattr(chat.admin_rights, name))
-                or (hasattr(chat, "admin_rights") and getattr(chat, "creator"))
+                for idx, name in enumerate(rights_names)
+                if (
+                    name != "until_date"
+                    and not (
+                        getattr(chat.default_banned_rights, name, True)
+                        if mode != "admin"
+                        else False
+                    )
+                )
             ],
             2,
         )
+
         markup.append(
             [
                 {
                     "text": self.strings["apply"],
                     "callback": self._apply_rights,
-                    "args": (user_id, chat_id, mask, rank),
+                    "args": (user_id, chat_id, mask, rank, mode, duration),
                 }
             ]
         )
+
         markup.append([{"text": self.strings["close"], "action": "close"}])
         return markup
 
     async def _toggle_right(
-        self, call, user_id: int, chat_id: int, mask: int, idx: int, rank: str
+        self,
+        call,
+        user_id: int,
+        chat_id: int,
+        mask: int,
+        idx: int,
+        rank: str,
+        mode: str,
+        duration: str,
     ):
         new_mask = mask ^ (1 << idx)
-        new_markup = await self.build_promote_markup(user_id, chat_id, new_mask, rank)
+
+        new_markup = await self.build_markup(
+            user_id, chat_id, new_mask, rank, mode=mode, duration=duration
+        )
+
         user = await self._client.get_entity(user_id)
+
+        title = self.strings["promote"] if mode == "admin" else self.strings["restrict"]
+
         await utils.answer(
             call,
-            self.strings["promote"].format(
+            title.format(
                 id=user_id,
                 name=user.first_name
                 if hasattr(user, "first_name")
@@ -846,23 +935,47 @@ class ChatModuleMod(loader.Module):
                 if hasattr(user, "title")
                 else "None",
                 rank=rank,
+                time=f" {duration}" if duration else self.strings["forever"],
             ),
             reply_markup=new_markup,
         )
 
     async def _apply_rights(
-        self, call, user_id: int, chat_id: int, mask: int, rank: str
+        self,
+        call,
+        user_id: int,
+        chat_id: int,
+        mask: int,
+        rank: str,
+        mode: str,
+        duration: typing.Optional[str] = None,
     ):
         user = await self._client.get_entity(user_id)
         chat = await self._client.get_entity(chat_id)
-        ok = await self.xdlib.admin.set_rights(chat, user, mask, rank)
-        rights_list = [
-            r for r, a in self.xdlib.admin_rights(mask).to_dict().items() if a
-        ]
+
+        if mode == "admin":
+            ok = await self.xdlib.admin.set_rights(chat, user, mask, rank)
+            rights_items = self.xdlib.admin_rights(mask).to_dict()
+        else:
+            ok = await self.xdlib.chat.set_restrictions(
+                chat, user, mask, duration=duration
+            )
+            rights_items = self.xdlib.banned_rights(mask).to_dict()
+
+        rights_list = [r for r, v in rights_items.items() if v]
+
         if ok:
+            text = (
+                self.strings["promoted"]
+                if mode == "admin" and mask
+                else self.strings["demoted"]
+                if mode == "admin" and not mask
+                else self.strings["restricted"]
+            )
+
             await utils.answer(
                 call,
-                self.strings["promoted"].format(
+                text.format(
                     id=user_id,
                     name=user.first_name
                     if hasattr(user, "first_name")
@@ -872,6 +985,8 @@ class ChatModuleMod(loader.Module):
                     rights=", ".join([self.strings[r] for r in rights_list])
                     if rights_list
                     else self.strings["no"],
+                    duration=f" {duration}" if duration else self.strings["forever"],
+                    time=f" {duration}" if duration else self.strings["forever"],
                 ),
                 reply_markup=[[{"text": self.strings["close"], "action": "close"}]],
             )
