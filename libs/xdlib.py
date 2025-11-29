@@ -700,8 +700,8 @@ class Rights:
     @classmethod
     def to_mask(self, chat_rights):
         mask = 0
-        for right, mask in self.RIGHTS.items():
-            self.mask |= mask
+        for right, rmask in self.RIGHTS.items():
+            mask |= rmask
         return mask
 
     def remove_index(self, idx: int) -> None:
