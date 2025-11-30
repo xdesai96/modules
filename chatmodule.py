@@ -828,7 +828,8 @@ class ChatModuleMod(loader.Module):
 
         rights = await self.xdlib.chat.get_rights(chat, user)
         mask = (
-            self.xdlib.banned_rights.to_mask(rights.participant.banned_rights)
+            self.xdlib.banned_rights.MAX_MASK
+            - self.xdlib.banned_rights.to_mask(rights.participant.banned_rights)
             if hasattr(rights.participant, "banned_rights")
             else 0
         )
