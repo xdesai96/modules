@@ -123,19 +123,15 @@ class TagWatcher(loader.Module):
             suspend_on_error=True,
         )
 
-        self.notif_chat, _ = await utils.asset_channel(
+        self.asset_channel = self._db.get("legacy.forums", "channel_id", 0)
+        self._notif_topic = await utils.asset_forum_topic(
             self._client,
-            "tag-watcher",
-            "Here will be notifications about mentions in chats.",
-            invite_bot=True,
-            avatar="https://img.icons8.com/liquid-glass-color/1024/appointment-reminders.png",
-            _folder="legacy",
+            self._db,
+            self.asset_channel,
+            "TagWatcher",
+            description="Here will be notifications about mentions in chats.",
+            icon_emoji_id=5409025823388741707,
         )
-        if _:
-            await self.inline.bot.send_message(
-                int(f"-100{self.notif_chat.id}"),
-                self.strings["first_msg"].format(prefix=self.get_prefix()),
-            )
 
     async def render_text(self, m):
         if self.config["custom_notif_text"]:
@@ -173,7 +169,6 @@ class TagWatcher(loader.Module):
                     if reply.message
                     else self.strings["no_message_content"]
                 )
-        msg_url = await utils.get_message_link(m)
         return text.format(
             title=title,
             name=name,
@@ -181,7 +176,7 @@ class TagWatcher(loader.Module):
             user_id=id,
             msg_content=msg_content,
             reply_content=reply_content,
-            link=msg_url,
+            link=await m.link,
         )
 
     @loader.command(
@@ -234,7 +229,7 @@ class TagWatcher(loader.Module):
             if (
                 not sender
                 or utils.get_chat_id(m) in self.config["blacklist_chats"]
-                or utils.get_chat_id(m) == self.notif_chat.id
+                or utils.get_chat_id(m) == self._notif_topic.id
                 or sender.id in self.config["blacklist_users"]
             ):
                 return
@@ -243,9 +238,10 @@ class TagWatcher(loader.Module):
                     if sender.bot:
                         return
             await self.inline.bot.send_message(
-                int(f"-100{self.notif_chat.id}"),
+                int(f"-100{self.asset_channel}"),
                 await self.render_text(m),
                 disable_web_page_preview=True,
+                message_thread_id=self._notif_topic.id,
             )
         except Exception as e:
             logger.error(e)
