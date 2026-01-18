@@ -27,9 +27,6 @@ class ChatModuleMod(loader.Module):
             "https://raw.githubusercontent.com/xdesai96/modules/refs/heads/main/libs/xdlib.py",
             suspend_on_error=True,
         )
-        await self.request_join(
-            "@xdesai_modules", self.xdlib.strings["request_join_reason"]
-        )
 
     @loader.command(ru_doc="[reply] - Узнать ID")
     async def id(self, message):

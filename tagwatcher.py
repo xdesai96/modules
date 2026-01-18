@@ -117,7 +117,6 @@ class TagWatcher(loader.Module):
         )
 
     async def client_ready(self):
-        await self.request_join("@xdesai_modules", self.strings["request_join_reason"])
         self.xdlib = await self.import_lib(
             "https://raw.githubusercontent.com/xdesai96/modules/refs/heads/main/libs/xdlib.py",
             suspend_on_error=True,
